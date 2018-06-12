@@ -14,10 +14,11 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
+#include "Entity.h"
 
 namespace AMG {
 
-class MeshData {
+class MeshData : private Entity {
 private:
 	GLuint id;
 	GLuint indexid;
@@ -25,7 +26,7 @@ private:
 	std::vector<int> buffer_size;
 	int count;
 public:
-	MeshData(int count);
+	MeshData();
 	void addBuffer(void *data, int size, int comps);
 	void setIndexBuffer(void *data, int size);
 	void draw();

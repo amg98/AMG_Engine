@@ -6,9 +6,13 @@ layout(location = 1) in vec2 vertexUV;
 
 // Output data ; will be interpolated for each fragment.
 out vec2 UV;
+out vec4 color;
 
 // Values that stay constant for the whole mesh.
 uniform mat4 MVP;
+uniform vec2 texPosition;
+uniform vec2 texScale;
+uniform vec4 sprColor;
 
 void main(){
 
@@ -16,5 +20,6 @@ void main(){
     gl_Position =  MVP * vec4(vertexPosition_modelspace,0,1);
 
     // UV of the vertex. No special space for this one.
-    UV = vertexUV;
+    color = sprColor;
+    UV = vertexUV * texScale + texPosition;
 }

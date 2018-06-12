@@ -13,16 +13,18 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Entity.h"
+
 namespace AMG {
 
-class Texture {
+class Texture : private Entity {
 private:
 	GLuint id;
+protected:
 	int width;
 	int height;
 public:
-	Texture();
-	int load(const char *path);
+	Texture(const char *path);
 	void enable();
 	int getWidth();
 	int getHeight();

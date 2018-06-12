@@ -28,7 +28,7 @@ enum ErrorCodes {
 
 class Debug {
 public:
-	static int showError(int code, void *param);
+	static void showError(int code, void *param);
 };
 
 }

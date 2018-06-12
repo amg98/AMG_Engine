@@ -17,16 +17,6 @@ namespace AMG {
 bool Renderer::glfwSetup = false;
 bool Renderer::glewSetup = false;
 
-Renderer::Renderer() {
-	this->window = NULL;
-	this->renderCb = NULL;
-	this->projection = NULL;
-	this->model = glm::mat4(1.0f);
-	this->mvp = glm::mat4(1.0f);
-	this->width = 0;
-	this->height = 0;
-}
-
 static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
 	Renderer *renderer = (Renderer*) glfwGetWindowUserPointer(window);
 	if(renderer){
@@ -37,16 +27,13 @@ static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
 	}
 }
 
-void Renderer::calculateProjection(){
-	this->perspective = glm::perspective(glm::radians(45.0f), (float)this->width/(float)this->height, 0.1f, 100.0f);
-	this->ortho = glm::ortho(0.0f, (float)this->width, 0.0f, (float)this->height, -1.0f, 1.0f);
-}
-
-int Renderer::setup(int width, int height, const char *title, int resize){
+Renderer::Renderer(int width, int height, const char *title, int resize) {
+	this->model = glm::mat4(1.0f);
+	this->mvp = glm::mat4(1.0f);
 
 	if(!glfwSetup){
 		if(!glfwInit())
-			return Debug::showError(1, NULL);
+			Debug::showError(1, NULL);
 
 		glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwWindowHint(GLFW_RESIZABLE, resize);
@@ -63,7 +50,7 @@ int Renderer::setup(int width, int height, const char *title, int resize){
 	window = glfwCreateWindow(width, height, title, NULL, NULL);
 	if(window == NULL){
 		glfwTerminate();
-		return Debug::showError(2, NULL);
+		Debug::showError(2, NULL);
 	}
 
 	this->setCurrent();
@@ -71,9 +58,11 @@ int Renderer::setup(int width, int height, const char *title, int resize){
 	if(!glewSetup){
 		if (glewInit() != GLEW_OK) {
 			glfwTerminate();
-			return Debug::showError(3, NULL);
+			Debug::showError(3, NULL);
 		}
 		glEnable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glewSetup = true;
 	}
 
@@ -86,8 +75,11 @@ int Renderer::setup(int width, int height, const char *title, int resize){
 
 	this->calculateProjection();
 	this->set3dMode(true);
+}
 
-	return 0;
+void Renderer::calculateProjection(){
+	this->perspective = glm::perspective(glm::radians(45.0f), (float)this->width/(float)this->height, 0.1f, 100.0f);
+	this->ortho = glm::ortho(0.0f, (float)this->width, 0.0f, (float)this->height, -1.0f, 1.0f);
 }
 
 void Renderer::update(){
@@ -113,6 +105,7 @@ Renderer::~Renderer() {
 }
 
 int Renderer::exitProcess(){
+	Entity::destroyEntities();
 	if(glfwSetup){
 		glfwTerminate();
 		glfwSetup = false;
@@ -135,7 +128,7 @@ void Renderer::updateMVP(Shader *shader, Camera *camera){
 	}else{
 		mvp = *projection * model;
 	}
-	glUniformMatrix4fv(shader->getMVPLocation(), 1, GL_FALSE, &mvp[0][0]);
+	glUniformMatrix4fv(shader->getUniform("MVP"), 1, GL_FALSE, &mvp[0][0]);
 }
 
 void Renderer::set3dMode(bool mode){

@@ -18,12 +18,13 @@ using namespace glm;
 
 #include "Shader.h"
 #include "Camera.h"
+#include "Entity.h"
 
 namespace AMG {
 
 typedef void (*renderCallback)(void);
 
-class Renderer {
+class Renderer : private Entity {
 private:
 	GLFWwindow* window;
 	static bool glfwSetup;
@@ -36,8 +37,7 @@ private:
 public:
 	int width, height;
 
-	Renderer();
-	int setup(int width, int height, const char *title, int resize);
+	Renderer(int width, int height, const char *title, int resize);
 	void update();
 	bool running();
 	void setCurrent();

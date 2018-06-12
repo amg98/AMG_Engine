@@ -18,17 +18,11 @@
 
 namespace AMG {
 
-Shader::Shader() {
-	this->programID = -1;
-	this->matrixID = -1;
-}
-
-int Shader::load(const char *vertex_file_path, const char *fragment_file_path){
-
+Shader::Shader(const char *vertex_file_path, const char *fragment_file_path) {
 	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 	if(VertexShaderID == 0 || FragmentShaderID == 0){
-		return Debug::showError(4, NULL);
+		Debug::showError(4, NULL);
 	}
 
 	std::string VertexShaderCode;
@@ -39,7 +33,7 @@ int Shader::load(const char *vertex_file_path, const char *fragment_file_path){
 		VertexShaderCode = sstr.str();
 		VertexShaderStream.close();
 	}else{
-		return Debug::showError(5, (void*)vertex_file_path);
+		Debug::showError(5, (void*)vertex_file_path);
 	}
 
 	std::string FragmentShaderCode;
@@ -50,7 +44,7 @@ int Shader::load(const char *vertex_file_path, const char *fragment_file_path){
 		FragmentShaderCode = sstr.str();
 		FragmentShaderStream.close();
 	}else{
-		return Debug::showError(5, (void*)fragment_file_path);
+		Debug::showError(5, (void*)fragment_file_path);
 	}
 
 	GLint Result = GL_FALSE;
@@ -65,7 +59,7 @@ int Shader::load(const char *vertex_file_path, const char *fragment_file_path){
 	if(InfoLogLength > 0){
 		std::vector<char> VertexShaderErrorMessage(InfoLogLength+1);
 		glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-		return Debug::showError(6, &VertexShaderErrorMessage[0]);
+		Debug::showError(6, &VertexShaderErrorMessage[0]);
 	}
 
 	char const * FragmentSourcePointer = FragmentShaderCode.c_str();
@@ -77,12 +71,12 @@ int Shader::load(const char *vertex_file_path, const char *fragment_file_path){
 	if(InfoLogLength > 0){
 		std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
 		glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-		return Debug::showError(6, &FragmentShaderErrorMessage[0]);
+		Debug::showError(6, &FragmentShaderErrorMessage[0]);
 	}
 
 	programID = glCreateProgram();
 	if(programID == 0)
-		return Debug::showError(7, NULL);
+		Debug::showError(7, NULL);
 	glAttachShader(programID, VertexShaderID);
 	glAttachShader(programID, FragmentShaderID);
 	glLinkProgram(programID);
@@ -99,18 +93,32 @@ int Shader::load(const char *vertex_file_path, const char *fragment_file_path){
 	if(InfoLogLength > 0){
 		std::vector<char> ProgramErrorMessage(InfoLogLength+1);
 		glGetProgramInfoLog(programID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-		return Debug::showError(8, &ProgramErrorMessage[0]);
+		Debug::showError(8, &ProgramErrorMessage[0]);
 	}
 
-	matrixID = glGetUniformLocation(programID, "MVP");
-	if(matrixID == -1)
-		return Debug::showError(9, (void*)"MVP");
-
-	return 0;
+	this->uniformsMap = std::tr1::unordered_map<const char*, int>();
+	this->defineUniform("MVP");
 }
 
-int Shader::getMVPLocation(){
-	return matrixID;
+void Shader::defineUniform(const char *name){
+	int id = glGetUniformLocation(programID, name);
+	if(id == -1){
+		Debug::showError(9, (void*)name);
+	}
+	uniformsMap[name] = id;
+}
+
+// Supongo que lanza una excepcion si no lo encuentra
+int Shader::getUniform(const char *name){
+	return uniformsMap[name];
+}
+
+void Shader::setUniform(const char *name, vec2 &v){
+	glUniform2f(getUniform(name), v.x, v.y);
+}
+
+void Shader::setUniform(const char *name, vec4 &v){
+	glUniform4f(getUniform(name), v.x, v.y, v.z, v.w);
 }
 
 void Shader::enable(){

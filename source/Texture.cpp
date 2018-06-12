@@ -18,23 +18,16 @@
 
 namespace AMG {
 
-Texture::Texture(){
-	this->id = -1;
-	this->width = 0;
-	this->height = 0;
-}
-
-int Texture::load(const char *path) {
-
+Texture::Texture(const char *path){
 	FILE *fp = fopen(path, "rb");
 	if (fp == NULL)
-		return Debug::showError(5, (void*)path);
+		Debug::showError(5, (void*)path);
 
 	char filecode[4];
 	fread(filecode, 1, 4, fp);
 	if (strncmp(filecode, "DDS ", 4) != 0) {
 	    fclose(fp);
-	    return Debug::showError(10, (void*)path);
+	    Debug::showError(10, (void*)path);
 	}
 
 	unsigned char header[124];
@@ -53,7 +46,7 @@ int Texture::load(const char *path) {
 
 	if(this->height % 2 != 0 || this->width % 2 != 0){
 		fclose(fp);
-		return Debug::showError(12, (void*)path);
+		Debug::showError(12, (void*)path);
 	}
 
 	bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
@@ -75,12 +68,14 @@ int Texture::load(const char *path) {
 			break;
 		default:
 			free(buffer);
-			return Debug::showError(11, (void*)path);
+			Debug::showError(11, (void*)path);
 	}
 
 	glGenTextures(1, &this->id);
-
 	glBindTexture(GL_TEXTURE_2D, this->id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
 	unsigned int offset = 0;
 
@@ -93,7 +88,6 @@ int Texture::load(const char *path) {
 	}
 
 	free(buffer);
-	return 0;
 }
 
 void Texture::enable(){

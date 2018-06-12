@@ -16,6 +16,8 @@
 #include <glm/glm.hpp>
 using namespace glm;
 
+#include "Entity.h"
+
 namespace AMG {
 
 enum CameraMode {
@@ -23,7 +25,7 @@ enum CameraMode {
 	FPS_CAMERA,
 };
 
-class Camera {
+class Camera : private Entity {
 private:
 	mat4 camera;
 	glm::vec3 position;

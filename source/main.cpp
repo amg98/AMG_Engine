@@ -6,14 +6,16 @@
 #include "Texture.h"
 #include "MeshData.h"
 #include "Sprite.h"
+#include "AnimatedSprite.h"
 using namespace AMG;
 
 Shader *basic;
 Renderer *window;
+
 Camera *cam;
 Texture *tex;
 MeshData *cube;
-Sprite *sprite;
+AnimatedSprite *sprite;
 
 void render(){
 
@@ -26,25 +28,26 @@ void render(){
 	cube->draw();
 
 	window->set3dMode(false);
-	sprite->rotation += 0.005f;
+	//sprite->rotation += 0.005f;
 	sprite->draw(window);
 	window->set3dMode(true);
 }
 
 int main(int argc, char **argv){
 
-	window = new Renderer();
-	window->setup(1024, 768, "Window1", true);
+	window = new Renderer(1024, 768, "Window1", true);
 	window->setRenderCallback(render);
 
 	cam = new Camera(NO_MOVE_CAMERA);
 
-	tex = new Texture();
-	tex->load("Data/Texture/texture.dds");
+	tex = new Texture("Data/Texture/texture.dds");
 
-	sprite = new Sprite("Data/Texture/texture.dds");
+	//sprite = new Sprite("Data/Texture/texture.dds");
+	sprite = new AnimatedSprite("Data/Texture/font.dds", 32, 32);
 	sprite->x = 300.0f;
 	sprite->y = 300.0f;
+	sprite->currentFrame = 65.0f;
+	//sprite->color = vec4(1.0f, 0.0f, 0.0f, 0.7f);
 
 	static const int indices[] = {
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
@@ -129,18 +132,16 @@ int main(int argc, char **argv){
 	    0.667979f, 1.0f-0.335851f
 	};
 
-	cube = new MeshData(12*3);
+	cube = new MeshData();
 	cube->addBuffer((void*)g_vertex_buffer_data, sizeof(g_vertex_buffer_data), 3);
 	cube->addBuffer((void*)g_uv_buffer_data, sizeof(g_uv_buffer_data), 2);
 	cube->setIndexBuffer((void*)indices, sizeof(indices));
 
-	basic = new Shader();
-	basic->load("Data/Shader/texture.vs", "Data/Shader/texture.fs");
+	basic = new Shader("Data/Shader/texture.vs", "Data/Shader/texture.fs");
 
 	do {
 		window->update();
 	}while(window->running());
 
-	delete window;
 	return Renderer::exitProcess();
 }

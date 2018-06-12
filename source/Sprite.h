@@ -10,16 +10,19 @@
 
 #include "Texture.h"
 #include "Renderer.h"
+#include "Entity.h"
 
 #include <glm/glm.hpp>
 using namespace glm;
 
 namespace AMG {
 
-class Sprite {
+class Sprite : public Texture {
 private:
-	Texture *texture;
 	static bool internalBuffersInit;
+protected:
+	vec2 texPosition;
+	vec2 texScale;
 public:
 	float x, y;
 	float rotation;

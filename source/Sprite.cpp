@@ -26,23 +26,23 @@ static float spr_vertices[] = {
 };
 
 static float uv_vertices[] = {
-	0, 0,
+	0, 1,
+	1, 1,
 	1, 0,
-	1, 1,
-	0, 0,
-	1, 1,
-	0, 1
+	0, 1,
+	1, 0,
+	0, 0
 };
 
-Sprite::Sprite(const char *path) {
-	this->texture = new Texture();
-	this->texture->load(path);
+Sprite::Sprite(const char *path) : Texture(path) {
 	this->x = 0.0f;
 	this->y = 0.0f;
 	this->rotation = 0.0f;
 	this->sx = 1.0f;
 	this->sy = 1.0f;
 	this->color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	this->texPosition = vec2(0.0f, 0.0f);
+	this->texScale = vec2(1.0f, 1.0f);
 
 	if(!internalBuffersInit){
 		internalBuffersInit = true;
@@ -54,16 +54,21 @@ Sprite::Sprite(const char *path) {
 		glGenBuffers(1, &uvDataId);
 		glBindBuffer(GL_ARRAY_BUFFER, uvDataId);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
-		shader2d = new Shader();
-		shader2d->load("Data/Shader/shader2d.vs", "Data/Shader/shader2d.fs");
+		shader2d = new Shader("Data/Shader/shader2d.vs", "Data/Shader/shader2d.fs");
+		shader2d->defineUniform("texPosition");
+		shader2d->defineUniform("texScale");
+		shader2d->defineUniform("sprColor");
 	}
 }
 
 void Sprite::draw(Renderer *renderer){
 	shader2d->enable();
-	renderer->setTransformation(glm::vec3(x, y, 0), rotation, glm::vec3(0, 0, 1), glm::vec3(sx * texture->getWidth(), sy * texture->getHeight(), 1.0f));
+	shader2d->setUniform("texPosition", texPosition);
+	shader2d->setUniform("texScale", texScale);
+	shader2d->setUniform("sprColor", color);
+	renderer->setTransformation(glm::vec3(x, y, 0), rotation, glm::vec3(0, 0, 1), glm::vec3(sx * width, sy * height, 1.0f));
 	renderer->updateMVP(shader2d, NULL);
-	texture->enable();
+	enable();
 	glBindVertexArray(verticesId);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexDataId);

@@ -9,7 +9,7 @@
 
 namespace AMG {
 
-MeshData::MeshData(int count) {
+MeshData::MeshData() {
 	glGenVertexArrays(1, &this->id);
 	glBindVertexArray(this->id);
 	glGenBuffers(1, &this->indexid);

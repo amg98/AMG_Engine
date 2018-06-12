@@ -6,12 +6,14 @@
  */
 
 #include "Debug.h"
+#include "Renderer.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 namespace AMG {
 
-int Debug::showError(int code, void *param){
+void Debug::showError(int code, void *param){
 	switch(code){
 		case 0:
 			fprintf(stderr, "No error found\n");
@@ -56,7 +58,10 @@ int Debug::showError(int code, void *param){
 			fprintf(stderr, "Unknown error\n");
 			break;
 	}
-	return code;
+
+	fflush(stderr);
+	Renderer::exitProcess();
+	exit(EXIT_FAILURE);
 }
 
 }
