@@ -30,6 +30,7 @@ static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
 Renderer::Renderer(int width, int height, const char *title, int resize) {
 	this->model = glm::mat4(1.0f);
 	this->mvp = glm::mat4(1.0f);
+	this->camera = NULL;
 
 	if(!glfwSetup){
 		if(!glfwInit())
@@ -121,7 +122,7 @@ void Renderer::setTransformation(vec3 pos, float angle, vec3 axis, vec3 scale){
 	model = glm::translate(mat4(1.0f), pos) * glm::rotate(angle, axis) * glm::scale(scale);
 }
 
-void Renderer::updateMVP(Shader *shader, Camera *camera){
+void Renderer::updateMVP(Shader *shader){
 	if(camera){
 		camera->update(this->window);
 		mvp = *projection * camera->getMatrix() * model;
@@ -140,6 +141,10 @@ void Renderer::set3dMode(bool mode){
 		this->projection = &this->ortho;
 		glDisable(GL_DEPTH_TEST);
 	}
+}
+
+void Renderer::setCamera(Camera *camera){
+	this->camera = camera;
 }
 
 } /* namespace AMG */

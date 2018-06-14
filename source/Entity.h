@@ -15,8 +15,10 @@ namespace AMG {
 class Entity {
 private:
 	static std::vector<Entity*> entities;
+	bool dependant;		// Si ese objeto esta dentro de otro (entonces el objeto padre debe borrarlo)
 public:
 	Entity();
+	void setDependency(bool dependency);
 	virtual ~Entity();
 	static void destroyEntities();
 };

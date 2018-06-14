@@ -17,7 +17,7 @@
 
 namespace AMG {
 
-class Texture : private Entity {
+class Texture : public Entity {
 private:
 	GLuint id;
 protected:

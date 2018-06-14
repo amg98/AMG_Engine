@@ -18,8 +18,8 @@
 
 namespace AMG {
 
-class MeshData : private Entity {
-private:
+class MeshData : public Entity {
+protected:
 	GLuint id;
 	GLuint indexid;
 	std::vector<GLuint> buffer_id;

@@ -67,7 +67,8 @@ void Sprite::draw(Renderer *renderer){
 	shader2d->setUniform("texScale", texScale);
 	shader2d->setUniform("sprColor", color);
 	renderer->setTransformation(glm::vec3(x, y, 0), rotation, glm::vec3(0, 0, 1), glm::vec3(sx * width, sy * height, 1.0f));
-	renderer->updateMVP(shader2d, NULL);
+	renderer->setCamera(NULL);
+	renderer->updateMVP(shader2d);
 	enable();
 	glBindVertexArray(verticesId);
 	glEnableVertexAttribArray(0);

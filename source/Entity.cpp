@@ -13,6 +13,7 @@ namespace AMG {
 std::vector<Entity*> Entity::entities;
 
 Entity::Entity() {
+	this->dependant = false;
 	entities.push_back(this);
 	//std::cout << "Size: " << entities.size() << std::endl;
 }
@@ -27,9 +28,14 @@ Entity::~Entity() {
 	}
 }
 
+void Entity::setDependency(bool dependency){
+	this->dependant = dependency;
+}
+
 void Entity::destroyEntities(){
 	for(unsigned int i=entities.size()-1;i>=0;i--){
-		delete entities[i];
+		if(!entities[i]->dependant)
+			delete entities[i];
 	}
 	entities.clear();
 }

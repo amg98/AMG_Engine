@@ -32,7 +32,7 @@ void MeshData::addBuffer(void *data, int size, int comps){
 void MeshData::setIndexBuffer(void *data, int size){
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexid);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-	this->count = size / sizeof(int);
+	this->count = size / sizeof(short);
 }
 
 void MeshData::draw(){
@@ -44,7 +44,7 @@ void MeshData::draw(){
 		glVertexAttribPointer(i, buffer_size.at(i), GL_FLOAT, GL_FALSE, 0, (void*)0);
 	}
 
-	glDrawElements(GL_TRIANGLES, this->count, GL_UNSIGNED_INT, (void*)0);
+	glDrawElements(GL_TRIANGLES, this->count, GL_UNSIGNED_SHORT, (void*)0);
 
 	for(unsigned int i=0;i<buffer_id.size();i++){
 		glDisableVertexAttribArray(i);

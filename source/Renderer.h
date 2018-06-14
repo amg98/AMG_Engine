@@ -34,6 +34,7 @@ private:
 	mat4 perspective, ortho;
 	mat4 model;
 	mat4 mvp;
+	Camera *camera;
 public:
 	int width, height;
 
@@ -45,9 +46,10 @@ public:
 	static int exitProcess();
 	void setRenderCallback(renderCallback cb);
 	void setTransformation(vec3 pos, float angle, vec3 axis, vec3 scale);
-	void updateMVP(Shader *shader, Camera *camera);
+	void updateMVP(Shader *shader);
 	void set3dMode(bool mode);
 	void calculateProjection();
+	void setCamera(Camera *camera);
 };
 
 } /* namespace AMG */
