@@ -24,7 +24,7 @@ public:
 	unsigned int nobjects;
 	Object **objects;
 
-	Model(const char *path);
+	Model(const char *path, Shader *shader);
 	void draw(Renderer *renderer, Shader *shader);
 	virtual ~Model();
 };

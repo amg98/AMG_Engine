@@ -10,6 +10,10 @@
 #include "Model.h"
 using namespace AMG;
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 Shader *basic;
 Renderer *window;
 
@@ -23,6 +27,8 @@ void render(){
 	window->setCamera(cam);
 
 	link->draw(window, basic);
+	link->objects[0]->rootBone->children[0]->children[2]->children[0]->children[0]->axis = vec3(1.0f, 0.0f, 0.0f);
+	link->objects[0]->rootBone->children[0]->children[2]->children[0]->children[0]->angle += 0.05f;
 
 	window->set3dMode(false);
 	sprite->rotation += 0.005f;
@@ -46,9 +52,11 @@ int main(int argc, char **argv){
 
 	basic = new Shader("Data/Shader/texture.vs", "Data/Shader/texture.fs");
 
-	link = new Model("Data/Model/model.amd");
-	link->objects[0]->scale = vec3(0.01f, 0.01f, 0.01f);
+	link = new Model("Data/Model/model2.amd", basic);
+	link->objects[0]->scale = vec3(0.1f, 0.1f, 0.1f);
 	link->objects[0]->position = vec3(0.0f, -0.5f, 3.0f);
+	link->objects[0]->angle = -3.141592f/2.0f;
+	link->objects[0]->axis = vec3(1.0f, 0.0f, 0.0f);
 
 	do {
 		window->update();

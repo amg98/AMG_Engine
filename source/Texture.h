@@ -20,6 +20,7 @@ namespace AMG {
 class Texture : public Entity {
 private:
 	GLuint id;
+	bool loaded;
 protected:
 	int width;
 	int height;

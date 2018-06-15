@@ -2,6 +2,7 @@ import bpy
 import bmesh
 import struct
 import os
+from mathutils import *
 
 # WINDOWS = LITTLE ENDIAN
 
@@ -41,6 +42,14 @@ def buscaVertex(v0, t0, n0, vtx, txc, nrm):
         i += 1
     return -1
 
+def buscaBone(bones, name):
+    index = 0
+    for b in bones:
+        if b.name == name:
+            return index
+        index += 1
+    return -1
+
 def export(context, filepath, use_some_setting):
     f = open(filepath, 'wb')
     
@@ -77,18 +86,46 @@ def export(context, filepath, use_some_setting):
             texcoords = []
             indices = []
             groups = []
+            weights = []
+            weight_bones = []
+            bones = None
             currentMaterial = -1
+            
+            armature = obj.find_armature()
+            if armature != None:
+                bones = armature.data.bones
+                
             
             for face in obj.data.polygons:
                 for vert, loop in zip(face.vertices, face.loop_indices):
                     normal = obj.data.vertices[vert].normal
                     vertex = obj.data.vertices[vert].co
                     texcoord = (obj.data.uv_layers.active.data[loop].uv if obj.data.uv_layers.active is not None else (0.0, 0.0))
+                    
+                    weight = []
+                    weight_bonelist = []
+                    
+                    if len(obj.data.vertices[vert].groups) > 4:
+                        print("Warning: " + str(len(obj.data.vertices[vert].groups)) + " weights per vertex is not allowed (max 4)")
+                        return {'FINISHED'}
+                    else:
+                        for g in obj.data.vertices[vert].groups:
+                            weight.append(g.weight)
+                            weight_bonelist.append(g.group)
+                        if len(weight) != 0:
+                            while len(weight) != 4:
+                                weight.append(0)
+                                weight_bonelist.append(0)
                     index = buscaVertex(vertex, texcoord, normal, vertices, texcoords, normals)
                     if(index == -1):    # Nuevo vertice
                         indices.append(len(vertices))
                         vertices.append(vertex)
-                        texcoords.append([texcoord[0], 1-texcoord[1])
+                        texcoords.append([texcoord[0], 1-texcoord[1]])
+                        
+                        if len(weight) != 0:
+                            weights.append(weight)
+                            weight_bones.append(weight_bonelist)
+                        
                         normals.append(normal)
                     else:               # Ya estaba en la lista
                         indices.append(index)
@@ -98,7 +135,7 @@ def export(context, filepath, use_some_setting):
                     groups.append([len(indices)/3-1, -1, face.material_index])
                     currentMaterial = face.material_index
             groups[len(groups)-1][1] = len(indices)/3
-            objects.append([vertices, texcoords, normals, indices, groups])
+            objects.append([vertices, texcoords, normals, indices, groups, weights, weight_bones, bones])
     #f.write("NObjects: " + str(len(objects)) + "\n")
     f.write(struct.pack("@B", len(objects)))
     for o in objects:
@@ -140,6 +177,47 @@ def export(context, filepath, use_some_setting):
             f.write(struct.pack("@HHH", int(g[0]), int(g[1]), int(g[2])))
         #f.write("\n")
         
+        # Solo si ese objeto tiene armadura
+        if o[7] != None:
+            f.write(struct.pack("@B", len(o[7])))
+            for b in o[7]:
+                # Hueso padre
+                if b.parent != None:
+                    p = buscaBone(o[7], b.parent.name)
+                    f.write(struct.pack("@H", p))
+                    #print("P: " + str(p))
+                else:
+                    f.write(struct.pack("@H", 0xffff))
+                    #print("P: " + str(0xffff))
+                # Huesos hijos
+                f.write(struct.pack("@H", len(b.children)))
+                #print("NC: " + str(len(b.children)))
+                for c in b.children:
+                    id = buscaBone(o[7], c.name)
+                    f.write(struct.pack("@H", id))
+                    #print("C: " + str(id))
+                
+                # Matriz del hueso
+                m = b.matrix_local
+                if b.parent != None:
+                    m = b.parent.matrix_local.inverted() * b.matrix_local
+                
+                mi = b.matrix_local.inverted()
+                for i in range(0,4):
+                    for j in range(0,4):
+                        f.write(struct.pack("@f", m[j][i])) # Izquierda->Derecha, Arriba->Abajo
+                for i in range(0,4):
+                    for j in range(0,4):
+                        f.write(struct.pack("@f", mi[j][i])) # Izquierda->Derecha, Arriba->Abajo
+                
+            for w in o[5]:
+                sum = w[0] + w[1] + w[2] + w[3]
+                f.write(struct.pack("@ffff", w[0]/sum, w[1]/sum, w[2]/sum, w[3]/sum))
+            for wb in o[6]:
+                f.write(struct.pack("@HHHH", int(wb[0]), int(wb[1]), int(wb[2]), int(wb[2])))
+                #print(wb[0], wb[1], wb[2])
+        else:
+            f.write(struct.pack("@B", 0))
     f.close()
     return {'FINISHED'}
 

@@ -19,6 +19,7 @@
 namespace AMG {
 
 Texture::Texture(const char *path){
+	this->loaded = false;
 	FILE *fp = fopen(path, "rb");
 	if (fp == NULL)
 		Debug::showError(5, (void*)path);
@@ -88,6 +89,7 @@ Texture::Texture(const char *path){
 	}
 
 	free(buffer);
+	this->loaded = true;
 }
 
 void Texture::enable(){
@@ -103,7 +105,8 @@ int Texture::getHeight(){
 }
 
 Texture::~Texture() {
-	glDeleteTextures(1, &this->id);
+	if(loaded)
+		glDeleteTextures(1, &this->id);
 }
 
 } /* namespace AMG */

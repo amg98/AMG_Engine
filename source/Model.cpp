@@ -7,20 +7,19 @@
 
 #include "Model.h"
 #include "Debug.h"
+#include "Bone.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <winsock2.h>
-
-/**
- * ntohl
- * ntohs
- *
- */
 
 namespace AMG {
 
-Model::Model(const char *path) {
+Model::Model(const char *path, Shader *shader) {
+	this->nobjects = 0;
+	this->nmaterials = 0;
+	this->objects = NULL;
+	this->materials = NULL;
+
 	FILE *f = fopen(path, "rb");
 	if(f == NULL) Debug::showError(FILE_NOT_FOUND, (void*)path);
 
@@ -52,6 +51,7 @@ Model::Model(const char *path) {
 	unsigned short nvertices;
 	unsigned short nindices;
 	unsigned char ngroups;
+	unsigned char nbones;
 
 	for(unsigned int i=0;i<nobjects;i++){
 		fread(&nvertices, sizeof(unsigned short), 1, f);
@@ -72,11 +72,50 @@ Model::Model(const char *path) {
 
 		objects[i] = new Object();
 		objects[i]->setDependency(true);
-		objects[i]->addBuffer(vertices, vertices_size, 3);
-		objects[i]->addBuffer(texcoords, texcoords_size, 2);
-		//objects[i]->addBuffer(normals, vertices_size, 3);		// TODO lighting
+		objects[i]->addBuffer(vertices, vertices_size, 3, GL_FLOAT);
+		objects[i]->addBuffer(texcoords, texcoords_size, 2, GL_FLOAT);
+		objects[i]->addBuffer(normals, vertices_size, 3, GL_FLOAT);
 		objects[i]->setIndexBuffer(indices, nindices*sizeof(unsigned short));
 		objects[i]->setMaterialGroups(groups, ngroups, materials, nmaterials);
+
+		fread(&nbones, sizeof(unsigned char), 1, f);
+		bone_t *bones = (bone_t*) calloc (nbones, sizeof(bone_t));
+		for(unsigned char j=0;j<nbones;j++){
+			bone_t *bone = &bones[j];
+			fread(&bone->parent, sizeof(unsigned short), 1, f);
+			fread(&bone->nchildren, sizeof(unsigned short), 1, f);
+			//fprintf(stderr, "%u %u ", bone->parent, bone->nchildren);
+			if(bone->nchildren > 0){
+				bone->children = (unsigned short*) malloc (bone->nchildren * sizeof(unsigned short));
+				fread(bone->children, sizeof(unsigned short), bone->nchildren, f);
+			}
+			fread(bone->localbindmatrix, sizeof(float), 16, f);
+			fread(bone->matrix_inv, sizeof(float), 16, f);
+
+			/*for(unsigned int k=0;k<bone->nchildren;k++){
+				fprintf(stderr, "{%u}", bone->children[k]);
+			}
+			fprintf(stderr, "\n");*/
+		}
+		//fflush(stderr);
+
+		objects[i]->createBoneHierarchy(bones, nbones, shader);
+
+		if(nbones > 0){
+			float *weights = (float*) malloc (nvertices*4*sizeof(float));
+			fread(weights, sizeof(float), 4*nvertices, f);
+			unsigned short *weights_bones = (unsigned short*) malloc (nvertices*4*sizeof(unsigned short));
+			fread(weights_bones, sizeof(unsigned short), 4*nvertices, f);
+			objects[i]->addBuffer(weights, nvertices*4*sizeof(float), 4, GL_FLOAT);
+			objects[i]->addBuffer(weights_bones, nvertices*4*sizeof(unsigned short), 4, GL_UNSIGNED_SHORT);
+			/*for(int k=0;k<nvertices;k++){
+				fprintf(stderr, "%f %f %f %f | %d %d %d %d\n", weights[(k<<2) + 0], weights[(k<<2) + 1], weights[(k<<2) + 2], weights[(k<<2) + 3],
+						weights_bones[(k<<2) + 0], weights_bones[(k<<2) + 1], weights_bones[(k<<2) + 2], weights_bones[(k<<2) + 3]);
+			}
+			fflush(stderr);*/
+			free(weights);
+			free(weights_bones);
+		}
 
 		free(vertices);
 		free(texcoords);

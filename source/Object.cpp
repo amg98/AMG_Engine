@@ -6,7 +6,9 @@
  */
 
 #include "Object.h"
+#include "Debug.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 namespace AMG {
@@ -20,6 +22,7 @@ Object::Object() {
 	this->ngroups = 0;
 	this->materials = NULL;		// Referencias, no se eliminan
 	this->nmaterials = 0;
+	this->rootBone = NULL;
 }
 
 void Object::setMaterialGroups(unsigned short *groups, unsigned int ngroups, Material **materials, unsigned int nmaterials){
@@ -29,16 +32,42 @@ void Object::setMaterialGroups(unsigned short *groups, unsigned int ngroups, Mat
 	this->nmaterials = nmaterials;
 }
 
+void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones, Shader *shader){
+	if(nbones > 16){
+		Debug::showError(TOO_MANY_BONES, NULL);
+	}
+	// Busca el hueso inicial
+	for(unsigned int i=0;i<nbones;i++){
+		if(bones[i].parent == 0xFFFF){
+			char id[64];
+			sprintf(id, "boneMatrix[%d]", i);
+			//fprintf(stderr, "%s ", id);
+			rootBone = new Bone(i, glGetUniformLocation(shader->getProgram(), id));
+			rootBone->setDependency(true);
+			rootBone->createChildren(bones, nbones, shader);
+		}
+	}
+	free(bones);
+}
+
 void Object::draw(Renderer *renderer, Shader *shader){
 	renderer->setTransformation(position, angle, axis, scale);
 	renderer->updateMVP(shader);
 
+	rootBone->calculateBoneMatrix(shader, NULL);
+	//Debug::showError(0, NULL);
+
 	glBindVertexArray(this->id);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexid);
-	for(unsigned int i=0;i<buffer_id.size();i++){
+	for(unsigned int i=0;i<info.size();i++){
+		buffer_info binfo = info.at(i);
 		glEnableVertexAttribArray(i);
-		glBindBuffer(GL_ARRAY_BUFFER, buffer_id.at(i));
-		glVertexAttribPointer(i, buffer_size.at(i), GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glBindBuffer(GL_ARRAY_BUFFER, binfo.id);
+		if(binfo.type == GL_FLOAT){
+			glVertexAttribPointer(i, binfo.size, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		}else{
+			glVertexAttribIPointer(i, binfo.size, GL_UNSIGNED_SHORT, 0, (void*)0);
+		}
 	}
 
 	for(unsigned int i=0;i<ngroups;i++){
@@ -51,13 +80,14 @@ void Object::draw(Renderer *renderer, Shader *shader){
 		}
 	}
 
-	for(unsigned int i=0;i<buffer_id.size();i++){
+	for(unsigned int i=0;i<info.size();i++){
 		glDisableVertexAttribArray(i);
 	}
 }
 
 Object::~Object() {
 	if(groups) free(groups);
+	if(rootBone) delete rootBone;
 }
 
 } /* namespace AMG */

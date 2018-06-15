@@ -18,16 +18,21 @@
 
 namespace AMG {
 
+typedef struct{
+	GLuint id;
+	int size;
+	GLuint type;
+}buffer_info;
+
 class MeshData : public Entity {
 protected:
 	GLuint id;
 	GLuint indexid;
-	std::vector<GLuint> buffer_id;
-	std::vector<int> buffer_size;
+	std::vector<buffer_info> info;
 	int count;
 public:
 	MeshData();
-	void addBuffer(void *data, int size, int comps);
+	void addBuffer(void *data, int size, int comps, GLuint type);
 	void setIndexBuffer(void *data, int size);
 	void draw();
 	virtual ~MeshData();

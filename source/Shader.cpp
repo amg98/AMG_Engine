@@ -125,8 +125,13 @@ void Shader::enable(){
 	glUseProgram(programID);
 }
 
+int Shader::getProgram(){
+	return programID;
+}
+
 Shader::~Shader() {
 	glDeleteProgram(programID);
+	uniformsMap.clear();
 }
 
 } /* namespace AMG */

@@ -24,6 +24,7 @@ enum ErrorCodes {
 	WRONG_SIGNATURE,
 	UNSUPPORTED_FORMAT,
 	NOT_POWER_OF_TWO_TEXTURE,
+	TOO_MANY_BONES,
 };
 
 class Debug {

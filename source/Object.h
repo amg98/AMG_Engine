@@ -12,6 +12,7 @@
 #include "Renderer.h"
 #include "Shader.h"
 #include "Material.h"
+#include "Bone.h"
 
 #include <glm/glm.hpp>
 using namespace glm;
@@ -25,12 +26,14 @@ private:
 	Material **materials;
 	unsigned int nmaterials;
 public:
+	Bone *rootBone;
 	vec3 position;
 	float angle;
 	vec3 axis;
 	vec3 scale;
 	Object();
 	void setMaterialGroups(unsigned short *groups, unsigned int ngroups, Material **materials, unsigned int nmaterials);
+	void createBoneHierarchy(bone_t *bones, unsigned int nbones, Shader *shader);
 	void draw(Renderer *renderer, Shader *shader);
 	virtual ~Object();
 };

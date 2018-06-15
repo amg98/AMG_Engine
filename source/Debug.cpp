@@ -54,6 +54,9 @@ void Debug::showError(int code, void *param){
 		case 12:
 			fprintf(stderr, "Not a power-of-two texture: %s\n", (char*)param);
 			break;
+		case 13:
+			fprintf(stderr, "More than 16 bones being used\n");
+			break;
 		default:
 			fprintf(stderr, "Unknown error\n");
 			break;

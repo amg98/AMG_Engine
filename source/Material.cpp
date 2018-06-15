@@ -18,6 +18,8 @@ Material::Material(float *data, const char *texture) {
 	this->ambient = vec4(data[10], data[10], data[10], 1.0f);
 	this->diffusePower = data[3];
 	this->specularPower = data[8];
+	this->texture = NULL;
+
 	char path[128];
 	sprintf(path, "Data/Texture/%s", texture);
 	this->texture = new Texture(path);
@@ -30,7 +32,8 @@ void Material::apply(Shader *shader){
 }
 
 Material::~Material() {
-	delete this->texture;
+	if(this->texture != NULL)
+		delete this->texture;
 }
 
 } /* namespace AMG */

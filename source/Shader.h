@@ -27,6 +27,7 @@ public:
 	void setUniform(const char* name, vec2 &v);
 	void setUniform(const char* name, vec4 &v);
 	void enable();
+	int getProgram();
 	virtual ~Shader();
 };
 
