@@ -1,53 +1,60 @@
-/*
- * Bone.h
- *
- *  Created on: 14 jun. 2018
- *      Author: Andrés
- */
+/** @file Bone.h
+  * @brief Bone hierachy used in skeletal animation
+  *
+  * Bones are stored recursively, and its root bone always belongs to an Object
+  */
 
 #ifndef BONE_H_
 #define BONE_H_
 
-#include "Entity.h"
-#include "Shader.h"
-
+// Includes C/C++
 #include <vector>
 
+// Includes OpenGL
 #define GLEW_STATIC
 #include <GL/glew.h>
-
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
 using namespace glm;
 
+// Own includes
+#include "Entity.h"
+
 namespace AMG {
 
+/**
+ * @struct bone_t
+ * @brief Stores information about a bone, used to fill in the Bone class
+ */
 typedef struct{
-	unsigned short parent;
-	unsigned short nchildren;
-	unsigned short *children;
-	float localbindmatrix[16];
-	float matrix_inv[16];
+	unsigned short parent;			/**< ID of the parent bone, 0xFFFF if there is no parent */
+	unsigned short nchildren;		/**< Number of children of this bone, 0 if there are no children */
+	unsigned short *children;		/**< Buffer holding bone's children IDs */
+	float localbindmatrix[16];		/**< Local binding matrix of the bone, transforms from parent bone's space to bone space */
+	float matrix_inv[16];			/**< Inverse of the Model Space to Bone Space Matrix */
 }bone_t;
 
+/**
+ * @class Animated Sprite
+ * @brief Class that holds a bone hierarchy
+ */
 class Bone: public Entity {
 private:
-	mat4 localBindMatrix;
-	mat4 modelMatrixInv;
-	int openglid;
+	mat4 localBindMatrix;		/**< Local binding matrix */
+	mat4 modelMatrixInv;		/**< Bone Space to Model Space Matrix */
+	int openglid;				/**< ID of the bone matrix in the shader */
+	int id;						/**< ID of this bone, it is object-specific */
+	mat4 transformMatrix;		/**< Final bone matrix, which is passed to the shader */
 public:
-	int id;
-	mat4 transformMatrix;
-	float angle;
-	vec3 axis;
-	std::vector<Bone*> children;
+	mat4 model;						/**< Bone Model Matrix */
+	std::vector<Bone*> children;	/**< Vector holding this bone's children */
+
 	Bone(int id, int glid);
-	void createChildren(bone_t *bones, int nbones, Shader *shader);
-	void calculateBoneMatrix(Shader *shader, Bone *parent);
+	void createChildren(bone_t *bones, int nbones);
+	void calculateBoneMatrix(Bone *parent);
 	virtual ~Bone();
 };
 
-} /* namespace AMG */
+}
 
-#endif /* BONE_H_ */
+#endif

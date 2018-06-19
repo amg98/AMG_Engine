@@ -1,23 +1,28 @@
-/*
- * Texture.cpp
- *
- *  Created on: 3 jun. 2018
- *      Author: Andrés
+/**
+ * @file Texture.cpp
+ * @brief Loading and configuration of textures in general
  */
 
-#include "Texture.h"
-#include "Debug.h"
-
+// Includes C/C++
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// Own includes
+#include "Texture.h"
+#include "Debug.h"
+
+// Defines for DDS loading
 #define FOURCC_DXT1 0x31545844
 #define FOURCC_DXT3 0x33545844
 #define FOURCC_DXT5 0x35545844
 
 namespace AMG {
 
+/**
+ * @brief Constructor for a Texture
+ * @param path Location of the texture file (*.dds)
+ */
 Texture::Texture(const char *path){
 	this->loaded = false;
 	FILE *fp = fopen(path, "rb");
@@ -92,21 +97,35 @@ Texture::Texture(const char *path){
 	this->loaded = true;
 }
 
+/**
+ * @brief Enable texture in OpenGL
+ */
 void Texture::enable(){
 	glBindTexture(GL_TEXTURE_2D, this->id);
 }
 
+/**
+ * @brief Get texture's width, in pixels
+ * @return The actual texture width
+ */
 int Texture::getWidth(){
 	return this->width;
 }
 
+/**
+ * @brief Get texture's height, in pixels
+ * @return The actual texture height
+ */
 int Texture::getHeight(){
 	return this->height;
 }
 
+/**
+ * @brief Destructor for a Texture
+ */
 Texture::~Texture() {
 	if(loaded)
 		glDeleteTextures(1, &this->id);
 }
 
-} /* namespace AMG */
+}

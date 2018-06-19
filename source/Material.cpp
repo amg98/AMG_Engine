@@ -1,17 +1,22 @@
-/*
- * Material.cpp
- *
- *  Created on: 13 jun. 2018
- *      Author: Andrés
+/**
+ * @file Material.cpp
+ * @brief Defines materials
  */
 
-#include "Material.h"
-
+// Includes C/C++
 #include <stdio.h>
 #include <string.h>
 
+// Own includes
+#include "Material.h"
+
 namespace AMG {
 
+/**
+ * @brief Constructor for a Material
+ * @param data Float data which was loaded from a model
+ * @param texture Texture path (if its NULL it doesn't load a texture)
+ */
 Material::Material(float *data, const char *texture) {
 	this->diffuse = vec4(data[0], data[1], data[2], data[4]);
 	this->specular = vec4(data[5], data[6], data[7], data[9]);
@@ -20,20 +25,28 @@ Material::Material(float *data, const char *texture) {
 	this->specularPower = data[8];
 	this->texture = NULL;
 
-	char path[128];
-	sprintf(path, "Data/Texture/%s", texture);
-	this->texture = new Texture(path);
-	this->texture->setDependency(true);
+	if(texture){
+		char path[128];
+		sprintf(path, "Data/Texture/%s", texture);
+		this->texture = new Texture(path);
+		this->texture->setDependency(true);
+	}
 }
 
-void Material::apply(Shader *shader){
+/**
+ * @brief Update material information in a shader
+ */
+void Material::apply(){
 	this->texture->enable();
 	// TODO lighting
 }
 
+/**
+ * @brief Destructor of a Material
+ */
 Material::~Material() {
 	if(this->texture != NULL)
 		delete this->texture;
 }
 
-} /* namespace AMG */
+}

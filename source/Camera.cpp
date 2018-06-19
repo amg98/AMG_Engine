@@ -1,21 +1,25 @@
-/*
- * Camera.cpp
- *
- *  Created on: 2 jun. 2018
- *      Author: Andrés
- */
+/** @file Camera.cpp
+  * @brief Camera objects
+  * It is under development, just a proof of concept
+  */
 
-#include "Camera.h"
-#include "Renderer.h"
-
+// Includes OpenGL
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 
+// Own includes
+#include "Camera.h"
+#include "Renderer.h"
+
 namespace AMG {
 
+/**
+ * @brief Constructor of a camera
+ * @param mode Desired camera mode (under development)
+ */
 Camera::Camera(int mode) {
 	this->position = glm::vec3(0, 0, 5);
-	this->camera = glm::lookAt(position, position+glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+	this->camera = glm::lookAt(position, position + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 	this->horizontalAngle = 3.14f;
 	this->verticalAngle = 0.0f;
 	this->speed = 3.0f;
@@ -23,10 +27,18 @@ Camera::Camera(int mode) {
 	this->mode = mode;
 }
 
+/**
+ * @brief Destructor of a camera
+ */
 Camera::~Camera() {
-	// TODO Auto-generated destructor stub
+
 }
 
+/**
+ * @brief Update this camera according to a window's input
+ * @param window Window to be read its input
+ * @note Called internally by a renderer
+ */
 void Camera::update(GLFWwindow *window){
 	switch(this->mode){
 		case FPS_CAMERA:
@@ -37,6 +49,11 @@ void Camera::update(GLFWwindow *window){
 	}
 }
 
+/**
+ * @brief Update a FPS-ish camera
+ * @param window Window to be read its input
+ * @note Called internally by a renderer
+ */
 void Camera::updateFPS(GLFWwindow *window){
 
 	static double lastTime = glfwGetTime();
@@ -87,8 +104,12 @@ void Camera::updateFPS(GLFWwindow *window){
 	lastTime = currentTime;
 }
 
+/**
+ * @brief Get camera matrix
+ * @return Camera matrix
+ */
 mat4& Camera::getMatrix(){
 	return camera;
 }
 
-} /* namespace AMG */
+}

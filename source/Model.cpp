@@ -1,58 +1,73 @@
-/*
- * Model.cpp
- *
- *  Created on: 13 jun. 2018
- *      Author: Andrés
+/**
+ * @file Model.h
+ * @brief Describes model loading and rendering
  */
 
+// Includes C/C++
+#include <stdio.h>
+#include <stdlib.h>
+
+// Own includes
 #include "Model.h"
 #include "Debug.h"
 #include "Bone.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 namespace AMG {
 
-Model::Model(const char *path, Shader *shader) {
+/**
+ * @brief Constructor for a 3D Model
+ * @param path Path for the *.amd file
+ */
+Model::Model(const char *path) {
+
+	// Initialise variables
 	this->nobjects = 0;
 	this->nmaterials = 0;
 	this->objects = NULL;
 	this->materials = NULL;
 
+	// Open file
 	FILE *f = fopen(path, "rb");
 	if(f == NULL) Debug::showError(FILE_NOT_FOUND, (void*)path);
 
+	// Check signature
 	char sign[3];
 	fread(sign, sizeof(char), 3, f);
 	if(sign[0] != 'A' || sign[1] != 'M' || sign[2] != 'D') Debug::showError(WRONG_SIGNATURE, (void*)path);
 
+	// Set up material informationo
 	nmaterials = 0;
 	fread(&nmaterials, sizeof(unsigned char), 1, f);
 	materials = (Material**) calloc (nmaterials, sizeof(Material*));
 
+	// Read all materials
 	for(unsigned int i=0;i<nmaterials;i++){
 		float buff[11];
 		fread(buff, sizeof(float), 11, f);
 		unsigned char len;
 		fread(&len, sizeof(unsigned char), 1, f);
-		char *path = (char*) calloc (len+1, sizeof(char));
-		fread(path, len, sizeof(char), f);
-		path[len] = 0;
+		char *path = NULL;
+		if(len > 0){		// Only if we have a texture
+			path = (char*) calloc (len+1, sizeof(char));
+			fread(path, len, sizeof(char), f);
+			path[len] = 0;
+		}
 		materials[i] = new Material(buff, path);
 		materials[i]->setDependency(true);
 		free(path);
 	}
 
-	nobjects = 0;
+	// Set up object information
 	fread(&nobjects, sizeof(unsigned char), 1, f);
 	objects = (Object**) calloc (nobjects, sizeof(Object*));
 
+	// Temporal variables
 	unsigned short nvertices;
 	unsigned short nindices;
 	unsigned char ngroups;
 	unsigned char nbones;
 
+	// Read each object
 	for(unsigned int i=0;i<nobjects;i++){
 		fread(&nvertices, sizeof(unsigned short), 1, f);
 		unsigned int vertices_size = nvertices*3*sizeof(float);
@@ -70,6 +85,7 @@ Model::Model(const char *path, Shader *shader) {
 		unsigned short *groups = (unsigned short*) malloc (ngroups*3*sizeof(unsigned short));
 		fread(groups, sizeof(unsigned short), 3*ngroups, f);
 
+		// Create a new object
 		objects[i] = new Object();
 		objects[i]->setDependency(true);
 		objects[i]->addBuffer(vertices, vertices_size, 3, GL_FLOAT);
@@ -78,29 +94,27 @@ Model::Model(const char *path, Shader *shader) {
 		objects[i]->setIndexBuffer(indices, nindices*sizeof(unsigned short));
 		objects[i]->setMaterialGroups(groups, ngroups, materials, nmaterials);
 
+		// Read bone information
 		fread(&nbones, sizeof(unsigned char), 1, f);
 		bone_t *bones = (bone_t*) calloc (nbones, sizeof(bone_t));
+
+		// Read each bone
 		for(unsigned char j=0;j<nbones;j++){
 			bone_t *bone = &bones[j];
 			fread(&bone->parent, sizeof(unsigned short), 1, f);
 			fread(&bone->nchildren, sizeof(unsigned short), 1, f);
-			//fprintf(stderr, "%u %u ", bone->parent, bone->nchildren);
 			if(bone->nchildren > 0){
 				bone->children = (unsigned short*) malloc (bone->nchildren * sizeof(unsigned short));
 				fread(bone->children, sizeof(unsigned short), bone->nchildren, f);
 			}
 			fread(bone->localbindmatrix, sizeof(float), 16, f);
 			fread(bone->matrix_inv, sizeof(float), 16, f);
-
-			/*for(unsigned int k=0;k<bone->nchildren;k++){
-				fprintf(stderr, "{%u}", bone->children[k]);
-			}
-			fprintf(stderr, "\n");*/
 		}
-		//fflush(stderr);
 
-		objects[i]->createBoneHierarchy(bones, nbones, shader);
+		// Create our bone structure
+		objects[i]->createBoneHierarchy(bones, nbones);
 
+		// Load up the weights buffer
 		if(nbones > 0){
 			float *weights = (float*) malloc (nvertices*4*sizeof(float));
 			fread(weights, sizeof(float), 4*nvertices, f);
@@ -108,11 +122,6 @@ Model::Model(const char *path, Shader *shader) {
 			fread(weights_bones, sizeof(unsigned short), 4*nvertices, f);
 			objects[i]->addBuffer(weights, nvertices*4*sizeof(float), 4, GL_FLOAT);
 			objects[i]->addBuffer(weights_bones, nvertices*4*sizeof(unsigned short), 4, GL_UNSIGNED_SHORT);
-			/*for(int k=0;k<nvertices;k++){
-				fprintf(stderr, "%f %f %f %f | %d %d %d %d\n", weights[(k<<2) + 0], weights[(k<<2) + 1], weights[(k<<2) + 2], weights[(k<<2) + 3],
-						weights_bones[(k<<2) + 0], weights_bones[(k<<2) + 1], weights_bones[(k<<2) + 2], weights_bones[(k<<2) + 3]);
-			}
-			fflush(stderr);*/
 			free(weights);
 			free(weights_bones);
 		}
@@ -121,18 +130,27 @@ Model::Model(const char *path, Shader *shader) {
 		free(texcoords);
 		free(normals);
 		free(indices);
-		// Grupos no, se eliminan en el objeto
+		// Groups are deleted in its Object
 	}
 
+	// Close file
 	fclose(f);
 }
 
-void Model::draw(Renderer *renderer, Shader *shader){
+/**
+ * @brief Draw a 3D model previously loaded
+ * @param renderer Window to be drawn
+ * @param shader Shader to update information
+ */
+void Model::draw(Renderer *renderer){
 	for(unsigned int i=0;i<nobjects;i++){
-		objects[i]->draw(renderer, shader);
+		objects[i]->draw(renderer);
 	}
 }
 
+/**
+ * @brief Destructor of a 3D model
+ */
 Model::~Model() {
 	for(unsigned int i=0;i<nobjects;i++){
 		delete objects[i];
@@ -144,4 +162,4 @@ Model::~Model() {
 	if(materials) free(materials);
 }
 
-} /* namespace AMG */
+}

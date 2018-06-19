@@ -1,18 +1,22 @@
-/*
- * Debug.cpp
- *
- *  Created on: 1 jun. 2018
- *      Author: Andrés
- */
+/** @file Debug.cpp
+  * @brief Debug and utility functions
+  */
 
-#include "Debug.h"
-#include "Renderer.h"
-
+// Includes C/C++
 #include <stdio.h>
 #include <stdlib.h>
 
+// Own includes
+#include "Debug.h"
+#include "Renderer.h"
+
 namespace AMG {
 
+/**
+ * @brief Show an error and exit program
+ * @param code Error code
+ * @param param additional information of the error
+ */
 void Debug::showError(int code, void *param){
 	switch(code){
 		case 0:

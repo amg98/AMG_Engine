@@ -1,8 +1,7 @@
-/*
- * Sprite.cpp
- *
- *  Created on: 2 jun. 2018
- *      Author: Andrés
+/**
+ * @file Sprite.cpp
+ * @brief Creation and rendering of sprites
+ * Used as a template to make more complicated sprite types (e.g. animated sprites)
  */
 
 #include "Sprite.h"
@@ -11,12 +10,12 @@
 namespace AMG {
 
 bool Sprite::internalBuffersInit = false;
-static GLuint verticesId;
-static GLuint vertexDataId;
-static GLuint uvDataId;
-static Shader *shader2d;
+static GLuint verticesId;					/**< Primitive OpenGL buffer ID */
+static GLuint vertexDataId;					/**< Vertices OpenGL buffer ID */
+static GLuint uvDataId;						/**< Texture coordinates OpenGL buffer ID */
+static Shader *shader2d;					/**< Internal shader to allow 2D drawing */
 
-static float spr_vertices[] = {
+static float spr_vertices[] = {				/**< The actual vertex buffer contents */
 	-0.5f, -0.5f,
 	0.5f, -0.5f,
 	0.5f, 0.5f,
@@ -25,7 +24,7 @@ static float spr_vertices[] = {
 	-0.5f, 0.5f
 };
 
-static float uv_vertices[] = {
+static float uv_vertices[] = {				/**< The actual texture coordinates buffer contents */
 	0, 1,
 	1, 1,
 	1, 0,
@@ -34,7 +33,14 @@ static float uv_vertices[] = {
 	0, 0
 };
 
+
+/**
+ * @brief Constructor for an Sprite, extends a Texture
+ * @param path Location of the sprite image (*.dds)
+ */
 Sprite::Sprite(const char *path) : Texture(path) {
+
+	// Initialise data
 	this->x = 0.0f;
 	this->y = 0.0f;
 	this->rotation = 0.0f;
@@ -44,6 +50,7 @@ Sprite::Sprite(const char *path) : Texture(path) {
 	this->texPosition = vec2(0.0f, 0.0f);
 	this->texScale = vec2(1.0f, 1.0f);
 
+	// Initialise internal buffers and load 2D shader
 	if(!internalBuffersInit){
 		internalBuffersInit = true;
 		glGenVertexArrays(1, &verticesId);
@@ -61,15 +68,19 @@ Sprite::Sprite(const char *path) : Texture(path) {
 	}
 }
 
+/**
+ * @brief Draw an Sprite in the proper window
+ * @param renderer The window in which the sprite is going to be drawn
+ */
 void Sprite::draw(Renderer *renderer){
+	Shader *shader = Renderer::shader;
 	shader2d->enable();
 	shader2d->setUniform("texPosition", texPosition);
 	shader2d->setUniform("texScale", texScale);
 	shader2d->setUniform("sprColor", color);
 	renderer->setTransformation(glm::vec3(x, y, 0), rotation, glm::vec3(0, 0, 1), glm::vec3(sx * width, sy * height, 1.0f));
-	renderer->setCamera(NULL);
-	renderer->updateMVP(shader2d);
-	enable();
+	renderer->updateMVP();
+	enable();			// Enable texture
 	glBindVertexArray(verticesId);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexDataId);
@@ -80,10 +91,14 @@ void Sprite::draw(Renderer *renderer){
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+	shader->enable();
 }
 
+/**
+ * @brief Destructor for a Sprite, the same as for a Texture
+ */
 Sprite::~Sprite() {
-	// TODO Auto-generated destructor stub
+
 }
 
-} /* namespace AMG */
+}

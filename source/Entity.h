@@ -1,21 +1,24 @@
-/*
- * Entity.h
- *
- *  Created on: 12 jun. 2018
- *      Author: Andrés
+/**
+ * @file Entity.h
+ * @brief File to declare Entity features, used in trash collector
  */
 
 #ifndef ENTITY_H_
 #define ENTITY_H_
 
+// Includes C/C++
 #include <vector>
 
 namespace AMG {
 
+/**
+ * @class Entity
+ * @brief An engine entity
+ */
 class Entity {
 private:
-	static std::vector<Entity*> entities;
-	bool dependant;		// Si ese objeto esta dentro de otro (entonces el objeto padre debe borrarlo)
+	static std::vector<Entity*> entities;		/**< Vector of registered entities */
+	bool dependant;								/**< If an entity depends on another the root entity must delete it */
 public:
 	Entity();
 	void setDependency(bool dependency);
@@ -23,6 +26,6 @@ public:
 	static void destroyEntities();
 };
 
-} /* namespace AMG */
+}
 
-#endif /* ENTITY_H_ */
+#endif
