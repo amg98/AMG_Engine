@@ -23,8 +23,11 @@ Model::Model(const char *path) {
 	// Initialise variables
 	this->nobjects = 0;
 	this->nmaterials = 0;
+	this->nanimations = 0;
 	this->objects = NULL;
 	this->materials = NULL;
+	this->animations = NULL;
+	this->fps = 0;
 
 	// Open file
 	FILE *f = fopen(path, "rb");
@@ -126,10 +129,36 @@ Model::Model(const char *path) {
 			free(weights_bones);
 		}
 
+		// Read animation data
+		fread(&this->nanimations, sizeof(unsigned char), 1, f);
+		fread(&this->fps, sizeof(unsigned char), 1, f);
+
+		// Prepare temporary buffers
+		float *data = (float*) malloc (7*nbones*sizeof(float));
+		float instant;
+
+		if(this->nanimations > 0){
+			this->animations = (Animation**) calloc (this->nanimations, sizeof(Animation*));
+			for(unsigned int j=0;j<this->nanimations;j++){
+				unsigned int nkeyframes = 0;
+				fread(&nkeyframes, sizeof(unsigned short), 1, f);
+				Keyframe **keyframes = (Keyframe**) calloc (nkeyframes, sizeof(Keyframe*));
+				for(unsigned int i=0;i<nkeyframes;i++){
+					fread(&instant, sizeof(float), 1, f);
+					fread(data, sizeof(float), 7*nbones, f);
+					keyframes[i] = new Keyframe(instant, data, nbones);
+				}
+				this->animations[j] = new Animation(keyframes, nkeyframes);
+				this->animations[j]->setDependency(true);
+			}
+		}
+
+		// Free temporary data
 		free(vertices);
 		free(texcoords);
 		free(normals);
 		free(indices);
+		free(data);
 		// Groups are deleted in its Object
 	}
 
@@ -149,6 +178,21 @@ void Model::draw(Renderer *renderer){
 }
 
 /**
+ * @brief Animate an Object in this Model
+ * @param objIndex Object to animate
+ * @param animIndex Which animation to apply to the object
+ * @param delta The renderer's delta time
+ */
+void Model::animate(unsigned int objIndex, unsigned int animIndex, float delta){
+	if(objIndex < nobjects && animIndex < nanimations){
+		animations[animIndex]->increaseTime(fps * delta);
+		Keyframe *first, *last;
+		float progress = animations[animIndex]->getKeyframes(&first, &last);
+		animations[animIndex]->animateBone(objects[objIndex]->rootBone, first, last, progress);
+	}
+}
+
+/**
  * @brief Destructor of a 3D model
  */
 Model::~Model() {
@@ -158,8 +202,12 @@ Model::~Model() {
 	for(unsigned int i=0;i<nmaterials;i++){
 		delete materials[i];
 	}
+	for(unsigned int i=0;i<nanimations;i++){
+		delete animations[i];
+	}
 	if(objects) free(objects);
 	if(materials) free(materials);
+	if(animations) free(animations);
 }
 
 }

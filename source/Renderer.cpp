@@ -3,6 +3,9 @@
  * @brief General rendering stuff
  */
 
+// Includes C/C++
+#include <unistd.h>
+
 // Includes OpenGL
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
@@ -11,6 +14,9 @@
 // Own includes
 #include "Renderer.h"
 #include "Debug.h"
+
+// Includes Windows
+#include <windows.h>
 
 namespace AMG {
 
@@ -40,9 +46,10 @@ static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
  * @param height Window height, in pixels
  * @param title Title for this new window
  * @param resize Resizable window?
+ * @param fps Desired frames per second
  * @todo Full screen parameter
  */
-Renderer::Renderer(int width, int height, const char *title, int resize) {
+Renderer::Renderer(int width, int height, const char *title, int resize, double fps) {
 
 	// Initialise variables
 	this->model = glm::mat4(1.0f);
@@ -50,6 +57,10 @@ Renderer::Renderer(int width, int height, const char *title, int resize) {
 	this->camera = NULL;
 	this->width = width;
 	this->height = height;
+	this->frametime = 1.0/fps;
+	this->renderCb = NULL;
+	this->updateCb = NULL;
+	this->FPS = fps;
 
 	// Initialise GLFW
 	if(!glfwSetup){
@@ -74,6 +85,7 @@ Renderer::Renderer(int width, int height, const char *title, int resize) {
 
 	// Set OpenGL context owner to this renderer
 	this->setCurrent();
+	glfwSwapInterval(1);			// Vsync enabled by default
 
 	// Initialise GLEW
 	if(!glewSetup){
@@ -114,25 +126,66 @@ void Renderer::calculateProjection(){
 }
 
 /**
- * @brief Update a renderer, flipping buffers and reading input
+ * @brief Update a renderer, flips buffers, reads input and limits frames per second
+ * @note You should use multi-threading to have multiple windows, as the main loop is here
+ * @todo Multi-threaded renderers
  */
 void Renderer::update(){
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if(renderCb)
-		renderCb();
+	bool running = true;
 
-	glfwSwapBuffers(window);
-	glfwPollEvents();
-}
+	double lastTime = glfwGetTime();
+	double startTime;
+	double passedTime;
+	double unprocessedTime = 0;
+	double frameCounter = 0;
+	int frames = 0;
+	bool render;
 
-/**
- * @brief Check whether this renderer is running already
- * @return Whether the renderer is running or should be closed
- */
-bool Renderer::running(){
-	return (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
+	// Main loop
+	while(running){
+
+		render = false;
+
+		startTime = glfwGetTime();
+		passedTime = startTime - lastTime;
+		lastTime = startTime;
+
+		unprocessedTime += passedTime;
+		frameCounter += passedTime;
+
+		while(unprocessedTime > frametime){
+			render = true;
+			unprocessedTime -= frametime;
+
+			if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)){
+				running = false;
+			}
+
+			// Update engine
+			glfwPollEvents();
+			if(updateCb) updateCb();
+
+			if(frameCounter > 1.0){
+				FPS = frames;
+				frames = 0;
+				frameCounter = 0;
+				/*fprintf(stdout, "%d\n", FPS);
+				fflush(stdout);*/
+			}
+		}
+
+		// Render scene
+		if(renderCb && render){
+			glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			renderCb();
+			glfwSwapBuffers(window);
+			frames ++;
+		}else{
+			Sleep(1);
+		}
+	}
 }
 
 /**
@@ -168,6 +221,13 @@ int Renderer::exitProcess(){
  */
 void Renderer::setRenderCallback(renderCallback cb){
 	this->renderCb = cb;
+}
+
+/**
+ * @brief Set a update callback to update the engine
+ */
+void Renderer::setUpdateCallback(renderCallback cb){
+	this->updateCb = cb;
 }
 
 /**
@@ -216,6 +276,14 @@ void Renderer::set3dMode(bool mode){
  */
 void Renderer::setCamera(Camera *camera){
 	this->camera = camera;
+}
+
+/**
+ * @brief Get the delta value for this Renderer
+ * @return The renderer's delta time
+ */
+double Renderer::getDelta(){
+	return 1.0f/FPS;
 }
 
 }

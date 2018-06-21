@@ -28,12 +28,12 @@ namespace AMG {
  */
 Bone::Bone(int id, int glid) {
 	this->id = id;
-	this->openglid = glid + id;
+	this->openglid = glid + id;				// At the specified array index
 	this->children = std::vector<Bone*>();
 	this->localBindMatrix = mat4(1.0f);
 	this->modelMatrixInv = mat4(1.0f);
 	this->transformMatrix = mat4(1.0f);
-	this->model = mat4(1.0f);
+	this->currentBindMatrix = mat4(1.0f);
 }
 
 /**
@@ -45,6 +45,7 @@ void Bone::createChildren(bone_t *bones, int nbones){
 
 	// Create needed matrices
 	this->localBindMatrix = glm::make_mat4(bones[id].localbindmatrix);
+	this->currentBindMatrix = this->localBindMatrix;
 	this->modelMatrixInv = glm::make_mat4(bones[id].matrix_inv);
 
 	// If there are children
@@ -67,9 +68,9 @@ void Bone::calculateBoneMatrix(Bone *parent){
 
 	// Compute bone matrix
 	if(parent == NULL){
-		this->transformMatrix = this->localBindMatrix * this->model;
+		this->transformMatrix = this->currentBindMatrix;
 	}else{
-		this->transformMatrix = parent->transformMatrix * this->localBindMatrix * this->model;
+		this->transformMatrix = parent->transformMatrix * this->currentBindMatrix;
 	}
 
 	// Do it for each child
@@ -80,6 +81,14 @@ void Bone::calculateBoneMatrix(Bone *parent){
 	// Perform the final matrix and push it to the shader
 	this->transformMatrix *= this->modelMatrixInv;
 	glUniformMatrix4fv(this->openglid, 1, GL_FALSE, &this->transformMatrix[0][0]);
+}
+
+/**
+ * @brief Get a bone's ID
+ * @return This bone's ID
+ */
+int Bone::getID(){
+	return this->id;
 }
 
 /**

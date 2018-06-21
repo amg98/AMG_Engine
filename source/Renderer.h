@@ -36,28 +36,32 @@ private:
 	static bool glfwSetup;			/**< Whether GLFW is setup */
 	static bool glewSetup;			/**< Whether GLEW is setup */
 	renderCallback renderCb;		/**< Rendering callback */
+	renderCallback updateCb;		/**< Update callback */
 	mat4 *projection;				/**< Current projection matrix */
 	mat4 perspective, ortho;		/**< Precalculated perspective and ortho matrices */
 	mat4 model;						/**< Model matrix */
 	mat4 mvp;						/**< Concatenation of Model, Projection and Camera matrices */
 	Camera *camera;					/**< Current set camera */
+	double frametime;				/**< Desired frame time*/
 public:
 	int width;						/**< Window width, in pixels (don't write) */
 	int height;						/**< Window height, in pixels (don't write) */
 	static Shader *shader;			/**< Current used shader */
+	int FPS;						/**< The actual frames per secoond */
 
-	Renderer(int width, int height, const char *title, int resize);
+	Renderer(int width, int height, const char *title, int resize, double fps);
 	void update();
-	bool running();
 	void setCurrent();
 	virtual ~Renderer();
 	static int exitProcess();
 	void setRenderCallback(renderCallback cb);
+	void setUpdateCallback(renderCallback cb);
 	void setTransformation(vec3 pos, float angle, vec3 axis, vec3 scale);
 	void updateMVP();
 	void set3dMode(bool mode);
 	void calculateProjection();
 	void setCamera(Camera *camera);
+	double getDelta();
 };
 
 }

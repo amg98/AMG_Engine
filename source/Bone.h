@@ -40,18 +40,19 @@ typedef struct{
  */
 class Bone: public Entity {
 private:
-	mat4 localBindMatrix;		/**< Local binding matrix */
 	mat4 modelMatrixInv;		/**< Bone Space to Model Space Matrix */
 	int openglid;				/**< ID of the bone matrix in the shader */
 	int id;						/**< ID of this bone, it is object-specific */
 	mat4 transformMatrix;		/**< Final bone matrix, which is passed to the shader */
 public:
-	mat4 model;						/**< Bone Model Matrix */
+	mat4 localBindMatrix;			/**< Local binding matrix */
+	mat4 currentBindMatrix;			/**< Current local binding matrix */
 	std::vector<Bone*> children;	/**< Vector holding this bone's children */
 
 	Bone(int id, int glid);
 	void createChildren(bone_t *bones, int nbones);
 	void calculateBoneMatrix(Bone *parent);
+	int getID();
 	virtual ~Bone();
 };
 

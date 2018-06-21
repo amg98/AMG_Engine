@@ -1,36 +1,21 @@
+# Imports
 import bpy
 import bmesh
 import struct
 import os
 from mathutils import *
 
-# WINDOWS = LITTLE ENDIAN
-
-# Vertices
-# Normales
-# Caras
-# Materiales
-# Objetos
-# Grupos de materiales
-# Texturas normales
-# Coordenadas de textura
-
-# Huesos
-# Animaciones
-
+# Triangulate an object
 def triangulate_object(obj):
     me = obj.data
-    # Get a BMesh representation
     bm = bmesh.new()
     bm.from_mesh(me)
-
     bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method=0, ngon_method=0)
-    #bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-
-    # Finish up, write the bmesh back to the mesh
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(me)
     bm.free()
-    
+
+# Search a vertex in a buffer
 def buscaVertex(v0, t0, n0, vtx, txc, nrm):
     i=0
     while(i<len(vtx)):
@@ -42,6 +27,7 @@ def buscaVertex(v0, t0, n0, vtx, txc, nrm):
         i += 1
     return -1
 
+# Search a bone
 def buscaBone(bones, name):
     index = 0
     for b in bones:
@@ -50,16 +36,36 @@ def buscaBone(bones, name):
         index += 1
     return -1
 
+# Get a local bone matrix (relative to its parent)
+def getBoneMatrix(poseBone):
+    if poseBone.parent is None:
+        return poseBone.matrix_local
+    else:
+        return poseBone.parent.matrix_local.inverted() * poseBone.matrix_local
+
+# Get a local pose bone matrix (relative to its parent)
+def getPoseBoneMatrix(poseBone):
+    if poseBone.parent is None:
+        return poseBone.matrix
+    else:
+        return poseBone.parent.matrix.inverted() * poseBone.matrix
+
+# The actual export script
 def export(context, filepath, use_some_setting):
+    
+    # Open file
     f = open(filepath, 'wb')
     
+    # Get number of objects
     nobjects = 0
     for obj in bpy.data.objects:
         if(obj.type == "MESH"):
             nobjects += 1
     
+    # Write signature
     f.write(bytes("AMD", "utf-8"))
     
+    # Write material data
     f.write(struct.pack("@B", len(bpy.data.materials)))
     #f.write("NMaterials: " + str(len(bpy.data.materials)) + "\n");
     for mat in bpy.data.materials:
@@ -75,8 +81,12 @@ def export(context, filepath, use_some_setting):
             texturepath = os.path.splitext(os.path.basename(mat.texture_slots[0].texture.image.filepath))[0]+'.dds'
             f.write(struct.pack("@B", len(texturepath)))
             f.write(bytes(texturepath, "utf-8"))
+        else:
+            f.write(struct.pack("@B", 0))
     
     objects = []
+    
+    # Write object data
     for obj in bpy.data.objects:
         if(obj.type == "MESH"):
             triangulate_object(obj)
@@ -91,11 +101,12 @@ def export(context, filepath, use_some_setting):
             bones = None
             currentMaterial = -1
             
+            # Get bone data
             armature = obj.find_armature()
             if armature != None:
                 bones = armature.data.bones
-                
             
+            # Fill in vertices and indices buffers
             for face in obj.data.polygons:
                 for vert, loop in zip(face.vertices, face.loop_indices):
                     normal = obj.data.vertices[vert].normal
@@ -117,7 +128,7 @@ def export(context, filepath, use_some_setting):
                                 weight.append(0)
                                 weight_bonelist.append(0)
                     index = buscaVertex(vertex, texcoord, normal, vertices, texcoords, normals)
-                    if(index == -1):    # Nuevo vertice
+                    if(index == -1):        # New vertex in our list
                         indices.append(len(vertices))
                         vertices.append(vertex)
                         texcoords.append([texcoord[0], 1-texcoord[1]])
@@ -127,8 +138,10 @@ def export(context, filepath, use_some_setting):
                             weight_bones.append(weight_bonelist)
                         
                         normals.append(normal)
-                    else:               # Ya estaba en la lista
+                    else:               # It was in the list
                         indices.append(index)
+                        
+                # Don't forget material groups
                 if(face.material_index != currentMaterial):
                     if(len(groups) > 0):
                         groups[len(groups)-1][1] = len(indices)/3
@@ -161,15 +174,6 @@ def export(context, filepath, use_some_setting):
         for i in indices:
             #f.write(str(i))
             f.write(struct.pack("@H", i))
-            """
-            newline += 1
-            if(newline == 3):
-                newline = 0
-                f.write("\n")
-            else:
-                f.write(",")
-        f.write("\n")
-        """
         #f.write("NGroups: " + str(len(o[4]))+"\n")
         f.write(struct.pack("@B", len(o[4])))
         for g in o[4]:
@@ -177,11 +181,11 @@ def export(context, filepath, use_some_setting):
             f.write(struct.pack("@HHH", int(g[0]), int(g[1]), int(g[2])))
         #f.write("\n")
         
-        # Solo si ese objeto tiene armadura
+        # If we have an armature
         if o[7] != None:
             f.write(struct.pack("@B", len(o[7])))
             for b in o[7]:
-                # Hueso padre
+                # Parent bone
                 if b.parent != None:
                     p = buscaBone(o[7], b.parent.name)
                     f.write(struct.pack("@H", p))
@@ -189,7 +193,7 @@ def export(context, filepath, use_some_setting):
                 else:
                     f.write(struct.pack("@H", 0xffff))
                     #print("P: " + str(0xffff))
-                # Huesos hijos
+                # Children bones
                 f.write(struct.pack("@H", len(b.children)))
                 #print("NC: " + str(len(b.children)))
                 for c in b.children:
@@ -197,11 +201,8 @@ def export(context, filepath, use_some_setting):
                     f.write(struct.pack("@H", id))
                     #print("C: " + str(id))
                 
-                # Matriz del hueso
-                m = b.matrix_local
-                if b.parent != None:
-                    m = b.parent.matrix_local.inverted() * b.matrix_local
-                
+                # Get bone matrix
+                m = getBoneMatrix(b)
                 mi = b.matrix_local.inverted()
                 for i in range(0,4):
                     for j in range(0,4):
@@ -218,6 +219,64 @@ def export(context, filepath, use_some_setting):
                 #print(wb[0], wb[1], wb[2])
         else:
             f.write(struct.pack("@B", 0))
+    
+    # Get number of animations
+    nactions = 0
+    for a in bpy.data.actions:
+        if a.id_root == 'OBJECT':
+            nactions += 1
+    
+    # Only 1 object is supported using animations, and it must have a skeleton
+    # If you are using a non-skeleton animated object, make a skeleton of a single bone with
+    # weight 1 on all vertices, then animate the bone
+    if(nobjects > 1 and nactions > 0):
+        f.write(struct.pack("@B", 0))
+        print("Multiobject actions are unsupported")
+        f.close()
+        return {'FINISHED'}
+
+    ob = None
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            ob = o.find_armature()
+            if(ob == None):
+                print("No armature found for animated object")
+                f.close()
+                return {"FINISHED"}
+            bpy.context.scene.objects.active = ob
+            break
+    
+    # Write animation data
+    f.write(struct.pack("@B", nactions))                        # Number of animations
+    f.write(struct.pack("@B", bpy.context.scene.render.fps))    # Frames per second
+    for action in bpy.data.actions:
+        if a.id_root == 'OBJECT':
+            ob.animation_data.action = action
+            bpy.ops.object.mode_set(mode="POSE")
+            bpy.ops.pose.select_all(action="SELECT")
+            bpy.ops.pose.transforms_clear()
+        
+            # Get all frame numbers in this animation
+            frames = dict()
+            for fcurve in action.fcurves:
+                for key in fcurve.keyframe_points:
+                    frame = key.co.x
+                    frames[frame] = 1
+            
+            f.write(struct.pack("@H", len(frames)))
+            for fr in sorted(frames):
+                bpy.context.scene.frame_set(fr)             # Frame number
+                bpy.context.scene.update()
+                f.write(struct.pack("@f", fr))
+                for bone in ob.pose.bones:                  # Frame matrix for each bone
+                    m = getPoseBoneMatrix(bone)
+                    #print(m)
+                    pos = m.to_translation()
+                    rot = m.to_quaternion()
+                    f.write(struct.pack("@fff", pos[0], pos[1], pos[2]))
+                    f.write(struct.pack("@ffff", rot.x, rot.y, rot.z, rot.w))
+                #print("\n")
+            
     f.close()
     return {'FINISHED'}
 
@@ -297,3 +356,4 @@ if __name__ == "__main__":
 
     # test call
     bpy.ops.export.amd_scene('INVOKE_DEFAULT')
+	

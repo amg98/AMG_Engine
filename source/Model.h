@@ -11,6 +11,7 @@
 #include "Object.h"
 #include "Material.h"
 #include "Renderer.h"
+#include "Animation.h"
 
 namespace AMG {
 
@@ -22,12 +23,17 @@ class Model: public Entity {
 private:
 	unsigned int nmaterials;		/**< Number of materials in the model */
 	Material **materials;			/**< List of materials */
+	unsigned int fps;				/**< Frames per second */
 public:
 	unsigned int nobjects;			/**< Number of objects in the model	*/
 	Object **objects;				/**< List of objects */
 
+	unsigned int nanimations;		/**< Number of animations */
+	Animation **animations;			/**< List of animations */
+
 	Model(const char *path);
 	void draw(Renderer *renderer);
+	void animate(unsigned int objIndex, unsigned int animIndex, float delta);
 	virtual ~Model();
 };
 

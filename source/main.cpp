@@ -27,8 +27,8 @@ void render(){
 
 	window->setCamera(cam);
 
+	link->animate(0, 0, window->getDelta());
 	link->draw(window);
-	link->objects[0]->rootBone->children[0]->children[2]->children[0]->children[0]->model = glm::rotate(sprite->rotation, vec3(1, 0, 0));
 
 	window->set3dMode(false);
 	sprite->rotation += 0.05f;
@@ -38,7 +38,7 @@ void render(){
 
 int main(int argc, char **argv){
 
-	window = new Renderer(1024, 768, "Window1", true);
+	window = new Renderer(1024, 768, "Window1", true, 60);
 	window->setRenderCallback(render);
 
 	cam = new Camera(NO_MOVE_CAMERA);
@@ -54,9 +54,7 @@ int main(int argc, char **argv){
 	link->objects[0]->angle = -3.141592f/2.0f;
 	link->objects[0]->axis = vec3(1.0f, 0.0f, 0.0f);
 
-	do {
-		window->update();
-	}while(window->running());
+	window->update();
 
 	return Renderer::exitProcess();
 }
