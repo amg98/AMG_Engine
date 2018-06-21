@@ -13,7 +13,7 @@
 namespace AMG {
 
 /**
- * @class Animated Sprite
+ * @class AnimatedSprite
  * @brief Class that holds an animated sprite, extending Sprite
  */
 class AnimatedSprite: public Sprite {

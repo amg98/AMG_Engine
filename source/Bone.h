@@ -35,7 +35,7 @@ typedef struct{
 }bone_t;
 
 /**
- * @class Animated Sprite
+ * @class Bone
  * @brief Class that holds a bone hierarchy
  */
 class Bone: public Entity {
