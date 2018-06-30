@@ -20,14 +20,11 @@ uniform float fog_gradient;
 
 void main(){
 
-	float brightness = max(dot(normal, toLight), 0);
+	float brightness = max(dot(normal, toLight), 0.2);
 	vec4 diffuse = vec4(brightness * lightColor, 1);
-	
-	float specularBrightness = pow(max(dot(toCamera, reflect(-toLight, normal)), 0.2), 10) * 0.8;
-	vec4 specular = vec4(specularBrightness * lightColor, 1);
 
     // Output color = color of the texture at the specified UV
-    color = diffuse * texture(myTextureSampler, UV) + specular;
+    color = diffuse * texture(myTextureSampler, UV);
     
-   color = mix(fog_color, color, fog_value);
+    color = mix(fog_color, color, fog_value);
 }

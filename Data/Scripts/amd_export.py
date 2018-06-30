@@ -356,4 +356,3 @@ if __name__ == "__main__":
 
     # test call
     bpy.ops.export.amd_scene('INVOKE_DEFAULT')
-	

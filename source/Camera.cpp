@@ -18,7 +18,7 @@ namespace AMG {
  * @param mode Desired camera mode (under development)
  */
 Camera::Camera(int mode) {
-	this->position = glm::vec3(0, 0, 5);
+	this->position = glm::vec3(0, 0.1f, 5);
 	this->camera = glm::lookAt(position, position + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 	this->horizontalAngle = 3.14f;
 	this->verticalAngle = 0.0f;

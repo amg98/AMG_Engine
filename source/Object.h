@@ -31,8 +31,7 @@ private:
 public:
 	Bone *rootBone;					/**< Bone hierarchy, NULL if there are no bones */
 	vec3 position;					/**< Object position */
-	float angle;					/**< Object angle of rotation */
-	vec3 axis;						/**< Object axis of rotation */
+	quat rotation;					/**< Object rotation */
 	vec3 scale;						/**< Object scale */
 	Object();
 	void setMaterialGroups(unsigned short *groups, unsigned int ngroups, Material **materials, unsigned int nmaterials);

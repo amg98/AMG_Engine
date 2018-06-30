@@ -62,9 +62,6 @@ Sprite::Sprite(const char *path) : Texture(path) {
 		glBindBuffer(GL_ARRAY_BUFFER, uvDataId);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
 		shader2d = new Shader("Data/Shader/shader2d.vs", "Data/Shader/shader2d.fs");
-		shader2d->defineUniform("texPosition");
-		shader2d->defineUniform("texScale");
-		shader2d->defineUniform("sprColor");
 	}
 }
 
@@ -78,7 +75,7 @@ void Sprite::draw(Renderer *renderer){
 	shader2d->setUniform("texPosition", texPosition);
 	shader2d->setUniform("texScale", texScale);
 	shader2d->setUniform("sprColor", color);
-	renderer->setTransformation(glm::vec3(x, y, 0), rotation, glm::vec3(0, 0, 1), glm::vec3(sx * width, sy * height, 1.0f));
+	renderer->setTransformation(glm::vec3(x, y, 0), glm::quat(glm::vec3(0, 0, rotation)), glm::vec3(sx * width, sy * height, 1.0f));
 	renderer->updateMVP();
 	enable();			// Enable texture
 	glBindVertexArray(verticesId);

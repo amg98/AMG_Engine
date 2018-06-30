@@ -18,8 +18,7 @@ namespace AMG {
  */
 Object::Object() {
 	this->position = vec3(0.0f, 0.0f, 0.0f);
-	this->angle = 0.0f;
-	this->axis = vec3(0.0f, 0.0f, 1.0f);
+	this->rotation = quat();
 	this->scale = vec3(1.0f, 1.0f, 1.0f);
 	this->groups = NULL;
 	this->ngroups = 0;
@@ -70,11 +69,12 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 void Object::draw(Renderer *renderer){
 
 	// Transform the object
-	renderer->setTransformation(position, angle, axis, scale);
+	renderer->setTransformation(position, rotation, scale);
 	renderer->updateMVP();
 
 	// Transform each bone
-	rootBone->calculateBoneMatrix(NULL);
+	if(rootBone)
+		rootBone->calculateBoneMatrix(NULL);
 
 	this->enableBuffers();
 

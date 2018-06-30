@@ -23,6 +23,7 @@ namespace AMG {
 bool Renderer::glfwSetup = false;
 bool Renderer::glewSetup = false;
 Shader *Renderer::shader = NULL;
+Renderer *Renderer::currentRenderer = NULL;
 
 /**
  * @brief Static method to resize a window
@@ -46,14 +47,15 @@ static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
  * @param height Window height, in pixels
  * @param title Title for this new window
  * @param resize Resizable window?
+ * @param fullscreen Full screen window?
  * @param fps Desired frames per second
- * @todo Full screen parameter
  */
-Renderer::Renderer(int width, int height, const char *title, int resize, double fps) {
+Renderer::Renderer(int width, int height, const char *title, bool resize, bool fullscreen, double fps) {
 
 	// Initialise variables
 	this->model = glm::mat4(1.0f);
 	this->mvp = glm::mat4(1.0f);
+	this->mv = glm::mat4(1.0f);
 	this->camera = NULL;
 	this->width = width;
 	this->height = height;
@@ -61,6 +63,9 @@ Renderer::Renderer(int width, int height, const char *title, int resize, double 
 	this->renderCb = NULL;
 	this->updateCb = NULL;
 	this->FPS = fps;
+	this->fogColor = vec4(0.2f, 0.2f, 0.2f, 1.0f);
+	this->fogDensity = 0.0f;
+	this->fogGradient = 1.0f;
 
 	// Initialise GLFW
 	if(!glfwSetup){
@@ -77,7 +82,8 @@ Renderer::Renderer(int width, int height, const char *title, int resize, double 
 	}
 
 	// Create a window
-	window = glfwCreateWindow(width, height, title, NULL, NULL);
+	GLFWmonitor *monitor = (fullscreen && !resize) ? glfwGetPrimaryMonitor() : NULL;
+	window = glfwCreateWindow(width, height, title, monitor, NULL);
 	if(window == NULL){
 		glfwTerminate();
 		Debug::showError(2, NULL);
@@ -93,11 +99,11 @@ Renderer::Renderer(int width, int height, const char *title, int resize, double 
 			glfwTerminate();
 			Debug::showError(3, NULL);
 		}
-		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		shader = new Shader("Data/Shader/default.vs", "Data/Shader/default.fs");
-		shader->defineUniform("boneMatrix");
 		shader->enable();
 		glewSetup = true;
 	}
@@ -177,7 +183,7 @@ void Renderer::update(){
 
 		// Render scene
 		if(renderCb && render){
-			glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+			glClearColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			renderCb();
 			glfwSwapBuffers(window);
@@ -193,6 +199,7 @@ void Renderer::update(){
  */
 void Renderer::setCurrent(){
 	glfwMakeContextCurrent(window);
+	currentRenderer = this;
 }
 
 /**
@@ -233,12 +240,11 @@ void Renderer::setUpdateCallback(renderCallback cb){
 /**
  * @brief Calculate model matrix from translation, rotation and scale vectors
  * @param pos Position vector
- * @param angle Angle of rotation, in radians
- * @param axis Axis of rotation, needs to be normalised
+ * @param rot Rotation quaternion
  * @param scale Vector of scale (1.0f, 1.0f, 1.0f) is default size
  */
-void Renderer::setTransformation(vec3 pos, float angle, vec3 axis, vec3 scale){
-	model = glm::translate(mat4(1.0f), pos) * glm::rotate(angle, axis) * glm::scale(scale);
+void Renderer::setTransformation(vec3 pos, quat rot, vec3 scale){
+	model = glm::translate(mat4(1.0f), pos) * glm::toMat4(rot) * glm::scale(scale);
 }
 
 /**
@@ -248,11 +254,13 @@ void Renderer::setTransformation(vec3 pos, float angle, vec3 axis, vec3 scale){
 void Renderer::updateMVP(){
 	if(camera){
 		camera->update(this->window);
-		mvp = *projection * camera->getMatrix() * model;
+		mv = camera->getMatrix() * model;
 	}else{
-		mvp = *projection * model;
+		mv = model;
 	}
-	glUniformMatrix4fv(shader->getUniform("MVP"), 1, GL_FALSE, &mvp[0][0]);
+	mvp = *projection * mv;
+	shader->setUniform("MVP", mvp);
+	shader->setUniform("MV", mv);
 }
 
 /**
@@ -284,6 +292,15 @@ void Renderer::setCamera(Camera *camera){
  */
 double Renderer::getDelta(){
 	return 1.0f/FPS;
+}
+
+/**
+ * @brief Update fog to the current shader
+ */
+void Renderer::updateFog(){
+	shader->setUniform("fog_color", fogColor);
+	shader->setUniform("fog_density", fogDensity);
+	shader->setUniform("fog_gradient", fogGradient);
 }
 
 }

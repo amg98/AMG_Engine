@@ -22,13 +22,18 @@ namespace AMG {
 class Shader : private Entity {
 private:
 	int programID;											/**< Internal OpenGL program ID */
-	std::tr1::unordered_map<std::string, int> uniformsMap;		/**< Hash map holding uniform variables in the shader */
+	std::tr1::unordered_map<std::string, int> uniformsMap;	/**< Hash map holding uniform variables in the shader */
+	int loadShader(const char *path, int type, std::string &ShaderCode);
 public:
 	Shader(const char *vertex_file_path, const char *fragment_file_path);
 	void defineUniform(std::string name);
+	void defineUniforms(std::string code);
 	int getUniform(const std::string &name);
+	void setUniform(const std::string &name, float v);
 	void setUniform(const std::string &name, vec2 &v);
+	void setUniform(const std::string &name, vec3 &v);
 	void setUniform(const std::string &name, vec4 &v);
+	void setUniform(const std::string &name, mat4 &v);
 	void enable();
 	virtual ~Shader();
 };

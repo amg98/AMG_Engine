@@ -101,6 +101,7 @@ Texture::Texture(const char *path){
  * @brief Enable texture in OpenGL
  */
 void Texture::enable(){
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, this->id);
 }
 
