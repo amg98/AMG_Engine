@@ -16,10 +16,10 @@ class Terrain: public Object {
 private:
 	const static float SIZE;			/**< Terrain size */
 	const static int VERTEX_COUNT;		/**< Number of vertices per terrain unit */
-	static Shader *terrainShader;		/**< Shader used for Terrain rendering */
 public:
+	static Shader *terrainShader;		/**< Shader used for Terrain rendering */
 	Terrain(float x, float y, const char *texture);
-	void draw(Renderer *renderer, Light *light);
+	void draw(Renderer *renderer);
 	virtual ~Terrain();
 };
 

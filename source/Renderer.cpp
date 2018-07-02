@@ -103,7 +103,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		shader = new Shader("Data/Shader/default.vs", "Data/Shader/default.fs");
+		shader = new Shader("Data/Shader/default.vs", "Data/Shader/default.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_SKINNING);
 		shader->enable();
 		glewSetup = true;
 	}
@@ -259,8 +259,8 @@ void Renderer::updateMVP(){
 		mv = model;
 	}
 	mvp = *projection * mv;
-	shader->setUniform("MVP", mvp);
-	shader->setUniform("MV", mv);
+	shader->setUniform("AMG_MVP", mvp);
+	shader->setUniform("AMG_MV", mv);
 }
 
 /**
@@ -298,9 +298,9 @@ double Renderer::getDelta(){
  * @brief Update fog to the current shader
  */
 void Renderer::updateFog(){
-	shader->setUniform("fog_color", fogColor);
-	shader->setUniform("fog_density", fogDensity);
-	shader->setUniform("fog_gradient", fogGradient);
+	shader->setUniform("AMG_FogColor", fogColor);
+	shader->setUniform("AMG_FogDensity", fogDensity);
+	shader->setUniform("AMG_FogGradient", fogGradient);
 }
 
 }

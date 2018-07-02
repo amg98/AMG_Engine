@@ -9,6 +9,7 @@
 // Includes C/C++
 #include <string>
 #include <tr1/unordered_map>
+#include <vector>
 
 // OpenGL includes
 #include <glm/glm.hpp>
@@ -16,18 +17,25 @@ using namespace glm;
 
 // Own includes
 #include "Entity.h"
+#include "Light.h"
 
 namespace AMG {
+
+#define AMG_USE_SKINNING 	(1 << 0)
+#define AMG_USE_FOG 		(1 << 1)
+#define AMG_USE_LIGHTING(n)	(((n)&31) << 2)
+#define AMG_USE_2D			(1 << 7)
 
 class Shader : private Entity {
 private:
 	int programID;											/**< Internal OpenGL program ID */
 	std::tr1::unordered_map<std::string, int> uniformsMap;	/**< Hash map holding uniform variables in the shader */
-	int loadShader(const char *path, int type, std::string &ShaderCode);
+	int loadShader(const char *path, int type);
+	std::string loadShaderCode(const char *path);
 public:
-	Shader(const char *vertex_file_path, const char *fragment_file_path);
+	std::vector<Light*> lights;								/**< Vector holding all lights used in the shader */
+	Shader(const char *vertex_file_path, const char *fragment_file_path, int options);
 	void defineUniform(std::string name);
-	void defineUniforms(std::string code);
 	int getUniform(const std::string &name);
 	void setUniform(const std::string &name, float v);
 	void setUniform(const std::string &name, vec2 &v);

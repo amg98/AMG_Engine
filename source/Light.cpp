@@ -9,6 +9,8 @@
 
 namespace AMG {
 
+static char shaderText[64];		/**< Internal char buffer for updating uniforms */
+
 /**
  * @brief Constructor for a Light
  * @param position Light's position
@@ -21,10 +23,13 @@ Light::Light(vec3 position, vec3 color) {
 
 /**
  * @brief Update light information onto the shader
+ * @param id Light's ID in the shader
  */
-void Light::enable(){
-	Renderer::shader->setUniform("lightPosition", position);
-	Renderer::shader->setUniform("lightColor", color);
+void Light::enable(int id){
+	sprintf(shaderText, "AMG_Light[%d].position", id);
+	Renderer::shader->setUniform(std::string(shaderText), position);
+	sprintf(shaderText, "AMG_Lights[%d].color", id);
+	Renderer::shader->setUniform(std::string(shaderText), color);
 }
 
 /**

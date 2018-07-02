@@ -10,9 +10,6 @@
 #include <glm/glm.hpp>
 using namespace glm;
 
-// Own includes
-#include "Shader.h"
-
 namespace AMG {
 
 /**
@@ -26,7 +23,7 @@ public:
 	vec3 color;			/**< Color of the light */
 
 	Light(vec3 position, vec3 color);
-	void enable();
+	void enable(int id);
 	virtual ~Light();
 };
 

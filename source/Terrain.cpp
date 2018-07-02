@@ -19,7 +19,7 @@ Terrain::Terrain(float x, float y, const char *texture) {
 
 	// Load the shader, if needed
 	if(terrainShader == NULL){
-		terrainShader = new Shader("Data/Shader/terrain.vs", "Data/Shader/terrain.fs");
+		terrainShader = new Shader("Data/Shader/terrain.vs", "Data/Shader/terrain.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG);
 	}
 
 	// Set position
@@ -85,12 +85,10 @@ Terrain::Terrain(float x, float y, const char *texture) {
 /**
  * @brief Render a Terrain object
  * @param renderer Window to draw this terrain
- * @param light Light to apply as global illumination
  */
-void Terrain::draw(Renderer *renderer, Light *light){
+void Terrain::draw(Renderer *renderer){
 	Shader *currentShader = Renderer::shader;
 	terrainShader->enable();
-	light->enable();
 	Object::draw(renderer);
 	currentShader->enable();
 }

@@ -61,7 +61,7 @@ Sprite::Sprite(const char *path) : Texture(path) {
 		glGenBuffers(1, &uvDataId);
 		glBindBuffer(GL_ARRAY_BUFFER, uvDataId);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
-		shader2d = new Shader("Data/Shader/shader2d.vs", "Data/Shader/shader2d.fs");
+		shader2d = new Shader("Data/Shader/shader2d.vs", "Data/Shader/shader2d.fs", AMG_USE_2D);
 	}
 }
 
@@ -72,9 +72,9 @@ Sprite::Sprite(const char *path) : Texture(path) {
 void Sprite::draw(Renderer *renderer){
 	Shader *shader = Renderer::shader;
 	shader2d->enable();
-	shader2d->setUniform("texPosition", texPosition);
-	shader2d->setUniform("texScale", texScale);
-	shader2d->setUniform("sprColor", color);
+	shader2d->setUniform("AMG_TexPosition", texPosition);
+	shader2d->setUniform("AMG_TexScale", texScale);
+	shader2d->setUniform("AMG_SprColor", color);
 	renderer->setTransformation(glm::vec3(x, y, 0), glm::quat(glm::vec3(0, 0, rotation)), glm::vec3(sx * width, sy * height, 1.0f));
 	renderer->updateMVP();
 	enable();			// Enable texture
