@@ -7,7 +7,7 @@
 namespace AMG {
 
 // Static variables
-const float Terrain::SIZE = 800;
+const float Terrain::SIZE = 128;
 const int Terrain::VERTEX_COUNT = 128;
 Shader *Terrain::terrainShader = NULL;
 

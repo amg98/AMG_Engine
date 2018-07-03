@@ -2,10 +2,6 @@
  * @file AMG_VertexUtility.glsl
  * @brief GLSL functions defined for compatability with the Engine
  */
- 
-// Global variables
-const int AMG_MAX_BONES = 16;		/**< Maximum number of bones (user can change this) */
-const int AMG_LIGHTS = 1;			/**< Number of lights used in this shader (user can change this) */
 
 // Input data layout
 layout(location = 0) in vec3 AMG_Position;			/**< Vertex position, in model space */
@@ -90,7 +86,7 @@ void AMG_PassLight(in mat4 modelview, int id){
 void AMG_Pass(in mat4 modelview){
 	AMG_OutUV = AMG_UV;
 	AMG_OutNormal = normalize((modelview * vec4(AMG_Normal, 0)).xyz);
-	AMG_OutToCamera = -(AMG_MV * vec4(AMG_Position, 1)).xyz;
+	AMG_OutToCamera = -(modelview * vec4(AMG_Position, 1)).xyz;
 	amg_distance = length(AMG_OutToCamera);
     AMG_OutToCamera /= amg_distance;
 }

@@ -9,6 +9,7 @@
 
 // Own includes
 #include "Material.h"
+#include "Renderer.h"
 
 namespace AMG {
 
@@ -22,7 +23,8 @@ Material::Material(const char *texture){
 	this->ambient = vec4(0.2f, 0.2f, 0.2f, 1);
 	this->diffusePower = 1.0f;
 	this->specularPower = 1.0f;
-	loadTexture(texture);
+	this->textures = std::vector<Texture*>();
+	addTexture(texture);
 }
 /**
  * @brief Constructor for a Material
@@ -35,16 +37,21 @@ Material::Material(float *data, const char *texture) {
 	this->ambient = vec4(data[10], data[10], data[10], data[4]);
 	this->diffusePower = data[3];
 	this->specularPower = data[8];
-	loadTexture(texture);
+	this->textures = std::vector<Texture*>();
+	addTexture(texture);
 }
 
-void Material::loadTexture(const char *texture){
-	this->texture = NULL;
+/**
+ * @brief Add a texture to the texture list
+ */
+void Material::addTexture(const char *texture){
+	Texture *tex = NULL;
 	if(texture){
 		char path[128];
 		sprintf(path, "Data/Texture/%s", texture);
-		this->texture = new Texture(path);
-		this->texture->setDependency(true);
+		tex = new Texture(path);
+		tex->setDependency(true);
+		this->textures.push_back(tex);
 	}
 }
 
@@ -52,21 +59,29 @@ void Material::loadTexture(const char *texture){
  * @brief Update material information in a shader
  */
 void Material::apply(){
-	this->texture->enable();
+	for(unsigned int i=0;i<textures.size();i++){
+		textures[i]->enable(i);
+	}
 	if(diffuse.a < 1.0f){
 		glDisable(GL_CULL_FACE);
 	}else{
 		glEnable(GL_CULL_FACE);
 	}
-	// TODO lighting
+	Renderer::shader->setUniform("AMG_MaterialDiffuse", diffuse);
+	Renderer::shader->setUniform("AMG_MaterialSpecular", specular);
+	Renderer::shader->setUniform("AMG_MaterialAmbient", ambient);
+	Renderer::shader->setUniform("AMG_DiffusePower", diffusePower);
+	Renderer::shader->setUniform("AMG_SpecularPower", specularPower);
 }
 
 /**
  * @brief Destructor of a Material
  */
 Material::~Material() {
-	if(this->texture != NULL)
-		delete this->texture;
+	for(unsigned int i=0;i<textures.size();i++){
+		delete textures[i];
+	}
+	textures.clear();
 }
 
 }

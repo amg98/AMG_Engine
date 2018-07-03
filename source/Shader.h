@@ -21,10 +21,13 @@ using namespace glm;
 
 namespace AMG {
 
+#define AMG_CUSTOM_SHADER	(0)
 #define AMG_USE_SKINNING 	(1 << 0)
 #define AMG_USE_FOG 		(1 << 1)
 #define AMG_USE_LIGHTING(n)	(((n)&31) << 2)
 #define AMG_USE_2D			(1 << 7)
+#define AMG_USE_SPECULAR	(1 << 8)
+#define AMG_USE_TEXTURE(n)	(((n)&15) << 9)
 
 class Shader : private Entity {
 private:
@@ -35,14 +38,17 @@ private:
 public:
 	std::vector<Light*> lights;								/**< Vector holding all lights used in the shader */
 	Shader(const char *vertex_file_path, const char *fragment_file_path, int options);
+	void enableOptions(int options);
 	void defineUniform(std::string name);
 	int getUniform(const std::string &name);
+	void setUniform(const std::string &name, int v);
 	void setUniform(const std::string &name, float v);
 	void setUniform(const std::string &name, vec2 &v);
 	void setUniform(const std::string &name, vec3 &v);
 	void setUniform(const std::string &name, vec4 &v);
 	void setUniform(const std::string &name, mat4 &v);
 	void enable();
+	int getProgram();
 	virtual ~Shader();
 };
 

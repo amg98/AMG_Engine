@@ -11,6 +11,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 using namespace glm;
 
 // Own includes
@@ -34,17 +36,19 @@ enum CameraMode {
 class Camera : private Entity {
 private:
 	mat4 camera;				/**< Camera matrix */
-	glm::vec3 position;			/**< Camera position */
-	float horizontalAngle;		/**< Camera horizontal angle */
-	float verticalAngle;		/**< Camera vertical angle */
-	float speed;				/**< Camera walking speed */
-	float mouseSpeed;			/**< Camera mouse speed */
+	vec3 position;				/**< Camera position */
+	quat rotation;				/**< Camera rotation */
+	vec3 forward;				/**< Forward vector */
+	vec3 right;					/**< Right vector */
+	float rotX;					/**< Rotation in X axis */
+	float rotY;					/**< Rotation in Y axis */
 	int mode;					/**< Selected mode */
+	void computeTrihedron();
 public:
 	Camera(int mode);
 	mat4& getMatrix();
-	void update(GLFWwindow *window);
-	void updateFPS(GLFWwindow *window);
+	void update(GLFWwindow *window, float delta);
+	void updateFPS(GLFWwindow *window, float delta);
 	virtual ~Camera();
 };
 

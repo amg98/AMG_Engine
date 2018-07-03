@@ -26,9 +26,9 @@ class Object: public MeshData {
 private:
 	unsigned short *groups;			/**< Buffer of material groups, each entry has a material index */
 	unsigned int ngroups;			/**< Number of groups in this object */
+public:
 	Material **materials;			/**< Buffer of materials, same for a Model */
 	unsigned int nmaterials;		/**< Number of materials, same for a Model */
-public:
 	Bone *rootBone;					/**< Bone hierarchy, NULL if there are no bones */
 	vec3 position;					/**< Object position */
 	quat rotation;					/**< Object rotation */

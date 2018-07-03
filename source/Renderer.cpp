@@ -33,7 +33,7 @@ Renderer *Renderer::currentRenderer = NULL;
  */
 static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
 	Renderer *renderer = (Renderer*) glfwGetWindowUserPointer(window);
-	if(renderer){
+	if(renderer && newWidth > 0 && newHeight > 0){
 		renderer->width = newWidth;
 		renderer->height = newHeight;
 		renderer->calculateProjection();
@@ -253,7 +253,7 @@ void Renderer::setTransformation(vec3 pos, quat rot, vec3 scale){
  */
 void Renderer::updateMVP(){
 	if(camera){
-		camera->update(this->window);
+		camera->update(this->window, this->getDelta());
 		mv = camera->getMatrix() * model;
 	}else{
 		mv = model;

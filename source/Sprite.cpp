@@ -38,7 +38,7 @@ static float uv_vertices[] = {				/**< The actual texture coordinates buffer con
  * @brief Constructor for an Sprite, extends a Texture
  * @param path Location of the sprite image (*.dds)
  */
-Sprite::Sprite(const char *path) : Texture(path) {
+Sprite::Sprite(const char *path, int frameWidth, int frameHeight) : Texture(path, frameWidth, frameHeight) {
 
 	// Initialise data
 	this->x = 0.0f;
@@ -47,8 +47,6 @@ Sprite::Sprite(const char *path) : Texture(path) {
 	this->sx = 1.0f;
 	this->sy = 1.0f;
 	this->color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	this->texPosition = vec2(0.0f, 0.0f);
-	this->texScale = vec2(1.0f, 1.0f);
 
 	// Initialise internal buffers and load 2D shader
 	if(!internalBuffersInit){
@@ -72,12 +70,10 @@ Sprite::Sprite(const char *path) : Texture(path) {
 void Sprite::draw(Renderer *renderer){
 	Shader *shader = Renderer::shader;
 	shader2d->enable();
-	shader2d->setUniform("AMG_TexPosition", texPosition);
-	shader2d->setUniform("AMG_TexScale", texScale);
 	shader2d->setUniform("AMG_SprColor", color);
-	renderer->setTransformation(glm::vec3(x, y, 0), glm::quat(glm::vec3(0, 0, rotation)), glm::vec3(sx * width, sy * height, 1.0f));
+	renderer->setTransformation(glm::vec3(x, y, 0), glm::quat(glm::vec3(0, 0, rotation)), glm::vec3(sx * texScale.x * width, sy * texScale.y * height, 1.0f));
 	renderer->updateMVP();
-	enable();			// Enable texture
+	enable(0);			// Enable texture
 	glBindVertexArray(verticesId);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexDataId);

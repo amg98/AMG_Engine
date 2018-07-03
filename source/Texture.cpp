@@ -11,6 +11,7 @@
 // Own includes
 #include "Texture.h"
 #include "Debug.h"
+#include "Renderer.h"
 
 // Defines for DDS loading
 #define FOURCC_DXT1 0x31545844
@@ -20,10 +21,40 @@
 namespace AMG {
 
 /**
- * @brief Constructor for a Texture
- * @param path Location of the texture file (*.dds)
+ * @brief Constructor for a Texture (1 frame version)
+ * @param path File to load as a Texture
  */
 Texture::Texture(const char *path){
+	this->currentFrame = 0.0f;
+	this->texScale.x = 1.0f;
+	this->texScale.y = 1.0f;
+	this->horizontalFrames = 1;
+	this->verticalFrames = 1;
+	this->nframes = 1;
+	loadTexture(path);
+}
+
+/**
+ * @brief Constructor for a Texture
+ * @param path File to load as a Texture
+ * @param frameWidth Width of one frame, in pixels
+ * @param frameHeight Height of one frame, in pixels
+ */
+Texture::Texture(const char *path, int frameWidth, int frameHeight){
+	loadTexture(path);
+	this->currentFrame = 0.0f;
+	this->texScale.x = (float)frameWidth / (float)width;
+	this->texScale.y = (float)frameHeight / (float)height;
+	this->horizontalFrames = width / frameWidth;
+	this->verticalFrames = height / frameHeight;
+	this->nframes = horizontalFrames * verticalFrames;
+}
+
+/**
+ * @brief Load a texture on memory
+ * @param path Location of the texture file (*.dds)
+ */
+void Texture::loadTexture(const char *path){
 	this->loaded = false;
 	FILE *fp = fopen(path, "rb");
 	if (fp == NULL)
@@ -81,6 +112,9 @@ Texture::Texture(const char *path){
 	glBindTexture(GL_TEXTURE_2D, this->id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f);
 
 	unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
 	unsigned int offset = 0;
@@ -99,10 +133,26 @@ Texture::Texture(const char *path){
 
 /**
  * @brief Enable texture in OpenGL
+ * @param slot Texture slot to upload the texture
  */
-void Texture::enable(){
-	glActiveTexture(GL_TEXTURE0);
+void Texture::enable(int slot){
+
+	// Enable the texture
+	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, this->id);
+	Renderer::shader->setUniform("AMG_TexPosition", texPosition);
+	Renderer::shader->setUniform("AMG_TexScale", texScale);
+
+	// Calculate current frame as an integer
+	int fr = (int)this->currentFrame;
+	if(fr >= this->nframes){
+		this->currentFrame = 0.0f;
+		fr = 0;
+	}
+
+	// Update texture position and scale to select the frame
+	this->texPosition.x = (fr % horizontalFrames) / (float)horizontalFrames;
+	this->texPosition.y = (fr / verticalFrames) / (float)verticalFrames;
 }
 
 /**

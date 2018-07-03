@@ -54,7 +54,7 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 	// Search root bone (must be only one)
 	for(unsigned int i=0;i<nbones;i++){
 		if(bones[i].parent == 0xFFFF){
-			rootBone = new Bone(i, Renderer::shader->getUniform("boneMatrix"));
+			rootBone = new Bone(i, Renderer::shader->getUniform("AMG_BoneMatrix"));
 			rootBone->setDependency(true);
 			rootBone->createChildren(bones, nbones);
 		}

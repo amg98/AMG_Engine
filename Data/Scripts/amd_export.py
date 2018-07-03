@@ -171,7 +171,7 @@ def export(context, filepath, use_some_setting):
         #f.write("NTriangles: " + str(len(o[3])/3)+"\n")
         f.write(struct.pack("@H", len(o[3])))       # Tamaño del buffer de indices
         #newline = 0
-        for i in indices:
+        for i in o[3]:
             #f.write(str(i))
             f.write(struct.pack("@H", i))
         #f.write("NGroups: " + str(len(o[4]))+"\n")
@@ -212,8 +212,7 @@ def export(context, filepath, use_some_setting):
                         f.write(struct.pack("@f", mi[j][i])) # Izquierda->Derecha, Arriba->Abajo
                 
             for w in o[5]:
-                sum = w[0] + w[1] + w[2] + w[3]
-                f.write(struct.pack("@ffff", w[0]/sum, w[1]/sum, w[2]/sum, w[3]/sum))
+                f.write(struct.pack("@ffff", w[0], w[1], w[2], w[3]))
             for wb in o[6]:
                 f.write(struct.pack("@HHHH", int(wb[0]), int(wb[1]), int(wb[2]), int(wb[2])))
                 #print(wb[0], wb[1], wb[2])

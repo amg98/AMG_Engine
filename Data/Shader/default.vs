@@ -1,5 +1,7 @@
 #version 330 core
 
+const int AMG_MAX_BONES = 16;
+const int AMG_LIGHTS = 1;
 #include <AMG_VertexUtility.glsl>
 
 void main(){

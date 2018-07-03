@@ -7,10 +7,6 @@
 #ifndef SPRITE_H_
 #define SPRITE_H_
 
-// Includes OpenGL
-#include <glm/glm.hpp>
-using namespace glm;
-
 // Own includes
 #include "Texture.h"
 #include "Renderer.h"
@@ -26,9 +22,6 @@ namespace AMG {
 class Sprite : public Texture {
 private:
 	static bool internalBuffersInit;		/**< Whether the primitive buffers are created */
-protected:
-	vec2 texPosition;						/**< Shader texture position */
-	vec2 texScale;							/**< Shader texture scale */
 public:
 	float x;								/**< Sprite horizontal position, in pixels */
 	float y;								/**< Sprite vertical position, in pixels */
@@ -37,7 +30,7 @@ public:
 	float sy;								/**< Sprite vertical scale */
 	vec4 color;								/**< Sprite color and transparency */
 
-	Sprite(const char *path);
+	Sprite(const char *path, int frameWidth, int frameHeight);
 	void draw(Renderer *renderer);
 	virtual ~Sprite();
 };

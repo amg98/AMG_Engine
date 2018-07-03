@@ -6,6 +6,9 @@
 #ifndef MATERIAL_H_
 #define MATERIAL_H_
 
+// Includes C/C++
+#include <vector>
+
 // Includes OpenGL
 #include <glm/glm.hpp>
 using namespace glm;
@@ -27,11 +30,11 @@ private:
 	vec4 ambient;				/**< Material ambient color */
 	float diffusePower;			/**< Material diffuse power */
 	float specularPower;		/**< Material specular power */
-	Texture *texture;			/**< Material texture, if needed */
-	void loadTexture(const char *texture);
+	std::vector<Texture*> textures;	/**< Material textures */
 public:
 	Material(const char *path);
 	Material(float *data, const char *path);
+	void addTexture(const char *texture);
 	void apply();
 	virtual ~Material();
 };

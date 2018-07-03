@@ -1,5 +1,7 @@
 #version 330 core
 
+const int AMG_MAX_BONES = 1;
+const int AMG_LIGHTS = 1;
 #include <AMG_VertexUtility.glsl>
 
 void main(){
@@ -9,7 +11,6 @@ void main(){
     
     // Pass data to the fragment shader
     AMG_Pass(AMG_MV);
-    AMG_OutUV *= 128;
     AMG_PassLight(AMG_MV, 0);
     AMG_PassFog();
 }

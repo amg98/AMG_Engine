@@ -13,7 +13,6 @@
 #include "Texture.h"
 #include "MeshData.h"
 #include "Sprite.h"
-#include "AnimatedSprite.h"
 #include "Model.h"
 #include "Light.h"
 #include "Terrain.h"
@@ -23,7 +22,7 @@ using namespace AMG;
 Renderer *window;
 Camera *cam;
 Model *link;
-AnimatedSprite *sprite;
+Sprite *sprite;
 Terrain *terrain;
 
 void render(){
@@ -33,8 +32,8 @@ void render(){
 	link->animate(0, 0, window->getDelta());
 	link->draw(window);
 
-	link->objects[0]->position.z -= 0.02f;
-	link->objects[0]->rotation *= quat(vec3(0, 0, 0.05f));
+	//link->objects[0]->position.z -= 0.02f;
+	//link->objects[0]->rotation *= quat(vec3(0, 0, 0.05f));
 
 	terrain->draw(window);
 
@@ -51,9 +50,9 @@ int main(int argc, char **argv){
 	window->fogDensity = 0.1f;
 	window->fogGradient = 5.0f;
 
-	cam = new Camera(NO_MOVE_CAMERA);
+	cam = new Camera(FPS_CAMERA);
 
-	sprite = new AnimatedSprite("Data/Texture/font.dds", 32, 32);
+	sprite = new Sprite("Data/Texture/font.dds", 32, 32);
 	sprite->x = 300.0f;
 	sprite->y = 300.0f;
 	sprite->currentFrame = 65.0f;
@@ -66,7 +65,12 @@ int main(int argc, char **argv){
 	link->objects[0]->position = vec3(0.0f, 0.0f, 3.0f);
 	link->objects[0]->rotation = quat(vec3(-3.141592f/2.0f, 0, 0));
 
-	terrain = new Terrain(-0.5f, 0, "grass.dds");
+	terrain = new Terrain(-0.5f, 0, "grassy2.dds");
+	Terrain::terrainShader->enableOptions(AMG_USE_TEXTURE(5));
+	terrain->materials[0]->addTexture("grassFlowers.dds");
+	terrain->materials[0]->addTexture("mud.dds");
+	terrain->materials[0]->addTexture("path.dds");
+	terrain->materials[0]->addTexture("blendMap.dds");
 	Terrain::terrainShader->lights.push_back(light);
 
 	window->update();

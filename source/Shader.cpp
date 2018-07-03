@@ -125,6 +125,14 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
 	this->uniformsMap = std::tr1::unordered_map<std::string, int>();
 	lights = std::vector<Light*>();
 	this->defineUniform("AMG_MVP");
+	this->enableOptions(options);
+}
+
+/**
+ * @brief Enable shader options to use with the engine
+ * @param options The options to use
+ */
+void Shader::enableOptions(int options){
 	if(options &AMG_USE_SKINNING){
 		this->defineUniform("AMG_BoneMatrix");
 	}
@@ -134,8 +142,8 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
 		this->defineUniform("AMG_FogColor");
 	}
 	int nlights = (options >> 2) &31;
+	char text[64];
 	if(nlights){
-		char text[64];
 		for(int i=0;i<nlights;i++){
 			sprintf(text, "AMG_Light[%d].position", i);
 			this->defineUniform(std::string(text));			// Vertex shader
@@ -143,11 +151,32 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
 			this->defineUniform(std::string(text));			// Fragmen shader
 		}
 		this->defineUniform("AMG_MV");
+		this->defineUniform("AMG_MaterialDiffuse");
+		this->defineUniform("AMG_MaterialAmbient");
+		this->defineUniform("AMG_DiffusePower");
+		if(options &AMG_USE_SPECULAR){
+			this->defineUniform("AMG_MaterialSpecular");
+			this->defineUniform("AMG_SpecularPower");
+		}
 	}
 	if(options &AMG_USE_2D){
 		this->defineUniform("AMG_TexPosition");
 		this->defineUniform("AMG_TexScale");
 		this->defineUniform("AMG_SprColor");
+	}
+	int ntextures = (options >> 9) &0x15;
+	if(ntextures){
+		int prg = 0;
+		if(Renderer::shader)
+			prg = Renderer::shader->getProgram();
+		glUseProgram(programID);
+		for(int i=0;i<ntextures;i++){
+			sprintf(text, "AMG_TextureSampler[%d]", i);
+			std::string name = std::string(text);
+			this->defineUniform(name);
+			this->setUniform(name, i);
+		}
+		glUseProgram(prg);
 	}
 }
 
@@ -173,6 +202,15 @@ int Shader::getUniform(const std::string &name){
 	if(got == uniformsMap.end())
 		return -1;
 	return got->second;
+}
+
+/**
+ * @brief Set a uniform value, int version
+ * @param name Name of the uniform variable to be set
+ * @param v Value to set
+ */
+void Shader::setUniform(const std::string &name, int v){
+	glUniform1i(getUniform(name), v);
 }
 
 /**
@@ -230,6 +268,14 @@ void Shader::enable(){
 	for(unsigned int i=0;i<lights.size();i++){
 		lights[i]->enable(i);
 	}
+}
+
+/**
+ * @brief Get this shader's program ID
+ * @return The shader ID
+ */
+int Shader::getProgram(){
+	return this->programID;
 }
 
 /**
