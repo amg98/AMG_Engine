@@ -47,6 +47,7 @@ private:
 public:
 	Camera(int mode);
 	mat4& getMatrix();
+	vec3 getRay();
 	void update(GLFWwindow *window, float delta);
 	void updateFPS(GLFWwindow *window, float delta);
 	virtual ~Camera();

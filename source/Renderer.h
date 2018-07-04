@@ -42,20 +42,22 @@ private:
 	renderCallback updateCb;		/**< Update callback */
 	mat4 *projection;				/**< Current projection matrix */
 	mat4 perspective, ortho;		/**< Precalculated perspective and ortho matrices */
+	mat4 invPerspective;			/**< Inverse perspective matrix, for ray tracing */
 	mat4 model;						/**< Model matrix */
 	mat4 mvp;						/**< Concatenation of Model, Projection and Camera matrices */
 	mat4 mv;						/**< Model view matrix */
 	Camera *camera;					/**< Current set camera */
 	double frametime;				/**< Desired frame time*/
+	Shader *shader2d;				/**< Shader used for 2D rendering */
 public:
 	int width;							/**< Window width, in pixels (don't write) */
 	int height;							/**< Window height, in pixels (don't write) */
-	static Shader *shader;				/**< Current used shader */
-	static Renderer *currentRenderer;	/**< Current Renderer drawing */
 	int FPS;							/**< The actual frames per second */
 	float fogDensity;					/**< Fog density */
 	float fogGradient;					/**< Fog gradient */
 	vec4 fogColor;						/**< Fog color, same as clear color */
+	Shader *currentShader;				/**< Current used shader */
+	static Renderer *currentRenderer;	/**< Current renderer drawing */
 
 	Renderer(int width, int height, const char *title, bool resize, bool fullscreen, double fps);
 	void update();
@@ -70,7 +72,10 @@ public:
 	void calculateProjection();
 	void setCamera(Camera *camera);
 	void updateFog();
+	void updateLighting();
 	double getDelta();
+	mat4 &getInversePerspective();
+	void getMousePosition(double *x, double *y);
 };
 
 }

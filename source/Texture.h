@@ -18,6 +18,8 @@ using namespace glm;
 
 namespace AMG {
 
+#define AMG_CUBE_SIDES 6		/**< Number of faces a cube has */
+
 /**
  * @class Texture
  * @brief Class defining a Texture object
@@ -28,7 +30,7 @@ private:
 	int nframes;			/**< Number of frames in the sprite */
 	int horizontalFrames;	/**< Number of horizontal frames in the sprite */
 	int verticalFrames;		/**< Number of vertical frames in the sprite */
-	bool loaded;			/**< If the texture is loaded (for debugging purposes) */
+	GLuint target;			/**< Texture mode */
 protected:
 	int width;						/**< Texture width, in pixels (must be a power of two) */
 	int height;						/**< Texture height, in pixels (must be a power of two) */
@@ -36,9 +38,11 @@ protected:
 	vec2 texScale;					/**< Shader texture scale */
 public:
 	float currentFrame;				/**< Current frame to show, it will be truncated */
-	Texture(const char *path);
-	Texture(const char *path, int frameWidth, int frameHeight);
+	static void loadTexture(const char *path, GLuint target, int *w, int *h);
 	void loadTexture(const char *path);
+	Texture(const char *path);
+	Texture(const char **names);
+	Texture(const char *path, int frameWidth, int frameHeight);
 	void enable(int slot);
 	int getWidth();
 	int getHeight();

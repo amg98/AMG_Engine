@@ -17,8 +17,9 @@ namespace AMG {
 /**
  * @brief Constructor for a 3D Model
  * @param path Path for the *.amd file
+ * @param shader Shader to be used
  */
-Model::Model(const char *path) {
+Model::Model(const char *path, Shader *shader) {
 
 	// Initialise variables
 	this->nobjects = 0;
@@ -28,6 +29,8 @@ Model::Model(const char *path) {
 	this->materials = NULL;
 	this->animations = NULL;
 	this->fps = 0;
+	this->shader = shader;
+	shader->enable();
 
 	// Open file
 	FILE *f = fopen(path, "rb");
@@ -38,10 +41,10 @@ Model::Model(const char *path) {
 	fread(sign, sizeof(char), 3, f);
 	if(sign[0] != 'A' || sign[1] != 'M' || sign[2] != 'D') Debug::showError(WRONG_SIGNATURE, (void*)path);
 
-	// Set up material informationo
+	// Set up material information
 	nmaterials = 0;
 	fread(&nmaterials, sizeof(unsigned char), 1, f);
-	materials = (Material**) calloc (nmaterials, sizeof(Material*));
+	materials = (Material**) malloc (nmaterials * sizeof(Material*));
 
 	// Read all materials
 	for(unsigned int i=0;i<nmaterials;i++){
@@ -62,7 +65,7 @@ Model::Model(const char *path) {
 
 	// Set up object information
 	fread(&nobjects, sizeof(unsigned char), 1, f);
-	objects = (Object**) calloc (nobjects, sizeof(Object*));
+	objects = (Object**) malloc (nobjects * sizeof(Object*));
 
 	// Temporal variables
 	unsigned short nvertices;
@@ -168,12 +171,13 @@ Model::Model(const char *path) {
 
 /**
  * @brief Draw a 3D model previously loaded
- * @param renderer Window to be drawn
- * @param shader Shader to update information
  */
-void Model::draw(Renderer *renderer){
+void Model::draw(){
+	shader->enable();
+	Renderer::currentRenderer->updateLighting();
+	Renderer::currentRenderer->updateFog();
 	for(unsigned int i=0;i<nobjects;i++){
-		objects[i]->draw(renderer);
+		objects[i]->draw();
 	}
 }
 
@@ -181,11 +185,10 @@ void Model::draw(Renderer *renderer){
  * @brief Animate an Object in this Model
  * @param objIndex Object to animate
  * @param animIndex Which animation to apply to the object
- * @param delta The renderer's delta time
  */
-void Model::animate(unsigned int objIndex, unsigned int animIndex, float delta){
+void Model::animate(unsigned int objIndex, unsigned int animIndex){
 	if(objIndex < nobjects && animIndex < nanimations){
-		animations[animIndex]->increaseTime(fps * delta);
+		animations[animIndex]->increaseTime(fps * Renderer::currentRenderer->getDelta());
 		Keyframe *first, *last;
 		float progress = animations[animIndex]->getKeyframes(&first, &last);
 		animations[animIndex]->animateBone(objects[objIndex]->rootBone, first, last, progress);

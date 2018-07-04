@@ -26,6 +26,23 @@ Material::Material(const char *texture){
 	this->textures = std::vector<Texture*>();
 	addTexture(texture);
 }
+
+/**
+ * @brief Constructor for a Material, if the Texture is a cube map
+ * @param texture Cube map filenames
+ */
+Material::Material(const char **names){
+	this->diffuse = vec4(1, 1, 1, 1);
+	this->specular = vec4(1, 1, 1, 1);
+	this->ambient = vec4(0.2f, 0.2f, 0.2f, 1);
+	this->diffusePower = 1.0f;
+	this->specularPower = 1.0f;
+	this->textures = std::vector<Texture*>();
+	Texture *tex = new Texture(names);
+	tex->setDependency(true);
+	this->textures.push_back(tex);
+}
+
 /**
  * @brief Constructor for a Material
  * @param data Float data which was loaded from a model
@@ -67,11 +84,12 @@ void Material::apply(){
 	}else{
 		glEnable(GL_CULL_FACE);
 	}
-	Renderer::shader->setUniform("AMG_MaterialDiffuse", diffuse);
-	Renderer::shader->setUniform("AMG_MaterialSpecular", specular);
-	Renderer::shader->setUniform("AMG_MaterialAmbient", ambient);
-	Renderer::shader->setUniform("AMG_DiffusePower", diffusePower);
-	Renderer::shader->setUniform("AMG_SpecularPower", specularPower);
+	Shader *shader = Renderer::currentRenderer->currentShader;
+	shader->setUniform("AMG_MaterialDiffuse", diffuse);
+	shader->setUniform("AMG_MaterialSpecular", specular);
+	shader->setUniform("AMG_MaterialAmbient", ambient);
+	shader->setUniform("AMG_DiffusePower", diffusePower);
+	shader->setUniform("AMG_SpecularPower", specularPower);
 }
 
 /**

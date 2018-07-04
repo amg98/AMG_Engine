@@ -1,6 +1,6 @@
 #version 330 core
 
-#include <AMG_VertexUtility2D.glsl>
+#include <AMG_VertexCommon2D.glsl>
 
 void main(){
 

@@ -1,8 +1,3 @@
-/**
- * @file AMG_FragmentUtility2D.glsl
- * @brief GLSL functions defined for compatability with the Engine (fragment shader version)
- */
-
 // Inputs from the vertex shader
 in vec2 AMG_OutUV;
 

@@ -9,18 +9,16 @@ namespace AMG {
 // Static variables
 const float Terrain::SIZE = 128;
 const int Terrain::VERTEX_COUNT = 128;
-Shader *Terrain::terrainShader = NULL;
 
 /**
  * @brief Constructor for a Terrain
  * @param texture Texture to use for this Terrain
+ * @param shader Shader for this Terrain
  */
-Terrain::Terrain(float x, float y, const char *texture) {
+Terrain::Terrain(float x, float y, const char *texture, Shader *shader) {
 
-	// Load the shader, if needed
-	if(terrainShader == NULL){
-		terrainShader = new Shader("Data/Shader/terrain.vs", "Data/Shader/terrain.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG);
-	}
+	// Set the shader
+	this->shader = shader;
 
 	// Set position
 	this->position.x = x * SIZE;
@@ -73,8 +71,9 @@ Terrain::Terrain(float x, float y, const char *texture) {
 	free(indices);
 
 	// Create the material
-	Material **mat = (Material**) malloc (sizeof(Material**));
+	Material **mat = (Material**) malloc (sizeof(Material*));
 	mat[0] = new Material(texture);
+	mat[0]->setDependency(true);
 	unsigned short *groups = (unsigned short*) malloc (3 * sizeof(unsigned short));
 	groups[0] = 0;
 	groups[1] = 2*(VERTEX_COUNT-1)*(VERTEX_COUNT-1)-1;
@@ -86,17 +85,21 @@ Terrain::Terrain(float x, float y, const char *texture) {
  * @brief Render a Terrain object
  * @param renderer Window to draw this terrain
  */
-void Terrain::draw(Renderer *renderer){
-	Shader *currentShader = Renderer::shader;
-	terrainShader->enable();
-	Object::draw(renderer);
-	currentShader->enable();
+void Terrain::draw(){
+	shader->enable();
+	Renderer::currentRenderer->updateFog();
+	Renderer::currentRenderer->updateLighting();
+	Object::draw();
 }
 
 /**
  * @brief Destructor for a Terrain
  */
 Terrain::~Terrain() {
+	if(materials){
+		delete materials[0];
+		free(materials);
+	}
 }
 
 }

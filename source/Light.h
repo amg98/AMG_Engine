@@ -21,7 +21,9 @@ private:
 public:
 	vec3 position;		/**< Position of the light */
 	vec3 color;			/**< Color of the light */
+	vec3 attenuation;	/**< Attenuation of the light, following a parabola */
 
+	Light(vec3 position, vec3 color, vec3 attenuation);
 	Light(vec3 position, vec3 color);
 	void enable(int id);
 	virtual ~Light();

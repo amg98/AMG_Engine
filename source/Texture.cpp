@@ -25,13 +25,46 @@ namespace AMG {
  * @param path File to load as a Texture
  */
 Texture::Texture(const char *path){
+	loadTexture(path);
 	this->currentFrame = 0.0f;
 	this->texScale.x = 1.0f;
 	this->texScale.y = 1.0f;
+	this->texPosition.x = 0.0f;
+	this->texPosition.y = 0.0f;
 	this->horizontalFrames = 1;
 	this->verticalFrames = 1;
 	this->nframes = 1;
-	loadTexture(path);
+}
+
+/**
+ * @brief Constructor for a Texture (cube map version)
+ * @param names Path of all the textures, in this order: right, left, up, bottom, behind, front
+ * @note Each texture must have the same number of mipmaps (only 1 is recommended)
+ */
+Texture::Texture(const char **names){
+
+	this->currentFrame = 0.0f;
+	this->texScale.x = 1.0f;
+	this->texScale.y = 1.0f;
+	this->texPosition.x = 0.0f;
+	this->texPosition.y = 0.0f;
+	this->horizontalFrames = 1;
+	this->verticalFrames = 1;
+	this->nframes = 1;
+	this->target = GL_TEXTURE_CUBE_MAP;
+
+	glGenTextures(1, &this->id);
+	glBindTexture(target, this->id);
+
+	int w, h;
+	for(int i=0;i<AMG_CUBE_SIDES;i++){
+		Texture::loadTexture(names[i], GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &w, &h);
+	}
+
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 /**
@@ -45,6 +78,8 @@ Texture::Texture(const char *path, int frameWidth, int frameHeight){
 	this->currentFrame = 0.0f;
 	this->texScale.x = (float)frameWidth / (float)width;
 	this->texScale.y = (float)frameHeight / (float)height;
+	this->texPosition.x = 0.0f;
+	this->texPosition.y = 0.0f;
 	this->horizontalFrames = width / frameWidth;
 	this->verticalFrames = height / frameHeight;
 	this->nframes = horizontalFrames * verticalFrames;
@@ -55,7 +90,26 @@ Texture::Texture(const char *path, int frameWidth, int frameHeight){
  * @param path Location of the texture file (*.dds)
  */
 void Texture::loadTexture(const char *path){
-	this->loaded = false;
+
+	this->target = GL_TEXTURE_2D;
+	glGenTextures(1, &this->id);
+	glBindTexture(target, this->id);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(target, GL_TEXTURE_LOD_BIAS, -0.4f);
+
+	Texture::loadTexture(path, target, &this->width, &this->height);
+}
+
+/**
+ * @brief Load a texture on memory
+ * @param path Location of the texture file (*.dds)
+ * @param w Width of the image (output)
+ * @param h Height of the image (output)
+ */
+void Texture::loadTexture(const char *path, GLuint target, int *w, int *h){
 	FILE *fp = fopen(path, "rb");
 	if (fp == NULL)
 		Debug::showError(5, (void*)path);
@@ -70,24 +124,24 @@ void Texture::loadTexture(const char *path){
 	unsigned char header[124];
 	fread(&header, 124, 1, fp);
 
-	this->height    	     = *(unsigned int*)&(header[8 ]);
-	this->width       	     = *(unsigned int*)&(header[12]);
+	*h    	  			     = *(unsigned int*)&(header[8 ]);
+	*w						 = *(unsigned int*)&(header[12]);
 	unsigned int linearSize  = *(unsigned int*)&(header[16]);
 	unsigned int mipMapCount = *(unsigned int*)&(header[24]);
 	unsigned int fourCC      = *(unsigned int*)&(header[80]);
-	unsigned int width = this->width;
-	unsigned int height = this->height;
+	unsigned int width = *w;
+	unsigned int height = *h;
 
 	unsigned char * buffer;
 	unsigned int bufsize;
 
-	if(this->height % 2 != 0 || this->width % 2 != 0){
+	if(height % 2 != 0 || width % 2 != 0){
 		fclose(fp);
 		Debug::showError(12, (void*)path);
 	}
 
 	bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
-	buffer = (unsigned char*)malloc(bufsize * sizeof(unsigned char));
+	buffer = (unsigned char*) malloc (bufsize * sizeof(unsigned char));
 	fread(buffer, 1, bufsize, fp);
 	fclose(fp);
 
@@ -108,27 +162,18 @@ void Texture::loadTexture(const char *path){
 			Debug::showError(11, (void*)path);
 	}
 
-	glGenTextures(1, &this->id);
-	glBindTexture(GL_TEXTURE_2D, this->id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f);
-
 	unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
 	unsigned int offset = 0;
 
 	for (unsigned int level = 0; level < mipMapCount && (width || height); ++level){
 		unsigned int size = ((width+3)/4)*((height+3)/4)*blockSize;
-		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height, 0, size, buffer + offset);
+		glCompressedTexImage2D(target, level, format, width, height, 0, size, buffer + offset);
 		offset += size;
 		width  /= 2;
 		height /= 2;
 	}
 
 	free(buffer);
-	this->loaded = true;
 }
 
 /**
@@ -139,20 +184,23 @@ void Texture::enable(int slot){
 
 	// Enable the texture
 	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, this->id);
-	Renderer::shader->setUniform("AMG_TexPosition", texPosition);
-	Renderer::shader->setUniform("AMG_TexScale", texScale);
+	glBindTexture(this->target, this->id);
+	Renderer::currentRenderer->currentShader->setUniform("AMG_TexPosition", texPosition);
+	Renderer::currentRenderer->currentShader->setUniform("AMG_TexScale", texScale);
 
-	// Calculate current frame as an integer
-	int fr = (int)this->currentFrame;
-	if(fr >= this->nframes){
-		this->currentFrame = 0.0f;
-		fr = 0;
+	// Perform animation
+	if(this->nframes > 1){
+		// Calculate current frame as an integer
+		int fr = (int)this->currentFrame;
+		if(fr >= this->nframes){
+			this->currentFrame = 0.0f;
+			fr = 0;
+		}
+
+		// Update texture position and scale to select the frame
+		this->texPosition.x = (fr % horizontalFrames) / (float)horizontalFrames;
+		this->texPosition.y = (fr / verticalFrames) / (float)verticalFrames;
 	}
-
-	// Update texture position and scale to select the frame
-	this->texPosition.x = (fr % horizontalFrames) / (float)horizontalFrames;
-	this->texPosition.y = (fr / verticalFrames) / (float)verticalFrames;
 }
 
 /**
@@ -175,8 +223,7 @@ int Texture::getHeight(){
  * @brief Destructor for a Texture
  */
 Texture::~Texture() {
-	if(loaded)
-		glDeleteTextures(1, &this->id);
+	glDeleteTextures(1, &this->id);
 }
 
 }

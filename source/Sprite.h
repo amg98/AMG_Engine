@@ -31,7 +31,7 @@ public:
 	vec4 color;								/**< Sprite color and transparency */
 
 	Sprite(const char *path, int frameWidth, int frameHeight);
-	void draw(Renderer *renderer);
+	void draw();
 	virtual ~Sprite();
 };
 

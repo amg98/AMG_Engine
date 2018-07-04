@@ -100,4 +100,32 @@ mat4& Camera::getMatrix(){
 	return camera;
 }
 
+/**
+ * @brief Get the current ray for this camera
+ * @return The direction the user points with the mouse
+ */
+vec3 Camera::getRay(){
+
+	Renderer *renderer = Renderer::currentRenderer;
+
+	// Get needed matrices
+	mat4 invPerspective = renderer->getInversePerspective();
+	mat4 invView = glm::inverse(this->camera);
+
+	// Get mouse position, in OpenGL coordinates
+	double x, y;
+	renderer->getMousePosition(&x, &y);
+
+	// Perform the inverse transformations
+	vec4 pos = vec4((2.0f * x)/renderer->width - 1, -(2.0f * y)/renderer->height + 1, -1, 1);
+	pos = invPerspective * pos;
+	pos.z = -1;
+	pos.w = 0;
+	pos = invView * pos;
+
+	// Return a 3D normalised ray vector
+	vec3 ray = vec3(pos);
+	return glm::normalize(ray);
+}
+
 }

@@ -47,7 +47,6 @@ std::string Shader::loadShaderCode(const char *path){
  * @brief Load a shader, used internally
  * @param path Shader code file path
  * @param type GL_VERTEX_SHADER, GL_FRAGMENT_SHADER or GL_GEOMETRY_SHADER
- * @param ShaderCode The actual shader code
  */
 int Shader::loadShader(const char *path, int type){
 
@@ -84,7 +83,7 @@ int Shader::loadShader(const char *path, int type){
  * @brief Constructor for a Shader object
  * @param vertex_file_path Location of the vertex shader file, any extension allowed
  * @param fragment_file_path Location of the fragment shader file, any extension allowed
- * @param options The shader packages used, see the defined macros
+ * @param options Options to use in this shader, see the defined macros
  */
 Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int options) {
 
@@ -125,6 +124,8 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
 	this->uniformsMap = std::tr1::unordered_map<std::string, int>();
 	lights = std::vector<Light*>();
 	this->defineUniform("AMG_MVP");
+	this->defineUniform("AMG_TexPosition");
+	this->defineUniform("AMG_TexScale");
 	this->enableOptions(options);
 }
 
@@ -148,27 +149,23 @@ void Shader::enableOptions(int options){
 			sprintf(text, "AMG_Light[%d].position", i);
 			this->defineUniform(std::string(text));			// Vertex shader
 			sprintf(text, "AMG_Lights[%d].color", i);
-			this->defineUniform(std::string(text));			// Fragmen shader
+			this->defineUniform(std::string(text));			// Fragment shader
+			sprintf(text, "AMG_Lights[%d].attenuation", i);
+			this->defineUniform(std::string(text));
 		}
 		this->defineUniform("AMG_MV");
+		this->defineUniform("AMG_M");
 		this->defineUniform("AMG_MaterialDiffuse");
 		this->defineUniform("AMG_MaterialAmbient");
 		this->defineUniform("AMG_DiffusePower");
-		if(options &AMG_USE_SPECULAR){
-			this->defineUniform("AMG_MaterialSpecular");
-			this->defineUniform("AMG_SpecularPower");
-		}
+		this->defineUniform("AMG_MaterialSpecular");
+		this->defineUniform("AMG_SpecularPower");
 	}
 	if(options &AMG_USE_2D){
-		this->defineUniform("AMG_TexPosition");
-		this->defineUniform("AMG_TexScale");
 		this->defineUniform("AMG_SprColor");
 	}
-	int ntextures = (options >> 9) &0x15;
+	int ntextures = (options >> 8) &0x15;
 	if(ntextures){
-		int prg = 0;
-		if(Renderer::shader)
-			prg = Renderer::shader->getProgram();
 		glUseProgram(programID);
 		for(int i=0;i<ntextures;i++){
 			sprintf(text, "AMG_TextureSampler[%d]", i);
@@ -176,7 +173,6 @@ void Shader::enableOptions(int options){
 			this->defineUniform(name);
 			this->setUniform(name, i);
 		}
-		glUseProgram(prg);
 	}
 }
 
@@ -199,8 +195,9 @@ void Shader::defineUniform(std::string name){
  */
 int Shader::getUniform(const std::string &name){
 	std::tr1::unordered_map<std::string, int>::const_iterator got = uniformsMap.find(name);
-	if(got == uniformsMap.end())
+	if(got == uniformsMap.end()){
 		return -1;
+	}
 	return got->second;
 }
 
@@ -263,11 +260,7 @@ void Shader::setUniform(const std::string &name, mat4 &v){
  */
 void Shader::enable(){
 	glUseProgram(programID);
-	Renderer::shader = this;
-	Renderer::currentRenderer->updateFog();
-	for(unsigned int i=0;i<lights.size();i++){
-		lights[i]->enable(i);
-	}
+	Renderer::currentRenderer->currentShader = this;
 }
 
 /**

@@ -24,6 +24,7 @@ private:
 	unsigned int nmaterials;		/**< Number of materials in the model */
 	Material **materials;			/**< List of materials */
 	unsigned int fps;				/**< Frames per second */
+	Shader *shader;					/**< Shader used by this Model */
 public:
 	unsigned int nobjects;			/**< Number of objects in the model	*/
 	Object **objects;				/**< List of objects */
@@ -31,9 +32,9 @@ public:
 	unsigned int nanimations;		/**< Number of animations */
 	Animation **animations;			/**< List of animations */
 
-	Model(const char *path);
-	void draw(Renderer *renderer);
-	void animate(unsigned int objIndex, unsigned int animIndex, float delta);
+	Model(const char *path, Shader *shader);
+	void draw();
+	void animate(unsigned int objIndex, unsigned int animIndex);
 	virtual ~Model();
 };
 

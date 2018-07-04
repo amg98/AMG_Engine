@@ -14,7 +14,7 @@
 namespace AMG {
 
 /**
- * Constructor for an Object
+ * @brief Constructor for an Object
  */
 Object::Object() {
 	this->position = vec3(0.0f, 0.0f, 0.0f);
@@ -54,7 +54,7 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 	// Search root bone (must be only one)
 	for(unsigned int i=0;i<nbones;i++){
 		if(bones[i].parent == 0xFFFF){
-			rootBone = new Bone(i, Renderer::shader->getUniform("AMG_BoneMatrix"));
+			rootBone = new Bone(i, Renderer::currentRenderer->currentShader->getUniform("AMG_BoneMatrix"));
 			rootBone->setDependency(true);
 			rootBone->createChildren(bones, nbones);
 		}
@@ -64,13 +64,12 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 
 /**
  * @brief Draw an Object
- * @param renderer Window to draw this object
  */
-void Object::draw(Renderer *renderer){
+void Object::draw(){
 
 	// Transform the object
-	renderer->setTransformation(position, rotation, scale);
-	renderer->updateMVP();
+	Renderer::currentRenderer->setTransformation(position, rotation, scale);
+	Renderer::currentRenderer->updateMVP();
 
 	// Transform each bone
 	if(rootBone)

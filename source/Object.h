@@ -36,7 +36,7 @@ public:
 	Object();
 	void setMaterialGroups(unsigned short *groups, unsigned int ngroups, Material **materials, unsigned int nmaterials);
 	void createBoneHierarchy(bone_t *bones, unsigned int nbones);
-	void draw(Renderer *renderer);
+	void draw();
 	virtual ~Object();
 };
 

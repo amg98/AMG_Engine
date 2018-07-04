@@ -38,12 +38,13 @@ protected:
 	GLuint id;							/**< ID of the OpenGL VAO */
 	GLuint indexid;						/**< ID of the indices buffer */
 	std::vector<buffer_info> info;		/**< Vector holding information of all the defined buffers */
-	int count;							/**< Number of indices in the mesh */
+	int count;							/**< Number of indices / vertices in the mesh */
 public:
 	MeshData();
-	void addBuffer(void *data, int size, int comps, GLuint type);
+	void addBuffer(void *data, int size, int comps, GLuint type, bool drawRaw=false);
 	void setIndexBuffer(void *data, int size);
 	void draw();
+	void drawRaw();
 	void enableBuffers();
 	void disableBuffers();
 	virtual ~MeshData();

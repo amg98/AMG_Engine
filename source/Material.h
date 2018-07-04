@@ -25,14 +25,16 @@ namespace AMG {
  */
 class Material: public Entity {
 private:
+	std::vector<Texture*> textures;	/**< Material textures */
+public:
 	vec4 diffuse;				/**< Material diffuse color */
 	vec4 specular;				/**< Material specular color */
 	vec4 ambient;				/**< Material ambient color */
 	float diffusePower;			/**< Material diffuse power */
 	float specularPower;		/**< Material specular power */
-	std::vector<Texture*> textures;	/**< Material textures */
-public:
+
 	Material(const char *path);
+	Material(const char **names);
 	Material(float *data, const char *path);
 	void addTexture(const char *texture);
 	void apply();

@@ -1,8 +1,3 @@
-/**
- * @file AMG_VertexUtility2D.glsl
- * @brief GLSL functions defined for compatability with the Engine (2D mode)
- */
-
 // Input data layout
 layout(location = 0) in vec2 AMG_Position;			/**< Vertex position, in model space */
 layout(location = 1) in vec2 AMG_UV;				/**< Vertex texture coordinates */

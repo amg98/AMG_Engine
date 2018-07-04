@@ -22,7 +22,6 @@ namespace AMG {
 
 bool Renderer::glfwSetup = false;
 bool Renderer::glewSetup = false;
-Shader *Renderer::shader = NULL;
 Renderer *Renderer::currentRenderer = NULL;
 
 /**
@@ -103,8 +102,6 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		shader = new Shader("Data/Shader/default.vs", "Data/Shader/default.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_SKINNING);
-		shader->enable();
 		glewSetup = true;
 	}
 
@@ -120,6 +117,9 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 	// Calculate matrices
 	this->calculateProjection();
 	this->set3dMode(true);
+
+	// Load 2D shader
+	shader2d = new Shader("Data/Shader/shader2d.vs", "Data/Shader/shader2d.fs", AMG_USE_2D);
 }
 
 /**
@@ -127,7 +127,8 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
  * @note Called whenever a window is created or resized
  */
 void Renderer::calculateProjection(){
-	this->perspective = glm::perspective(glm::radians(45.0f), (float)this->width/(float)this->height, 0.1f, 100.0f);
+	this->perspective = glm::perspective(glm::radians(45.0f), (float)this->width/(float)this->height, 0.1f, 1000.0f);
+	this->invPerspective = glm::inverse(this->perspective);
 	this->ortho = glm::ortho(0.0f, (float)this->width, 0.0f, (float)this->height, -1.0f, 1.0f);
 }
 
@@ -199,7 +200,7 @@ void Renderer::update(){
  */
 void Renderer::setCurrent(){
 	glfwMakeContextCurrent(window);
-	currentRenderer = this;
+	Renderer::currentRenderer = this;
 }
 
 /**
@@ -259,8 +260,9 @@ void Renderer::updateMVP(){
 		mv = model;
 	}
 	mvp = *projection * mv;
-	shader->setUniform("AMG_MVP", mvp);
-	shader->setUniform("AMG_MV", mv);
+	currentShader->setUniform("AMG_MVP", mvp);
+	currentShader->setUniform("AMG_MV", mv);
+	currentShader->setUniform("AMG_M", model);
 }
 
 /**
@@ -276,6 +278,7 @@ void Renderer::set3dMode(bool mode){
 		this->projection = &this->ortho;
 		glDisable(GL_DEPTH_TEST);
 		this->setCamera(NULL);
+		shader2d->enable();
 	}
 }
 
@@ -298,9 +301,35 @@ double Renderer::getDelta(){
  * @brief Update fog to the current shader
  */
 void Renderer::updateFog(){
-	shader->setUniform("AMG_FogColor", fogColor);
-	shader->setUniform("AMG_FogDensity", fogDensity);
-	shader->setUniform("AMG_FogGradient", fogGradient);
+	currentShader->setUniform("AMG_FogColor", fogColor);
+	currentShader->setUniform("AMG_FogDensity", fogDensity);
+	currentShader->setUniform("AMG_FogGradient", fogGradient);
+}
+
+/**
+ * @brief Update lighting to the current shader
+ */
+void Renderer::updateLighting(){
+	for(unsigned int i=0;i<currentShader->lights.size();i++){
+		currentShader->lights[i]->enable(i);
+	}
+}
+
+/**
+ * @brief Get the inverse perspective matrix
+ * @return The inverse perspective matrix
+ */
+mat4 &Renderer::getInversePerspective(){
+	return this->invPerspective;
+}
+
+/**
+ * @brief Retrieve mouse position for this Renderer (window)
+ * @param x Output X coordinate, in pixels
+ * @param y Output Y coordinate, in pixels
+ */
+void Renderer::getMousePosition(double *x, double *y){
+	glfwGetCursorPos(window, x, y);
 }
 
 }
