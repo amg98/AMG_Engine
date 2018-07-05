@@ -62,13 +62,9 @@ const static char skyboxFiles[][16] = {
 /**
  * @brief Constructor for a Skybox
  * @param dir Folder where the cube map is
- * @param shader Shader to use for this Skybox
  * @note Each texture must have the same number of mipmaps (only 1 is recommended)
  */
-Skybox::Skybox(const char *dir, Shader *shader) {
-
-	// Set the shader
-	this->shader = shader;
+Skybox::Skybox(const char *dir) {
 
 	// Bind the vertices buffer and enable raw drawing for this object
 	addBuffer(skyboxData, sizeof(skyboxData), 3, GL_FLOAT, true);
@@ -89,7 +85,6 @@ Skybox::Skybox(const char *dir, Shader *shader) {
 }
 
 void Skybox::draw(){
-	shader->enable();		// Skyboxes don't use lighting nor fog
 	Renderer::currentRenderer->setTransformation(position, rotation, scale);
 	Renderer::currentRenderer->updateMVP();
 	materials[0]->apply();

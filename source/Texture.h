@@ -39,10 +39,10 @@ protected:
 public:
 	float currentFrame;				/**< Current frame to show, it will be truncated */
 	static void loadTexture(const char *path, GLuint target, int *w, int *h);
-	void loadTexture(const char *path);
-	Texture(const char *path);
+	void loadTexture(const char *path, float bias);
+	Texture(const char *path, float bias=-0.4f);
 	Texture(const char **names);
-	Texture(const char *path, int frameWidth, int frameHeight);
+	Texture(const char *path, int frameWidth, int frameHeight, float bias=-0.4f);
 	void enable(int slot);
 	int getWidth();
 	int getHeight();

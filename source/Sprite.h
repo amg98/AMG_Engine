@@ -21,7 +21,6 @@ namespace AMG {
  */
 class Sprite : public Texture {
 private:
-	static bool internalBuffersInit;		/**< Whether the primitive buffers are created */
 	void initData();
 public:
 	float x;								/**< Sprite horizontal position, in pixels */

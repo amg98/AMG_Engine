@@ -9,29 +9,6 @@
 
 namespace AMG {
 
-bool Sprite::internalBuffersInit = false;
-static GLuint verticesId;					/**< Primitive OpenGL buffer ID */
-static GLuint vertexDataId;					/**< Vertices OpenGL buffer ID */
-static GLuint uvDataId;						/**< Texture coordinates OpenGL buffer ID */
-
-static float spr_vertices[] = {				/**< The actual vertex buffer contents */
-	-0.5f, -0.5f,
-	0.5f, -0.5f,
-	0.5f, 0.5f,
-	-0.5f, -0.5f,
-	0.5f, 0.5f,
-	-0.5f, 0.5f
-};
-
-static float uv_vertices[] = {				/**< The actual texture coordinates buffer contents */
-	0, 1,
-	1, 1,
-	1, 0,
-	0, 1,
-	1, 0,
-	0, 0
-};
-
 /**
  * @brief Constructor for an Sprite, extends a Texture
  * @param path Location of the sprite image (*.dds)
@@ -52,19 +29,6 @@ void Sprite::initData(){
 	this->sx = 1.0f;
 	this->sy = 1.0f;
 	this->color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-	// Initialise internal buffers and load 2D shader
-	if(!internalBuffersInit){
-		internalBuffersInit = true;
-		glGenVertexArrays(1, &verticesId);
-		glBindVertexArray(verticesId);
-		glGenBuffers(1, &vertexDataId);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexDataId);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(spr_vertices), spr_vertices, GL_STATIC_DRAW);
-		glGenBuffers(1, &uvDataId);
-		glBindBuffer(GL_ARRAY_BUFFER, uvDataId);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
-	}
 }
 
 /**
@@ -84,14 +48,14 @@ void Sprite::draw(){
 	Renderer::currentRenderer->currentShader->setUniform("AMG_SprColor", color);
 	Renderer::currentRenderer->setTransformation(glm::vec3(x, y, 0), glm::quat(glm::vec3(0, 0, rotation)), glm::vec3(sx * texScale.x * width, sy * texScale.y * height, 1.0f));
 	Renderer::currentRenderer->updateMVP();
-	enable(0);			// Enable texture
-	glBindVertexArray(verticesId);
+	enable(0);									// Enable texture
+	glBindVertexArray(Renderer::quadID);
 	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexDataId);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, Renderer::quadVertices);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, uvDataId);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, Renderer::quadTexcoords);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);

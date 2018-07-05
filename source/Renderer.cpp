@@ -20,9 +20,31 @@
 
 namespace AMG {
 
+// Static variables
 bool Renderer::glfwSetup = false;
 bool Renderer::glewSetup = false;
 Renderer *Renderer::currentRenderer = NULL;
+GLuint Renderer::quadID;
+GLuint Renderer::quadVertices;
+GLuint Renderer::quadTexcoords;
+
+static float spr_vertices[] = {				/**< A vertex buffer for a quad (used for particles and 2D rendering) */
+	-0.5f, -0.5f,
+	0.5f, -0.5f,
+	0.5f, 0.5f,
+	-0.5f, -0.5f,
+	0.5f, 0.5f,
+	-0.5f, 0.5f
+};
+
+static float uv_vertices[] = {				/**< The quad's UV coordinates */
+	0, 1,
+	1, 1,
+	1, 0,
+	0, 1,
+	1, 0,
+	0, 0
+};
 
 /**
  * @brief Static method to resize a window
@@ -119,8 +141,15 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 	this->calculateProjection();
 	this->set3dMode(true);
 
-	// Load 2D shader
-	shader2d = new Shader("shader2d.vs", "shader2d.fs", AMG_USE_2D);
+	// Create the sample quad for 2D drawing and particles
+	glGenVertexArrays(1, &quadID);
+	glBindVertexArray(quadID);
+	glGenBuffers(1, &quadVertices);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVertices);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(spr_vertices), spr_vertices, GL_STATIC_DRAW);
+	glGenBuffers(1, &quadTexcoords);
+	glBindBuffer(GL_ARRAY_BUFFER, quadTexcoords);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
 }
 
 /**
@@ -209,6 +238,10 @@ void Renderer::setCurrent(){
  */
 Renderer::~Renderer() {
 	if(window) glfwDestroyWindow(window);
+	glDeleteBuffers(1, &quadVertices);
+	glDeleteBuffers(1, &quadTexcoords);
+	glDeleteVertexArrays(1, &quadID);
+
 }
 
 /**
@@ -258,6 +291,30 @@ void Renderer::setTransformation(vec3 pos){
 }
 
 /**
+ * @brief Calculate model matrix, making the transformed vertices to look towards the camera
+ * @param pos Position vector
+ * @param rot Rotation in radians
+ * @param scale Scale, 1.0f is the default size
+ * @note We need a camera set to call this
+ */
+void Renderer::setTransformationBillboard(vec3 pos, float rot, float scale){
+	if(camera){		// We need a camera set
+		mat4 &view = camera->getMatrix();
+		model = glm::translate(mat4(1.0f), pos);
+		model[0][0] = view[0][0];
+		model[0][1] = view[1][0];
+		model[0][2] = view[2][0];
+		model[1][0] = view[0][1];
+		model[1][1] = view[1][1];
+		model[1][2] = view[2][1];
+		model[2][0] = view[0][2];
+		model[2][1] = view[1][2];
+		model[2][2] = view[2][2];
+		model *= glm::rotate(rot, vec3(0, 0, 1)) * glm::scale(vec3(scale, scale, scale));
+	}
+}
+
+/**
  * @brief Flush model-view-projection matrix to the shader
  * @note Called internally when an Object needs to be rendered
  */
@@ -287,7 +344,7 @@ void Renderer::set3dMode(bool mode){
 		this->projection = &this->ortho;
 		glDisable(GL_DEPTH_TEST);
 		this->setCamera(NULL);
-		shader2d->enable();
+		glDisable(GL_CULL_FACE);
 	}
 }
 
@@ -339,6 +396,14 @@ mat4 &Renderer::getInversePerspective(){
  */
 void Renderer::getMousePosition(double *x, double *y){
 	glfwGetCursorPos(window, x, y);
+}
+
+/**
+ * @brief Get whether a key has been pressed
+ * @param code The key code
+ */
+bool Renderer::getKey(int code){
+	return (glfwGetKey(window, code) == GLFW_PRESS);
 }
 
 }

@@ -24,8 +24,8 @@ namespace AMG {
  * @brief Constructor for a Texture (1 frame version)
  * @param path File to load as a Texture
  */
-Texture::Texture(const char *path){
-	loadTexture(path);
+Texture::Texture(const char *path, float bias){
+	loadTexture(path, bias);
 	this->currentFrame = 0.0f;
 	this->texScale.x = 1.0f;
 	this->texScale.y = 1.0f;
@@ -73,8 +73,8 @@ Texture::Texture(const char **names){
  * @param frameWidth Width of one frame, in pixels
  * @param frameHeight Height of one frame, in pixels
  */
-Texture::Texture(const char *path, int frameWidth, int frameHeight){
-	loadTexture(path);
+Texture::Texture(const char *path, int frameWidth, int frameHeight, float bias){
+	loadTexture(path, bias);
 	this->currentFrame = 0.0f;
 	this->texScale.x = (float)frameWidth / (float)width;
 	this->texScale.y = (float)frameHeight / (float)height;
@@ -88,8 +88,9 @@ Texture::Texture(const char *path, int frameWidth, int frameHeight){
 /**
  * @brief Load a texture on memory
  * @param path Location of the texture file (*.dds)
+ * @param bias Level of detail bias
  */
-void Texture::loadTexture(const char *path){
+void Texture::loadTexture(const char *path, float bias){
 
 	this->target = GL_TEXTURE_2D;
 	glGenTextures(1, &this->id);
@@ -98,7 +99,7 @@ void Texture::loadTexture(const char *path){
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(target, GL_TEXTURE_LOD_BIAS, -0.4f);
+	glTexParameterf(target, GL_TEXTURE_LOD_BIAS, bias);
 
 	Texture::loadTexture(path, target, &this->width, &this->height);
 }

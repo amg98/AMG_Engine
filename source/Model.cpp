@@ -29,7 +29,6 @@ Model::Model(const char *path, Shader *shader) {
 	this->materials = NULL;
 	this->animations = NULL;
 	this->fps = 0;
-	this->shader = shader;
 	shader->enable();
 
 	// Open file
@@ -173,7 +172,6 @@ Model::Model(const char *path, Shader *shader) {
  * @brief Draw a 3D model previously loaded
  */
 void Model::draw(){
-	shader->enable();
 	Renderer::currentRenderer->updateLighting();
 	Renderer::currentRenderer->updateFog();
 	for(unsigned int i=0;i<nobjects;i++){

@@ -21,10 +21,8 @@ namespace AMG {
  * @brief Holds a environment made by a cube map
  */
 class Skybox: public Object {
-private:
-	Shader *shader;		/**< Shader used for Skybox rendering */
 public:
-	Skybox(const char *dir, Shader *shader);
+	Skybox(const char *dir);
 	void draw();
 	virtual ~Skybox();
 };

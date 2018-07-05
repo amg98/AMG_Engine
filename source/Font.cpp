@@ -23,7 +23,7 @@ Font::Font(const char *tex, const char *fnt){
 
 	// Load the texture
 	glyphBuffer = NULL;
-	font = new Texture(tex);
+	font = new Texture(tex, 0.0f);
 	font->setDependency(true);
 
 	// Create the glyph map
@@ -40,6 +40,7 @@ Font::Font(const char *tex, const char *fnt){
 	sscanf(line, "info face=%*s size=%f", &fontSize);
 	fgets(line, 256, f);
 	sscanf(line, "common lineHeight=%f", &lineHeight);
+	lineHeight += 8;
 	lineHeight /= fontSize;
 
 	// Get the number of characters
@@ -59,6 +60,7 @@ Font::Font(const char *tex, const char *fnt){
 		int id;
 		sscanf(line+5, "id=%d x=%f y=%f width=%f height=%f xoffset=%f yoffset=%f xadvance=%f",
 						&id, &glyph->x, &glyph->y, &glyph->width, &glyph->height, &glyph->xoffset, &glyph->yoffset, &glyph->advance);
+
 		glyph->xoffset /= fontSize;
 		glyph->yoffset /= fontSize;
 		glyph->advance /= fontSize;
@@ -93,7 +95,7 @@ AMG_Glyph *Font::getCharacter(char c){
 
 /**
  * @brief Create a text object using this font
- * @param text The text to be rendered
+ * @param text The text to be rendered, in extended ASCII format
  * @param size Size of the text
  * @param width Textbox width, in pixels
  * @param height Textbox height, in pixels
@@ -169,13 +171,13 @@ Text *Font::createText(const char *text, float size, float width, float height, 
 			// Calculate the coordinates for this character
 			int offset = written * 12;
 			float x = cursorX + character->xoffset * size;
-			float y = cursorY + character->yoffset * size;
+			float y = cursorY - character->yoffset * size;
 			float maxX = x + character->normWidth * size;
-			float maxY = y + character->normHeight * size;
+			float maxY = y - character->normHeight * size;
 			float texX = character->x;
-			float texMaxY = 1.0f - character->y;
+			float texY = 1.0f - character->y;
 			float texMaxX = character->x + character->width;
-			float texY = 1.0f - character->y - character->height;
+			float texMaxY = 1.0f - character->y - character->height;
 
 			// Write primitive data
 			vertices[offset + 0] = x;

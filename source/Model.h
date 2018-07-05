@@ -24,7 +24,6 @@ private:
 	unsigned int nmaterials;		/**< Number of materials in the model */
 	Material **materials;			/**< List of materials */
 	unsigned int fps;				/**< Frames per second */
-	Shader *shader;					/**< Shader used by this Model */
 public:
 	unsigned int nobjects;			/**< Number of objects in the model	*/
 	Object **objects;				/**< List of objects */

@@ -174,6 +174,14 @@ void Shader::enableOptions(int options){
 			this->setUniform(name, i);
 		}
 	}
+	if(options &AMG_USE_TEXT){
+		this->defineUniform("AMG_CharWidth");
+		this->defineUniform("AMG_CharEdge");
+		this->defineUniform("AMG_CharBorderWidth");
+		this->defineUniform("AMG_CharBorderEdge");
+		this->defineUniform("AMG_CharShadowOffset");
+		this->defineUniform("AMG_CharOutlineColor");
+	}
 }
 
 /**
@@ -259,8 +267,10 @@ void Shader::setUniform(const std::string &name, mat4 &v){
  * @brief Enable a shader program
  */
 void Shader::enable(){
-	glUseProgram(programID);
-	Renderer::currentRenderer->currentShader = this;
+	if(Renderer::currentRenderer->currentShader != this){
+		glUseProgram(programID);
+		Renderer::currentRenderer->currentShader = this;
+	}
 }
 
 /**

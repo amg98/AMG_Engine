@@ -48,7 +48,6 @@ private:
 	mat4 mv;						/**< Model view matrix */
 	Camera *camera;					/**< Current set camera */
 	double frametime;				/**< Desired frame time*/
-	Shader *shader2d;				/**< Shader used for 2D rendering */
 public:
 	int width;							/**< Window width, in pixels (don't write) */
 	int height;							/**< Window height, in pixels (don't write) */
@@ -58,6 +57,9 @@ public:
 	vec4 fogColor;						/**< Fog color, same as clear color */
 	Shader *currentShader;				/**< Current used shader */
 	static Renderer *currentRenderer;	/**< Current renderer drawing */
+	static GLuint quadID;				/**< OpenGL buffer ID for a quad */
+	static GLuint quadVertices;			/**< OpenGL buffer ID for the quad's vertices */
+	static GLuint quadTexcoords;		/**< OpenGL buffer ID for the quad's texture coordinates */
 
 	Renderer(int width, int height, const char *title, bool resize, bool fullscreen, double fps);
 	void update();
@@ -68,6 +70,7 @@ public:
 	void setUpdateCallback(renderCallback cb);
 	void setTransformation(vec3 pos, quat rot, vec3 scale);
 	void setTransformation(vec3 pos);
+	void setTransformationBillboard(vec3 pos, float rot, float scale);
 	void updateMVP();
 	void set3dMode(bool mode);
 	void calculateProjection();
@@ -77,6 +80,7 @@ public:
 	double getDelta();
 	mat4 &getInversePerspective();
 	void getMousePosition(double *x, double *y);
+	bool getKey(int code);
 };
 
 }

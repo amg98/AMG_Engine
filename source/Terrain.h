@@ -16,9 +16,8 @@ class Terrain: public Object {
 private:
 	const static float SIZE;			/**< Terrain size */
 	const static int VERTEX_COUNT;		/**< Number of vertices per terrain unit */
-	Shader *shader;						/**< Shader for this Terrain */
 public:
-	Terrain(float x, float y, const char *texture, Shader *shader);
+	Terrain(float x, float y, const char *texture);
 	void draw();
 	virtual ~Terrain();
 };

@@ -26,6 +26,13 @@ private:
 public:
 	vec3 position;			/**< Text position */
 	vec4 color;				/**< Text color */
+	float charWidth;		/**< Character width */
+	float charEdge;			/**< Character edge */
+	float charBorderWidth;	/**< Character border width */
+	float charBorderEdge;	/**< Character border edge */
+	vec2 charShadowOffset;	/**< Character shadow offset */
+	vec3 charOutlineColor;	/**< Character outline color */
+
 	Text(float *vertices, float *texcoords, int size, Texture *texture);
 	void draw();
 	virtual ~Text();

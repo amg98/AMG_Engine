@@ -13,12 +13,8 @@ const int Terrain::VERTEX_COUNT = 128;
 /**
  * @brief Constructor for a Terrain
  * @param texture Texture to use for this Terrain
- * @param shader Shader for this Terrain
  */
-Terrain::Terrain(float x, float y, const char *texture, Shader *shader) {
-
-	// Set the shader
-	this->shader = shader;
+Terrain::Terrain(float x, float y, const char *texture) {
 
 	// Set position
 	this->position.x = x * SIZE;
@@ -86,7 +82,6 @@ Terrain::Terrain(float x, float y, const char *texture, Shader *shader) {
  * @param renderer Window to draw this terrain
  */
 void Terrain::draw(){
-	shader->enable();
 	Renderer::currentRenderer->updateFog();
 	Renderer::currentRenderer->updateLighting();
 	Object::draw();

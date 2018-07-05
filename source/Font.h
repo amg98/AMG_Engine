@@ -38,12 +38,12 @@ typedef struct{
 class Font: public Entity {
 private:
 	std::tr1::unordered_map<char, AMG_Glyph*> glyphs;
-	float lineHeight;			/**< Height of one line */
 	float spaceSize;			/**< Space size */
 	Texture *font;				/**< Font texture */
 	AMG_Glyph *glyphBuffer;		/**< Buffer holding the font glyphs */
 	AMG_Glyph *getCharacter(char c);
 public:
+	float lineHeight;			/**< Height of one line */
 	Font(const char *tex, const char *fnt);
 	Text *createText(const char *text, float size, float width, float height, int *remaining);
 	virtual ~Font();
