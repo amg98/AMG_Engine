@@ -96,7 +96,7 @@ int Bone::getID(){
  */
 Bone::~Bone() {
 	for(unsigned int i=0;i<children.size();i++){
-		delete children[i];
+		if(children[i]) delete children[i];
 	}
 	children.clear();
 }

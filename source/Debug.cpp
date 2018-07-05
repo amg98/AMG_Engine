@@ -61,6 +61,9 @@ void Debug::showError(int code, void *param){
 		case 13:
 			fprintf(stderr, "More than 16 bones being used\n");
 			break;
+		case 14:
+			fprintf(stderr, "Character %c is not supported in this font\n", *(char*)param);
+			break;
 		default:
 			fprintf(stderr, "Unknown error\n");
 			break;

@@ -13,6 +13,33 @@ namespace AMG {
 
 std::vector<Entity*> Entity::entities;
 
+static char _fullpath[256];
+
+/**
+ * @brief Get the full path of an Entity
+ * @param path The short path
+ * @param type Type of entity we are referring, see EntityTypes
+ * @return The full path for this Entity
+ */
+char *Entity::getFullPath(const char *path, int type){
+	switch(type){
+		case AMG_MODEL:
+			sprintf(_fullpath, "Data/Model/%s", path);
+			break;
+		case AMG_FONT:
+			sprintf(_fullpath, "Data/Font/%s", path);
+			break;
+		case AMG_TEXTURE:
+			sprintf(_fullpath, "Data/Texture/%s", path);
+			break;
+		case AMG_SHADER:
+			sprintf(_fullpath, "Data/Shader/%s", path);
+			break;
+		default: break;
+	}
+	return _fullpath;
+}
+
 /**
  * @brief Constructor of an Entity
  */
@@ -57,4 +84,4 @@ void Entity::destroyEntities(){
 	entities.clear();
 }
 
-} /* namespace AMG */
+}

@@ -26,6 +26,7 @@ enum ErrorCodes {
 	UNSUPPORTED_FORMAT,				/**< A file format of characteristic of a file format is not supported */
 	NOT_POWER_OF_TWO_TEXTURE,		/**< When a texture has not power-of-two dimensions */
 	TOO_MANY_BONES,					/**< When the bones limit is exceeded */
+	UNSUPPORTED_CHARACTER,			/**< When a character is not supported by a font */
 };
 
 /**

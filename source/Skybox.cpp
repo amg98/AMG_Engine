@@ -74,7 +74,7 @@ Skybox::Skybox(const char *dir, Shader *shader) {
 	addBuffer(skyboxData, sizeof(skyboxData), 3, GL_FLOAT, true);
 
 	// Create the material
-	materials = (Material**) malloc (sizeof(Material*));
+	materials = (Material**) calloc (1, sizeof(Material*));
 	char **names = (char**) malloc (AMG_CUBE_SIDES * sizeof(char*));
 	for(int i=0;i<AMG_CUBE_SIDES;i++){
 		names[i] = (char*) malloc (128 * sizeof(char));
@@ -98,7 +98,7 @@ void Skybox::draw(){
 
 Skybox::~Skybox() {
 	if(materials){
-		delete materials[0];
+		if(materials[0]) delete materials[0];
 		free(materials);
 	}
 }

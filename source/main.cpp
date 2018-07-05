@@ -17,16 +17,18 @@
 #include "Light.h"
 #include "Terrain.h"
 #include "Skybox.h"
+#include "Font.h"
 using namespace AMG;
 
 // Definition of objects
 Renderer *window;
 Camera *cam;
 Model *link;
-Sprite *sprite;
 Terrain *terrain;
 Skybox *skybox;
 Shader *s0, *s1, *s2;
+Text *hello;
+Sprite *sprite;
 
 void render(){
 
@@ -42,8 +44,8 @@ void render(){
 	skybox->draw();
 
 	window->set3dMode(false);
-	sprite->rotation += 0.05f;
 	sprite->draw();
+	hello->draw();
 	window->set3dMode(true);
 }
 
@@ -56,20 +58,15 @@ int main(int argc, char **argv){
 
 	cam = new Camera(FPS_CAMERA);
 
-	s0 = new Shader("Data/Shader/default.vs", "Data/Shader/default.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_SKINNING);
-	s1 = new Shader("Data/Shader/terrain.vs", "Data/Shader/terrain.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_TEXTURE(5));
-	s2 = new Shader("Data/Shader/skybox.vs", "Data/Shader/skybox.fs", 0);
-
-	sprite = new Sprite("Data/Texture/font.dds", 32, 32);
-	sprite->x = 300.0f;
-	sprite->y = 300.0f;
-	sprite->currentFrame = 65.0f;
+	s0 = new Shader("default.vs", "default.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_SKINNING);
+	s1 = new Shader("terrain.vs", "terrain.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_TEXTURE(5));
+	s2 = new Shader("skybox.vs", "skybox.fs", 0);
 
 	Light *light = new Light(vec3(0, 1.0f, 0), vec3(1, 1, 0), vec3(0.1f, 0, 1));
 	s0->lights.push_back(light);
 	s1->lights.push_back(light);
 
-	link = new Model("Data/Model/model2.amd", s0);
+	link = new Model("model2.amd", s0);
 	link->objects[0]->scale = vec3(0.1f, 0.1f, 0.1f);
 	link->objects[0]->position = vec3(0.0f, 0.0f, 3.0f);
 	link->objects[0]->rotation = quat(vec3(-3.141592f/2.0f, 0, 0));
@@ -80,7 +77,26 @@ int main(int argc, char **argv){
 	terrain->materials[0]->addTexture("path.dds");
 	terrain->materials[0]->addTexture("blendMap.dds");
 
-	skybox = new Skybox("Data/Texture/sky", s2);
+	skybox = new Skybox("sky", s2);
+
+	Font *font = new Font("font.dds", "font.fnt");
+
+	float tbx = 300;
+	float tby = 300;
+
+	int remaining = 0;
+	char text[256];
+	sprintf(text, "Cada vez que escribo una entrada en este blog mis compañeros de estudio se burlan un poco. Dicen que sufro de incontinencia, que no manejo adecuadamente los códigos de un blog, que me extiendo demasiado");
+	hello = font->createText((const char*)text, 32, tbx, tby, &remaining);
+	hello->position.x = 200;
+	hello->position.y = 600;
+	hello->color = vec4(1, 0, 0, 1);
+
+	sprite = new Sprite("texture.dds");
+	sprite->x = hello->position.x + tbx/2;
+	sprite->y = hello->position.y - tby/2 + 39;
+	sprite->sx = tbx / 256;
+	sprite->sy = tby / 256;
 
 	window->update();
 

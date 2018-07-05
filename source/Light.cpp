@@ -51,7 +51,6 @@ void Light::enable(int id){
  * @brief Destructor of the Light
  */
 Light::~Light() {
-
 }
 
 }

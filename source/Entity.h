@@ -12,6 +12,17 @@
 namespace AMG {
 
 /**
+ * @enum EntityTypes
+ * @brief Describes the types of Entities we can find in the engine
+ */
+enum EntityTypes {
+	AMG_FONT = 0,
+	AMG_MODEL = 1,
+	AMG_TEXTURE = 2,
+	AMG_SHADER = 3,
+};
+
+/**
  * @class Entity
  * @brief An engine entity
  */
@@ -21,6 +32,7 @@ private:
 	bool dependant;								/**< If an entity depends on another the root entity must delete it */
 public:
 	Entity();
+	static char *getFullPath(const char *path, int type);
 	void setDependency(bool dependency);
 	virtual ~Entity();
 	static void destroyEntities();

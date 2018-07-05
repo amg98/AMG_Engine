@@ -13,9 +13,9 @@ namespace AMG {
  */
 MeshData::MeshData() {
 	glGenVertexArrays(1, &this->id);
-	glGenBuffers(1, &this->indexid);
 	info = std::vector<buffer_info>();
 	this->count = 0;
+	this->indexid = 0;
 }
 
 /**
@@ -42,8 +42,10 @@ void MeshData::addBuffer(void *data, int size, int comps, GLuint type, bool draw
  * @brief Sets information for the index buffer
  * @param data Pointer to the index buffer
  * @param size Index buffer size, in bytes
+ * @note Call it only once
  */
 void MeshData::setIndexBuffer(void *data, int size){
+	glGenBuffers(1, &this->indexid);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexid);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	this->count = size / sizeof(short);
@@ -78,7 +80,7 @@ void MeshData::drawRaw(){
  */
 void MeshData::enableBuffers(){
 	glBindVertexArray(this->id);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexid);
+	if(this->indexid) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexid);
 	for(unsigned int i=0;i<info.size();i++){
 		buffer_info binfo = info.at(i);
 		glEnableVertexAttribArray(i);
@@ -108,7 +110,7 @@ MeshData::~MeshData() {
 	for(unsigned int i=0;i<info.size();i++){
 		glDeleteBuffers(1, &info.at(i).id);
 	}
-	glDeleteBuffers(1, &this->indexid);
+	if(this->indexid) glDeleteBuffers(1, &this->indexid);
 	glDeleteVertexArrays(1, &this->id);
 	info.clear();
 }

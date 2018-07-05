@@ -21,7 +21,7 @@
 namespace AMG {
 
 std::string Shader::loadShaderCode(const char *path){
-	std::ifstream ShaderStream(path, std::ios::in);
+	std::ifstream ShaderStream(getFullPath(path, AMG_SHADER), std::ios::in);
 	std::string ShaderCode;
 	if(ShaderStream.is_open()){
 		std::string line;
@@ -30,7 +30,7 @@ std::string Shader::loadShaderCode(const char *path){
 			if(line.find("#include") != std::string::npos){
 				int start = line.find("<") + 1;
 				int end = line.find(">");
-				sstr << loadShaderCode(("Data/Shader/" + line.substr(start, end - start)).c_str());
+				sstr << loadShaderCode(line.substr(start, end - start).c_str());
 			}else{
 				sstr << line + "\n";
 			}

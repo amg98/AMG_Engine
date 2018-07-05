@@ -67,6 +67,7 @@ public:
 	void setRenderCallback(renderCallback cb);
 	void setUpdateCallback(renderCallback cb);
 	void setTransformation(vec3 pos, quat rot, vec3 scale);
+	void setTransformation(vec3 pos);
 	void updateMVP();
 	void set3dMode(bool mode);
 	void calculateProjection();

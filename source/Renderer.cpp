@@ -65,6 +65,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 	this->fogColor = vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	this->fogDensity = 0.0f;
 	this->fogGradient = 1.0f;
+	this->window = NULL;
 
 	// Initialise GLFW
 	if(!glfwSetup){
@@ -119,7 +120,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 	this->set3dMode(true);
 
 	// Load 2D shader
-	shader2d = new Shader("Data/Shader/shader2d.vs", "Data/Shader/shader2d.fs", AMG_USE_2D);
+	shader2d = new Shader("shader2d.vs", "shader2d.fs", AMG_USE_2D);
 }
 
 /**
@@ -207,7 +208,7 @@ void Renderer::setCurrent(){
  * @brief Destructor for a Renderer object
  */
 Renderer::~Renderer() {
-	glfwDestroyWindow(window);
+	if(window) glfwDestroyWindow(window);
 }
 
 /**
@@ -246,6 +247,14 @@ void Renderer::setUpdateCallback(renderCallback cb){
  */
 void Renderer::setTransformation(vec3 pos, quat rot, vec3 scale){
 	model = glm::translate(mat4(1.0f), pos) * glm::toMat4(rot) * glm::scale(scale);
+}
+
+/**
+ * @brief Calculate model matrix from translation vector
+ * @param pos Position vector
+ */
+void Renderer::setTransformation(vec3 pos){
+	model = glm::translate(mat4(1.0f), pos);
 }
 
 /**

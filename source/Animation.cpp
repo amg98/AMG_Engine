@@ -88,8 +88,8 @@ void Animation::animateBone(Bone *bone, Keyframe *first, Keyframe *last, float p
  * @brief Destructor for an Animation
  */
 Animation::~Animation() {
-	for(unsigned int i=0;i<this->nkeyframes;i++){
-		delete this->keyframes[i];
+	for(unsigned int i=0;i<nkeyframes;i++){
+		if(keyframes[i]) delete keyframes[i];
 	}
 	if(keyframes) free(this->keyframes);
 }

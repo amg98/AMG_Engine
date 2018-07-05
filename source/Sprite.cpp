@@ -32,12 +32,18 @@ static float uv_vertices[] = {				/**< The actual texture coordinates buffer con
 	0, 0
 };
 
-
 /**
  * @brief Constructor for an Sprite, extends a Texture
  * @param path Location of the sprite image (*.dds)
  */
-Sprite::Sprite(const char *path, int frameWidth, int frameHeight) : Texture(path, frameWidth, frameHeight) {
+Sprite::Sprite(const char *path) : Texture(path){
+	initData();
+}
+
+/**
+ * @brief Initialize Sprite data
+ */
+void Sprite::initData(){
 
 	// Initialise data
 	this->x = 0.0f;
@@ -59,6 +65,16 @@ Sprite::Sprite(const char *path, int frameWidth, int frameHeight) : Texture(path
 		glBindBuffer(GL_ARRAY_BUFFER, uvDataId);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
 	}
+}
+
+/**
+ * @brief Constructor for an Sprite, extends a Texture
+ * @param path Location of the sprite image (*.dds)
+ * @param frameWidth Width of a frame, in pixels
+ * @param frameHeight Height of a frame, in pixels
+ */
+Sprite::Sprite(const char *path, int frameWidth, int frameHeight) : Texture(path, frameWidth, frameHeight) {
+	initData();
 }
 
 /**
@@ -85,7 +101,6 @@ void Sprite::draw(){
  * @brief Destructor for a Sprite, the same as for a Texture
  */
 Sprite::~Sprite() {
-
 }
 
 }

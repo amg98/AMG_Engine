@@ -22,6 +22,7 @@ namespace AMG {
 class Sprite : public Texture {
 private:
 	static bool internalBuffersInit;		/**< Whether the primitive buffers are created */
+	void initData();
 public:
 	float x;								/**< Sprite horizontal position, in pixels */
 	float y;								/**< Sprite vertical position, in pixels */
@@ -30,6 +31,7 @@ public:
 	float sy;								/**< Sprite vertical scale */
 	vec4 color;								/**< Sprite color and transparency */
 
+	Sprite(const char *path);
 	Sprite(const char *path, int frameWidth, int frameHeight);
 	void draw();
 	virtual ~Sprite();

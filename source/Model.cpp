@@ -33,7 +33,7 @@ Model::Model(const char *path, Shader *shader) {
 	shader->enable();
 
 	// Open file
-	FILE *f = fopen(path, "rb");
+	FILE *f = fopen(getFullPath(path, AMG_MODEL), "rb");
 	if(f == NULL) Debug::showError(FILE_NOT_FOUND, (void*)path);
 
 	// Check signature
@@ -44,7 +44,7 @@ Model::Model(const char *path, Shader *shader) {
 	// Set up material information
 	nmaterials = 0;
 	fread(&nmaterials, sizeof(unsigned char), 1, f);
-	materials = (Material**) malloc (nmaterials * sizeof(Material*));
+	materials = (Material**) calloc (nmaterials, sizeof(Material*));
 
 	// Read all materials
 	for(unsigned int i=0;i<nmaterials;i++){
@@ -65,7 +65,7 @@ Model::Model(const char *path, Shader *shader) {
 
 	// Set up object information
 	fread(&nobjects, sizeof(unsigned char), 1, f);
-	objects = (Object**) malloc (nobjects * sizeof(Object*));
+	objects = (Object**) calloc (nobjects, sizeof(Object*));
 
 	// Temporal variables
 	unsigned short nvertices;
@@ -200,13 +200,13 @@ void Model::animate(unsigned int objIndex, unsigned int animIndex){
  */
 Model::~Model() {
 	for(unsigned int i=0;i<nobjects;i++){
-		delete objects[i];
+		if(objects[i]) delete objects[i];
 	}
 	for(unsigned int i=0;i<nmaterials;i++){
-		delete materials[i];
+		if(materials[i]) delete materials[i];
 	}
 	for(unsigned int i=0;i<nanimations;i++){
-		delete animations[i];
+		if(animations[i]) delete animations[i];
 	}
 	if(objects) free(objects);
 	if(materials) free(materials);

@@ -64,9 +64,7 @@ Material::Material(float *data, const char *texture) {
 void Material::addTexture(const char *texture){
 	Texture *tex = NULL;
 	if(texture){
-		char path[128];
-		sprintf(path, "Data/Texture/%s", texture);
-		tex = new Texture(path);
+		tex = new Texture(texture);
 		tex->setDependency(true);
 		this->textures.push_back(tex);
 	}
@@ -97,7 +95,7 @@ void Material::apply(){
  */
 Material::~Material() {
 	for(unsigned int i=0;i<textures.size();i++){
-		delete textures[i];
+		if(textures[i]) delete textures[i];
 	}
 	textures.clear();
 }

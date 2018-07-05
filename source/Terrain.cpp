@@ -97,7 +97,7 @@ void Terrain::draw(){
  */
 Terrain::~Terrain() {
 	if(materials){
-		delete materials[0];
+		if(materials[0]) delete materials[0];
 		free(materials);
 	}
 }

@@ -31,7 +31,6 @@ Camera::Camera(int mode) {
  * @brief Destructor of a camera
  */
 Camera::~Camera() {
-
 }
 
 /**

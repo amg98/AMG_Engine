@@ -110,7 +110,7 @@ void Texture::loadTexture(const char *path){
  * @param h Height of the image (output)
  */
 void Texture::loadTexture(const char *path, GLuint target, int *w, int *h){
-	FILE *fp = fopen(path, "rb");
+	FILE *fp = fopen(getFullPath(path, AMG_TEXTURE), "rb");
 	if (fp == NULL)
 		Debug::showError(5, (void*)path);
 
