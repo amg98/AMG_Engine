@@ -34,8 +34,8 @@ private:
 protected:
 	int width;						/**< Texture width, in pixels (must be a power of two) */
 	int height;						/**< Texture height, in pixels (must be a power of two) */
-	vec2 texPosition;				/**< Shader texture position */
-	vec2 texScale;					/**< Shader texture scale */
+	vec4 texPosition;				/**< Shader texture position (for 2 frames) */
+	vec4 texScale;					/**< Shader texture scale (for 2 frames) */
 public:
 	float currentFrame;				/**< Current frame to show, it will be truncated */
 	static void loadTexture(const char *path, GLuint target, int *w, int *h);
@@ -46,6 +46,7 @@ public:
 	void enable(int slot);
 	int getWidth();
 	int getHeight();
+	int getFrames();
 	virtual ~Texture();
 };
 

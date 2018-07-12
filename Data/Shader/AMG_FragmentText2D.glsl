@@ -12,10 +12,10 @@ uniform vec3 AMG_CharOutlineColor;
  * @brief Compute the color for a text, applying its effects
  */
 void AMG_ComputeTextColor(){
-	float distance = 1 - texture(AMG_TextureSampler, AMG_OutUV).a;
+	float distance = 1 - texture(AMG_TextureSampler[0], AMG_OutUV).a;
 	float alpha = 1 - smoothstep(AMG_CharWidth, AMG_CharWidth + AMG_CharEdge, distance);
 	
-	float distanceBorder = 1 - texture(AMG_TextureSampler, AMG_OutUV + AMG_CharShadowOffset).a;
+	float distanceBorder = 1 - texture(AMG_TextureSampler[0], AMG_OutUV + AMG_CharShadowOffset).a;
 	float alphaBorder = 1 - smoothstep(AMG_CharBorderWidth, AMG_CharBorderWidth + AMG_CharBorderEdge, distanceBorder);
 	
 	float overallAlpha = alpha + (1 - alpha) * alphaBorder;

@@ -4,7 +4,6 @@ const int AMG_LIGHTS = 1;
 const int AMG_TEXTURES = 5;
 
 #include <AMG_FragmentCommon.glsl>
-
 #include <AMG_FragmentTexture.glsl>
 #include <AMG_FragmentLighting.glsl>
 #include <AMG_FragmentFog.glsl>

@@ -3,9 +3,6 @@
  * @brief General rendering stuff
  */
 
-// Includes C/C++
-#include <unistd.h>
-
 // Includes OpenGL
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
@@ -69,9 +66,8 @@ static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
  * @param title Title for this new window
  * @param resize Resizable window?
  * @param fullscreen Full screen window?
- * @param fps Desired frames per second
  */
-Renderer::Renderer(int width, int height, const char *title, bool resize, bool fullscreen, double fps) {
+Renderer::Renderer(int width, int height, const char *title, bool resize, bool fullscreen) {
 
 	// Initialise variables
 	this->model = glm::mat4(1.0f);
@@ -80,10 +76,9 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 	this->camera = NULL;
 	this->width = width;
 	this->height = height;
-	this->frametime = 1.0/fps;
 	this->renderCb = NULL;
 	this->updateCb = NULL;
-	this->FPS = fps;
+	this->FPS = 60.0f;
 	this->fogColor = vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	this->fogDensity = 0.0f;
 	this->fogGradient = 1.0f;
@@ -113,7 +108,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 
 	// Set OpenGL context owner to this renderer
 	this->setCurrent();
-	glfwSwapInterval(1);			// Vsync enabled by default
+	glfwSwapInterval(1);		// V-sync always enabled
 
 	// Initialise GLEW
 	if(!glewSetup){
@@ -171,57 +166,39 @@ void Renderer::update(){
 
 	bool running = true;
 
-	double lastTime = glfwGetTime();
-	double startTime;
-	double passedTime;
-	double unprocessedTime = 0;
-	double frameCounter = 0;
+	double b = glfwGetTime();
+	double lastframe = b;
 	int frames = 0;
-	bool render;
 
-	// Main loop
 	while(running){
 
-		render = false;
+		b = glfwGetTime();
 
-		startTime = glfwGetTime();
-		passedTime = startTime - lastTime;
-		lastTime = startTime;
-
-		unprocessedTime += passedTime;
-		frameCounter += passedTime;
-
-		while(unprocessedTime > frametime){
-			render = true;
-			unprocessedTime -= frametime;
-
-			if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)){
-				running = false;
-			}
-
-			// Update engine
-			glfwPollEvents();
-			if(updateCb) updateCb();
-
-			if(frameCounter > 1.0){
-				FPS = frames;
-				frames = 0;
-				frameCounter = 0;
-				/*fprintf(stdout, "%d\n", FPS);
-				fflush(stdout);*/
-			}
+		// Perform frame counter
+		if(b - lastframe > 1.0){
+			FPS = frames;
+			frames = 0;
+			lastframe = b;
+			//printf("%d\n", FPS);
+			//fflush(stdout);
 		}
 
-		// Render scene
-		if(renderCb && render){
-			glClearColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Process events
+		glfwPollEvents();
+		if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)){
+			running = false;
+		}
+
+		// Render the scene
+		glClearColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		if(renderCb){
 			renderCb();
-			glfwSwapBuffers(window);
-			frames ++;
-		}else{
-			Sleep(1);
 		}
+
+		glfwSwapBuffers(window);
+		frames ++;
 	}
 }
 
@@ -320,7 +297,6 @@ void Renderer::setTransformationBillboard(vec3 pos, float rot, float scale){
  */
 void Renderer::updateMVP(){
 	if(camera){
-		camera->update(this->window, this->getDelta());
 		mv = camera->getMatrix() * model;
 	}else{
 		mv = model;
@@ -349,10 +325,11 @@ void Renderer::set3dMode(bool mode){
 }
 
 /**
- * @brief Set a current Camera for this Renderer
+ * @brief Set a current Camera for this Renderer, and updates it
  */
 void Renderer::setCamera(Camera *camera){
 	this->camera = camera;
+	if(camera) camera->update(window, getDelta());
 }
 
 /**

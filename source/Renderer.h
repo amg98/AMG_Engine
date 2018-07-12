@@ -46,12 +46,11 @@ private:
 	mat4 model;						/**< Model matrix */
 	mat4 mvp;						/**< Concatenation of Model, Projection and Camera matrices */
 	mat4 mv;						/**< Model view matrix */
-	Camera *camera;					/**< Current set camera */
-	double frametime;				/**< Desired frame time*/
 public:
 	int width;							/**< Window width, in pixels (don't write) */
 	int height;							/**< Window height, in pixels (don't write) */
 	int FPS;							/**< The actual frames per second */
+	Camera *camera;					/**< Current set camera */
 	float fogDensity;					/**< Fog density */
 	float fogGradient;					/**< Fog gradient */
 	vec4 fogColor;						/**< Fog color, same as clear color */
@@ -61,7 +60,7 @@ public:
 	static GLuint quadVertices;			/**< OpenGL buffer ID for the quad's vertices */
 	static GLuint quadTexcoords;		/**< OpenGL buffer ID for the quad's texture coordinates */
 
-	Renderer(int width, int height, const char *title, bool resize, bool fullscreen, double fps);
+	Renderer(int width, int height, const char *title, bool resize, bool fullscreen);
 	void update();
 	void setCurrent();
 	virtual ~Renderer();

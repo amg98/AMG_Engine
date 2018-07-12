@@ -1,6 +1,8 @@
 // Uniforms
 uniform sampler2D AMG_TextureSampler[AMG_TEXTURES];		/**< Texture samplers */
 
+in vec2 AMG_OutUV;
+
 /**
   * @brief Computes a texture mapping
   * @param tex Texture slot to use

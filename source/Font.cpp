@@ -101,7 +101,7 @@ AMG_Glyph *Font::getCharacter(char c){
  * @param height Textbox height, in pixels
  * @param remaining Position where it stopped writing text
  */
-Text *Font::createText(const char *text, float size, float width, float height, int *remaining){
+Text *Font::createText(char *text, float size, float width, float height, int *remaining){
 
 	// Get size of the string
 	int nchars = strlen(text);
@@ -123,9 +123,10 @@ Text *Font::createText(const char *text, float size, float width, float height, 
 	}
 
 	// Create buffers
-	int bufferSize = writeLen * 6 * 2 * sizeof(float);
-	float *vertices = (float*) malloc (bufferSize);
-	float *texcoords = (float*) malloc (bufferSize);
+	int bufferSize = writeLen * 6 * 2;
+	int textBufferSize = 0;
+	float *vertices = (float*) calloc (bufferSize, sizeof(float));
+	float *texcoords = (float*) calloc (bufferSize, sizeof(float));
 	float cursorX = 0.0f;
 	float cursorY = 0.0f;
 
@@ -204,6 +205,7 @@ Text *Font::createText(const char *text, float size, float width, float height, 
 			texcoords[offset + 9] = texMaxY;
 			texcoords[offset + 10] = texX;
 			texcoords[offset + 11] = texMaxY;
+			textBufferSize += 12;
 
 			// Advance to the next character
 			cursorX += character->advance * size;
@@ -215,7 +217,7 @@ Text *Font::createText(const char *text, float size, float width, float height, 
 	}
 
 	// Create text object
-	Text *t = new Text(vertices, texcoords, bufferSize, this->font);
+	Text *t = new Text(vertices, texcoords, textBufferSize * sizeof(float), this->font);
 
 	// Free data
 	free(vertices);

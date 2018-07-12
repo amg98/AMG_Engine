@@ -28,6 +28,7 @@ namespace AMG {
 #define AMG_USE_2D			(1 << 7)
 #define AMG_USE_TEXTURE(n)	(((n)&15) << 8)
 #define AMG_USE_TEXT		(1 << 13)
+#define AMG_USE_TEXANIM		(1 << 14)
 
 class Shader : private Entity {
 private:

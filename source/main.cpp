@@ -32,10 +32,6 @@ Text *hello;
 Sprite *sprite;
 ParticleSource *source;
 
-void update(){
-	source->update();
-}
-
 void render(){
 
 	window->setCamera(cam);
@@ -53,11 +49,12 @@ void render(){
 	skybox->draw();
 
 	if(window->getKey(GLFW_KEY_Q)){
-		source->particles.push_front(new Particle(vec3(0, 0, 0), vec3(0, 1, 0), 1, 5, 0, 1));
+		source->particles.push_front(new Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
 	}
 
 	s3->enable();
-	source->draw();
+	source->update();
+	source->draw(GL_ONE);
 
 	window->set3dMode(false);
 	s3->enable();
@@ -69,9 +66,8 @@ void render(){
 
 int main(int argc, char **argv){
 
-	window = new Renderer(1024, 768, "Window1", true, false, 60);
+	window = new Renderer(1024, 768, "Window1", true, false);
 	window->setRenderCallback(render);
-	window->setUpdateCallback(update);
 	window->fogDensity = 0.1f;
 	window->fogGradient = 5.0f;
 
@@ -80,7 +76,7 @@ int main(int argc, char **argv){
 	s0 = new Shader("default.vs", "default.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_SKINNING);
 	s1 = new Shader("terrain.vs", "terrain.fs", AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_TEXTURE(5));
 	s2 = new Shader("skybox.vs", "skybox.fs", 0);
-	s3 = new Shader("shader2d.vs", "shader2d.fs", AMG_USE_2D);
+	s3 = new Shader("shader2d.vs", "shader2d.fs", AMG_USE_2D | AMG_USE_TEXANIM);
 	s4 = new Shader("text2d.vs", "text2d.fs", AMG_USE_2D | AMG_USE_TEXT);
 
 	Light *light = new Light(vec3(0, 1.0f, 0), vec3(1, 1, 0), vec3(0.1f, 0, 1));
@@ -108,7 +104,7 @@ int main(int argc, char **argv){
 	int remaining = 0;
 	char text[512];
 	sprintf(text, "Cada vez que escribo una entrada en este blog mis companeros de estudio se burlan un poco. Dicen que sufro de incontinencia, que no manejo adecuadamente los codigos de un blog, que me extiendo demasiado");
-	hello = font->createText((const char*)text, 32, tbx, tby, &remaining);
+	hello = font->createText(text, 32, tbx, tby, &remaining);
 	hello->position.x = 200;
 	hello->position.y = 600;
 	hello->color = vec4(1, 0, 0, 1);

@@ -5,5 +5,5 @@
 void main(){
 
     AMG_ComputePosition();
-    AMG_Pass();
+    AMG_PassTexcoords();
 }

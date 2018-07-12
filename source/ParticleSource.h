@@ -27,7 +27,7 @@ public:
 	std::list<Particle*> particles;		/**< Vector holding all the particles for this source */
 	ParticleSource(const char *texPath, int hframes, int vframes);
 	void update();
-	void draw();
+	void draw(GLuint alphaFunc);
 	virtual ~ParticleSource();
 };
 

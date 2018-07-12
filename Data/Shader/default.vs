@@ -6,6 +6,7 @@ const int AMG_LIGHTS = 1;
 #include <AMG_InputAnimatedModel.glsl>
 
 #include <AMG_VertexCommon.glsl>
+#include <AMG_VertexTexture.glsl>
 #include <AMG_VertexSkinning.glsl>
 #include <AMG_VertexLighting.glsl>
 #include <AMG_VertexFog.glsl>
@@ -21,7 +22,7 @@ void main(){
     AMG_ComputePosition(skin);
     
     // Pass data to the fragment shader
-	AMG_Pass();
+	AMG_PassTexcoords();
     AMG_PassLighting(modelview);
     AMG_PassLight(model, 0);
     AMG_PassFog(modelview);

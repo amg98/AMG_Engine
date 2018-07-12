@@ -36,7 +36,6 @@ enum CameraMode {
 class Camera : private Entity {
 private:
 	mat4 camera;				/**< Camera matrix */
-	vec3 position;				/**< Camera position */
 	quat rotation;				/**< Camera rotation */
 	vec3 forward;				/**< Forward vector */
 	vec3 right;					/**< Right vector */
@@ -45,6 +44,7 @@ private:
 	int mode;					/**< Selected mode */
 	void computeTrihedron();
 public:
+	vec3 position;				/**< Camera position */
 	Camera(int mode);
 	mat4& getMatrix();
 	vec3 getRay();

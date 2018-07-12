@@ -124,8 +124,6 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
 	this->uniformsMap = std::tr1::unordered_map<std::string, int>();
 	lights = std::vector<Light*>();
 	this->defineUniform("AMG_MVP");
-	this->defineUniform("AMG_TexPosition");
-	this->defineUniform("AMG_TexScale");
 	this->enableOptions(options);
 }
 
@@ -181,6 +179,11 @@ void Shader::enableOptions(int options){
 		this->defineUniform("AMG_CharBorderEdge");
 		this->defineUniform("AMG_CharShadowOffset");
 		this->defineUniform("AMG_CharOutlineColor");
+	}
+	if(options &AMG_USE_TEXANIM){
+		this->defineUniform("AMG_TexPosition");
+		this->defineUniform("AMG_TexScale");
+		this->defineUniform("AMG_TexProgress");
 	}
 }
 

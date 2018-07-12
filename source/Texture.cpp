@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // Own includes
 #include "Texture.h"
@@ -76,10 +77,10 @@ Texture::Texture(const char **names){
 Texture::Texture(const char *path, int frameWidth, int frameHeight, float bias){
 	loadTexture(path, bias);
 	this->currentFrame = 0.0f;
-	this->texScale.x = (float)frameWidth / (float)width;
-	this->texScale.y = (float)frameHeight / (float)height;
-	this->texPosition.x = 0.0f;
-	this->texPosition.y = 0.0f;
+	float w = (float)frameWidth / (float)width;
+	float h = (float)frameHeight / (float)height;
+	this->texScale = vec4(w, h, w, h);
+	this->texPosition = vec4(0, 0, 0, 0);
 	this->horizontalFrames = width / frameWidth;
 	this->verticalFrames = height / frameHeight;
 	this->nframes = horizontalFrames * verticalFrames;
@@ -186,22 +187,34 @@ void Texture::enable(int slot){
 	// Enable the texture
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(this->target, this->id);
-	Renderer::currentRenderer->currentShader->setUniform("AMG_TexPosition", texPosition);
-	Renderer::currentRenderer->currentShader->setUniform("AMG_TexScale", texScale);
 
 	// Perform animation
 	if(this->nframes > 1){
+
 		// Calculate current frame as an integer
 		int fr = (int)this->currentFrame;
 		if(fr >= this->nframes){
 			this->currentFrame = 0.0f;
 			fr = 0;
 		}
+		int nfr = fr + 1;
+		if(nfr > this->nframes){
+			nfr = 0;
+		}
 
 		// Update texture position and scale to select the frame
 		this->texPosition.x = (fr % horizontalFrames) / (float)horizontalFrames;
 		this->texPosition.y = (fr / verticalFrames) / (float)verticalFrames;
+		this->texPosition.z = (nfr % horizontalFrames) / (float)horizontalFrames;
+		this->texPosition.w = (nfr / verticalFrames) / (float)verticalFrames;
 	}
+
+	// Update uniforms in the shader
+	Shader *shader = Renderer::currentRenderer->currentShader;
+	shader->setUniform("AMG_TexPosition", texPosition);
+	shader->setUniform("AMG_TexScale", texScale);
+	float p;
+	shader->setUniform("AMG_TexProgress", modf(currentFrame, &p));
 }
 
 /**
@@ -218,6 +231,14 @@ int Texture::getWidth(){
  */
 int Texture::getHeight(){
 	return this->height;
+}
+
+/**
+ * @brief Get texture's number of frames
+ * @return The texture's number of frames
+ */
+int Texture::getFrames(){
+	return this->nframes;
 }
 
 /**

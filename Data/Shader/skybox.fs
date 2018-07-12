@@ -2,9 +2,8 @@
 
 const int AMG_TEXTURES = 1;
 
-#include <AMG_FragmentCommonSkybox.glsl>
-
-#include <AMG_FragmentCubeMap.glsl>
+#include <AMG_FragmentCommon.glsl>
+#include <AMG_FragmentTextureCubeMap.glsl>
 
 void main(){
 

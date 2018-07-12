@@ -3,6 +3,9 @@
  * @brief A source for tons of particles
  */
 
+// Includes C/C++
+#include <algorithm>
+
 // Own includes
 #include "ParticleSource.h"
 #include "Renderer.h"
@@ -33,15 +36,17 @@ void ParticleSource::update(){
 			particles.remove(p);
 		}
 	}
+	particles.sort();
 }
 
 /**
  * @brief Draw all the particles in this source
+ * @param Blending function to apply
  */
-void ParticleSource::draw(){
+void ParticleSource::draw(GLuint alphaFunc){
 
 	glDepthMask(false);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA, alphaFunc);
 	glBindVertexArray(Renderer::quadID);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -54,6 +59,7 @@ void ParticleSource::draw(){
 	std::list<Particle*>::iterator i;
 	for(i = particles.begin(); i != particles.end(); i++){
 		Particle *p = *i;
+		atlas->currentFrame = p->life * atlas->getFrames();
 		atlas->enable(0);
 		Renderer::currentRenderer->setTransformationBillboard(p->position, p->rotation, p->scale);
 		Renderer::currentRenderer->updateMVP();

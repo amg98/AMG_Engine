@@ -45,7 +45,7 @@ private:
 public:
 	float lineHeight;			/**< Height of one line */
 	Font(const char *tex, const char *fnt);
-	Text *createText(const char *text, float size, float width, float height, int *remaining);
+	Text *createText(char *text, float size, float width, float height, int *remaining);
 	virtual ~Font();
 };
 

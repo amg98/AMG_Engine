@@ -53,8 +53,8 @@ void Camera::update(GLFWwindow *window, float delta){
  * @brief Compute the camera trihedron
  */
 void Camera::computeTrihedron(){
-	forward = glm::normalize(this->rotation * vec3(0, 0, 1));
-	right = glm::normalize(this->rotation * vec3(1, 0, 0));
+	forward = glm::normalize(this->rotation * vec3(0, 0, 1)) * 2.0f;
+	right = glm::normalize(this->rotation * vec3(1, 0, 0)) * 2.0f;
 }
 
 /**
@@ -66,14 +66,14 @@ void Camera::computeTrihedron(){
 void Camera::updateFPS(GLFWwindow *window, float delta){
 
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		rotY -= 3.141592f/4.0f * delta;
+		rotY -= 3.141592f/2.0f * delta;
 	} else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		rotY += 3.141592f/4.0f * delta;
+		rotY += 3.141592f/2.0f * delta;
 	}
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		rotX += 3.141592f/4.0f * delta;
+		rotX += 3.141592f/2.0f * delta;
 	} else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		rotX -= 3.141592f/4.0f * delta;
+		rotX -= 3.141592f/2.0f * delta;
 	}
 	this->rotation = glm::normalize(glm::angleAxis(rotY, vec3(0, 1, 0)) * glm::angleAxis(rotX, vec3(1, 0, 0)));
 	computeTrihedron();

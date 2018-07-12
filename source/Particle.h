@@ -26,8 +26,10 @@ public:
 	float lifeLength;	/**< Time of life of this particle */
 	float rotation;		/**< Particle rotation, in radians */
 	float scale;		/**< Particle scale, 1.0f is the default size */
+	float life;			/**< Life percentage */
 	Particle(vec3 position, vec3 velocity, float mass, float lifeLength, float rotation, float scale);
 	bool update();
+	bool operator<(Particle* p);
 	virtual ~Particle();
 };
 

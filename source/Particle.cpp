@@ -26,6 +26,7 @@ Particle::Particle(vec3 position, vec3 velocity, float mass, float lifeLength, f
 	this->rotation = rotation;
 	this->scale = scale;
 	this->elapsedTime = 0.0f;
+	this->life = 0.0f;
 }
 
 /**
@@ -37,7 +38,21 @@ bool Particle::update(){
 	velocity.y += -1.0f * mass * delta;
 	position += velocity * delta;
 	elapsedTime += delta;
+	life = elapsedTime / lifeLength;
 	return (elapsedTime > lifeLength);
+}
+
+/**
+ * @brief Operator less than for a Particle, used for sorting
+ * @param p Particle to compare this
+ * @return Whether this is less than p
+ */
+bool Particle::operator<(Particle* p){
+	vec3 v1 = this->position - Renderer::currentRenderer->camera->position;
+	vec3 v2 = p->position - Renderer::currentRenderer->camera->position;
+	float d1 = glm::dot(v1, v1);
+	float d2 = glm::dot(v2, v2);
+	return d1 > d2;
 }
 
 /**
