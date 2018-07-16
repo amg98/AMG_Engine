@@ -1,8 +1,8 @@
 #version 330 core
 
-#include <AMG_FragmentCommon2D.glsl>
+#include <AMG_FragmentCommonParticles.glsl>
 
 void main(){
-
-    AMG_Color = AMG_SprColor;
+	
+	AMG_Color = AMG_ComputeParticlesColor();
 }

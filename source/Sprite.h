@@ -23,16 +23,17 @@ class Sprite : public Texture {
 private:
 	void initData();
 public:
-	float x;								/**< Sprite horizontal position, in pixels */
-	float y;								/**< Sprite vertical position, in pixels */
+	vec3 position;							/**< Sprite position, in pixels */
 	float rotation;							/**< Sprite rotation angle, in radians */
 	float sx;								/**< Sprite horizontal scale */
 	float sy;								/**< Sprite vertical scale */
+	float billboardScale;					/**< Scale of the billboard */
 	vec4 color;								/**< Sprite color and transparency */
 
 	Sprite(const char *path);
 	Sprite(const char *path, int frameWidth, int frameHeight);
 	void draw();
+	void drawBillboard();
 	virtual ~Sprite();
 };
 

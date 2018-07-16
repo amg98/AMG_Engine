@@ -29,7 +29,12 @@ namespace AMG {
 #define AMG_USE_TEXTURE(n)	(((n)&15) << 8)
 #define AMG_USE_TEXT		(1 << 13)
 #define AMG_USE_TEXANIM		(1 << 14)
+#define AMG_USE_INSTANCES	(1 << 15)
 
+/**
+ * @class Shader
+ * @brief Holds a shader program and its usage
+ */
 class Shader : private Entity {
 private:
 	int programID;											/**< Internal OpenGL program ID */

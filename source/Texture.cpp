@@ -25,13 +25,12 @@ namespace AMG {
  * @brief Constructor for a Texture (1 frame version)
  * @param path File to load as a Texture
  */
-Texture::Texture(const char *path, float bias){
-	loadTexture(path, bias);
+Texture::Texture(const char *path){
+	loadTexture(path);
 	this->currentFrame = 0.0f;
 	this->texScale.x = 1.0f;
 	this->texScale.y = 1.0f;
-	this->texPosition.x = 0.0f;
-	this->texPosition.y = 0.0f;
+	this->texPosition = vec4(0, 0, 0, 0);
 	this->horizontalFrames = 1;
 	this->verticalFrames = 1;
 	this->nframes = 1;
@@ -47,8 +46,7 @@ Texture::Texture(const char **names){
 	this->currentFrame = 0.0f;
 	this->texScale.x = 1.0f;
 	this->texScale.y = 1.0f;
-	this->texPosition.x = 0.0f;
-	this->texPosition.y = 0.0f;
+	this->texPosition = vec4(0, 0, 0, 0);
 	this->horizontalFrames = 1;
 	this->verticalFrames = 1;
 	this->nframes = 1;
@@ -74,12 +72,11 @@ Texture::Texture(const char **names){
  * @param frameWidth Width of one frame, in pixels
  * @param frameHeight Height of one frame, in pixels
  */
-Texture::Texture(const char *path, int frameWidth, int frameHeight, float bias){
-	loadTexture(path, bias);
+Texture::Texture(const char *path, int frameWidth, int frameHeight){
+	loadTexture(path);
 	this->currentFrame = 0.0f;
-	float w = (float)frameWidth / (float)width;
-	float h = (float)frameHeight / (float)height;
-	this->texScale = vec4(w, h, w, h);
+	this->texScale.x = (float)frameWidth / (float)width;
+	this->texScale.y = (float)frameHeight / (float)height;
 	this->texPosition = vec4(0, 0, 0, 0);
 	this->horizontalFrames = width / frameWidth;
 	this->verticalFrames = height / frameHeight;
@@ -91,7 +88,7 @@ Texture::Texture(const char *path, int frameWidth, int frameHeight, float bias){
  * @param path Location of the texture file (*.dds)
  * @param bias Level of detail bias
  */
-void Texture::loadTexture(const char *path, float bias){
+void Texture::loadTexture(const char *path){
 
 	this->target = GL_TEXTURE_2D;
 	glGenTextures(1, &this->id);
@@ -100,9 +97,31 @@ void Texture::loadTexture(const char *path, float bias){
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(target, GL_TEXTURE_LOD_BIAS, bias);
 
 	Texture::loadTexture(path, target, &this->width, &this->height);
+}
+
+/**
+ * @brief Set texture level of detail
+ * @param bias LOD bias
+ */
+void Texture::setLod(float bias){
+	glBindTexture(target, this->id);
+	if(GLEW_EXT_texture_lod_bias){
+		glTexParameterf(target, GL_TEXTURE_LOD_BIAS, bias);
+	}
+}
+
+/**
+ * @brief Set texture anisotropic filtering
+ * @param aniso Amount of anisotropic filtering
+ */
+void Texture::setAniso(float aniso){
+	if(GLEW_ARB_texture_filter_anisotropic){
+		float maxaniso = 0.0f;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxaniso);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, glm::min(aniso, maxaniso));
+	}
 }
 
 /**
@@ -179,14 +198,26 @@ void Texture::loadTexture(const char *path, GLuint target, int *w, int *h){
 }
 
 /**
- * @brief Enable texture in OpenGL
+ * @brief Bind a texture
  * @param slot Texture slot to upload the texture
  */
-void Texture::enable(int slot){
+void Texture::bind(int slot){
 
-	// Enable the texture
+	// Bind the texture
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(this->target, this->id);
+
+	// Update uniforms in the shader
+	Shader *shader = Renderer::currentRenderer->currentShader;
+	shader->setUniform("AMG_TexPosition", texPosition);
+	shader->setUniform("AMG_TexScale", texScale);
+	shader->setUniform("AMG_TexProgress", progress);
+}
+
+/**
+ * @brief Animate a texture
+ */
+void Texture::animate(){
 
 	// Perform animation
 	if(this->nframes > 1){
@@ -207,14 +238,22 @@ void Texture::enable(int slot){
 		this->texPosition.y = (fr / verticalFrames) / (float)verticalFrames;
 		this->texPosition.z = (nfr % horizontalFrames) / (float)horizontalFrames;
 		this->texPosition.w = (nfr / verticalFrames) / (float)verticalFrames;
+		float p;
+			progress = modf(currentFrame, &p);
 	}
+}
 
-	// Update uniforms in the shader
-	Shader *shader = Renderer::currentRenderer->currentShader;
-	shader->setUniform("AMG_TexPosition", texPosition);
-	shader->setUniform("AMG_TexScale", texScale);
-	float p;
-	shader->setUniform("AMG_TexProgress", modf(currentFrame, &p));
+/**
+ * @brief Flush frame data to a float buffer
+ * @param data Float buffer
+ * @param offset Where to start storing the data (in floats)
+ */
+void Texture::storeFrameData(float *data, int offset){
+	data[offset + 0] = texPosition.x;
+	data[offset + 1] = texPosition.y;
+	data[offset + 2] = texPosition.z;
+	data[offset + 3] = texPosition.w;
+	data[offset + 4] = progress;
 }
 
 /**

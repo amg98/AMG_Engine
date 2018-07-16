@@ -39,7 +39,6 @@ private:
 	static bool glfwSetup;			/**< Whether GLFW is setup */
 	static bool glewSetup;			/**< Whether GLEW is setup */
 	renderCallback renderCb;		/**< Rendering callback */
-	renderCallback updateCb;		/**< Update callback */
 	mat4 *projection;				/**< Current projection matrix */
 	mat4 perspective, ortho;		/**< Precalculated perspective and ortho matrices */
 	mat4 invPerspective;			/**< Inverse perspective matrix, for ray tracing */
@@ -66,11 +65,11 @@ public:
 	virtual ~Renderer();
 	static int exitProcess();
 	void setRenderCallback(renderCallback cb);
-	void setUpdateCallback(renderCallback cb);
 	void setTransformation(vec3 pos, quat rot, vec3 scale);
 	void setTransformation(vec3 pos);
 	void setTransformationBillboard(vec3 pos, float rot, float scale);
 	void updateMVP();
+	void storeMVP(float *data, int offset);
 	void set3dMode(bool mode);
 	void calculateProjection();
 	void setCamera(Camera *camera);

@@ -11,6 +11,6 @@ const int AMG_TEXTURES = 1;
 
 void main(){
 
-	AMG_Color = AMG_ComputeLight(0, AMG_TextureMap(0));
+	AMG_Color = AMG_ComputeLightCel(0, AMG_TextureMap(0));
 	AMG_ComputeFog();
 }

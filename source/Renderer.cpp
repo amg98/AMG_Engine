@@ -77,7 +77,6 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 	this->width = width;
 	this->height = height;
 	this->renderCb = NULL;
-	this->updateCb = NULL;
 	this->FPS = 60.0f;
 	this->fogColor = vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	this->fogDensity = 0.0f;
@@ -120,6 +119,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_MULTISAMPLE);
 		glewSetup = true;
 	}
 
@@ -243,13 +243,6 @@ void Renderer::setRenderCallback(renderCallback cb){
 }
 
 /**
- * @brief Set a update callback to update the engine
- */
-void Renderer::setUpdateCallback(renderCallback cb){
-	this->updateCb = cb;
-}
-
-/**
  * @brief Calculate model matrix from translation, rotation and scale vectors
  * @param pos Position vector
  * @param rot Rotation quaternion
@@ -305,6 +298,15 @@ void Renderer::updateMVP(){
 	currentShader->setUniform("AMG_MVP", mvp);
 	currentShader->setUniform("AMG_MV", mv);
 	currentShader->setUniform("AMG_M", model);
+}
+
+/**
+ * @brief Flush model-view-projection matrix to a float buffer
+ * @param data Float buffer
+ * @param offset Where to start storing the matrix (in floats)
+ */
+void Renderer::storeMVP(float *data, int offset){
+	memcpy(&data[offset], &mvp[0][0], 16 * sizeof(float));
 }
 
 /**

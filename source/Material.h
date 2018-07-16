@@ -29,7 +29,7 @@ private:
 public:
 	vec4 diffuse;				/**< Material diffuse color */
 	vec4 specular;				/**< Material specular color */
-	vec4 ambient;				/**< Material ambient color */
+	float ambient;				/**< Material ambient color */
 	float diffusePower;			/**< Material diffuse power */
 	float specularPower;		/**< Material specular power */
 

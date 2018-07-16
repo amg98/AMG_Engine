@@ -1,9 +1,9 @@
 #version 330 core
 
-#include <AMG_VertexCommon2D.glsl>
+#include <AMG_VertexCommonParticles.glsl>
 
 void main(){
-
-    AMG_ComputePosition();
-    AMG_PassTexcoords();
+	
+	AMG_ComputeParticlesPosition();
+	AMG_PassTexcoordsInstanced();
 }

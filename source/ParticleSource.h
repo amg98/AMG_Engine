@@ -9,10 +9,18 @@
 // Includes C/C++
 #include <list>
 
+// Includes OpenGL
+#define GLEW_STATIC
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 // Own includes
 #include "Entity.h"
 #include "Particle.h"
 #include "Texture.h"
+
+#define AMG_MAX_PARTICLES 10000					/**< Maximum number of particles per ParticleSource */
+#define AMG_PVBO_STRIDE 21 * sizeof(float)		/**< Stride for the particle source VBO */
 
 namespace AMG {
 
@@ -23,6 +31,10 @@ namespace AMG {
 class ParticleSource : private Entity {
 private:
 	Texture *atlas;						/**< Texture atlas for this source */
+	GLuint vbo;							/**< VBO for instanced rendering */
+	GLuint vao;							/**< VAO for this source */
+	float *vboData;						/**< VBO data to be updated */
+	void addInstancedAttribute(int attribute, int dataSize, int offset);
 public:
 	std::list<Particle*> particles;		/**< Vector holding all the particles for this source */
 	ParticleSource(const char *texPath, int hframes, int vframes);

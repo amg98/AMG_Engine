@@ -20,7 +20,7 @@ namespace AMG {
 Material::Material(const char *texture){
 	this->diffuse = vec4(1, 1, 1, 1);
 	this->specular = vec4(1, 1, 1, 1);
-	this->ambient = vec4(0.2f, 0.2f, 0.2f, 1);
+	this->ambient = 0.2f;
 	this->diffusePower = 1.0f;
 	this->specularPower = 1.0f;
 	this->textures = std::vector<Texture*>();
@@ -34,7 +34,7 @@ Material::Material(const char *texture){
 Material::Material(const char **names){
 	this->diffuse = vec4(1, 1, 1, 1);
 	this->specular = vec4(1, 1, 1, 1);
-	this->ambient = vec4(0.2f, 0.2f, 0.2f, 1);
+	this->ambient = 0.2f;
 	this->diffusePower = 1.0f;
 	this->specularPower = 1.0f;
 	this->textures = std::vector<Texture*>();
@@ -51,7 +51,7 @@ Material::Material(const char **names){
 Material::Material(float *data, const char *texture) {
 	this->diffuse = vec4(data[0], data[1], data[2], data[4]);
 	this->specular = vec4(data[5], data[6], data[7], data[9]);
-	this->ambient = vec4(data[10], data[10], data[10], data[4]);
+	this->ambient = data[10];
 	this->diffusePower = data[3];
 	this->specularPower = data[8];
 	this->textures = std::vector<Texture*>();
@@ -66,6 +66,8 @@ void Material::addTexture(const char *texture){
 	if(texture){
 		tex = new Texture(texture);
 		tex->setDependency(true);
+		tex->setLod(-0.4f);			// -0.4 level of detail
+		tex->setAniso(4.0f);		// 4x anisotropic filtering
 		this->textures.push_back(tex);
 	}
 }
@@ -75,7 +77,8 @@ void Material::addTexture(const char *texture){
  */
 void Material::apply(){
 	for(unsigned int i=0;i<textures.size();i++){
-		textures[i]->enable(i);
+		textures[i]->animate();
+		textures[i]->bind(i);
 	}
 	if(diffuse.a < 1.0f){
 		glDisable(GL_CULL_FACE);

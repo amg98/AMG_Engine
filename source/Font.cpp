@@ -23,7 +23,7 @@ Font::Font(const char *tex, const char *fnt){
 
 	// Load the texture
 	glyphBuffer = NULL;
-	font = new Texture(tex, 0.0f);
+	font = new Texture(tex);
 	font->setDependency(true);
 
 	// Create the glyph map

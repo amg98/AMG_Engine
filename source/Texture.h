@@ -31,22 +31,27 @@ private:
 	int horizontalFrames;	/**< Number of horizontal frames in the sprite */
 	int verticalFrames;		/**< Number of vertical frames in the sprite */
 	GLuint target;			/**< Texture mode */
+	float progress;			/**< Blending between frames */
 protected:
 	int width;						/**< Texture width, in pixels (must be a power of two) */
 	int height;						/**< Texture height, in pixels (must be a power of two) */
 	vec4 texPosition;				/**< Shader texture position (for 2 frames) */
-	vec4 texScale;					/**< Shader texture scale (for 2 frames) */
+	vec2 texScale;					/**< Shader texture scale */
 public:
 	float currentFrame;				/**< Current frame to show, it will be truncated */
 	static void loadTexture(const char *path, GLuint target, int *w, int *h);
-	void loadTexture(const char *path, float bias);
-	Texture(const char *path, float bias=-0.4f);
+	void loadTexture(const char *path);
+	Texture(const char *path);
 	Texture(const char **names);
-	Texture(const char *path, int frameWidth, int frameHeight, float bias=-0.4f);
-	void enable(int slot);
+	Texture(const char *path, int frameWidth, int frameHeight);
+	void setLod(float bias);
+	void setAniso(float aniso);
+	void bind(int slot);
+	void animate();
 	int getWidth();
 	int getHeight();
 	int getFrames();
+	void storeFrameData(float *data, int offset);
 	virtual ~Texture();
 };
 

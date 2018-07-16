@@ -52,7 +52,7 @@ void render(){
 		source->particles.push_front(new Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
 	}
 
-	s3->enable();
+	s5->enable();
 	source->update();
 	source->draw(GL_ONE);
 
@@ -78,8 +78,9 @@ int main(int argc, char **argv){
 	s2 = new Shader("skybox.vs", "skybox.fs", 0);
 	s3 = new Shader("shader2d.vs", "shader2d.fs", AMG_USE_2D | AMG_USE_TEXANIM);
 	s4 = new Shader("text2d.vs", "text2d.fs", AMG_USE_2D | AMG_USE_TEXT);
+	s5 = new Shader("particles.vs", "particles.fs", AMG_USE_TEXANIM | AMG_USE_INSTANCES);
 
-	Light *light = new Light(vec3(0, 1.0f, 0), vec3(1, 1, 0), vec3(0.1f, 0, 1));
+	Light *light = new Light(vec3(1, 1.0f, 3), vec3(1, 1, 0), vec3(0.1f, 0, 1));
 	s0->lights.push_back(light);
 	s1->lights.push_back(light);
 
@@ -110,8 +111,8 @@ int main(int argc, char **argv){
 	hello->color = vec4(1, 0, 0, 1);
 
 	sprite = new Sprite("texture.dds");
-	sprite->x = hello->position.x + tbx/2;
-	sprite->y = hello->position.y - tby/2 + font->lineHeight;
+	sprite->position.x = hello->position.x + tbx/2;
+	sprite->position.y = hello->position.y - tby/2 + font->lineHeight;
 	sprite->sx = tbx / 256;
 	sprite->sy = tby / 256;
 

@@ -20,6 +20,11 @@
 
 namespace AMG {
 
+/**
+ * @brief Load a file onto a string, doing preprocessing step
+ * @param path Path to the file to be loaded
+ * @return The code onto that file on a std::string
+ */
 std::string Shader::loadShaderCode(const char *path){
 	std::ifstream ShaderStream(getFullPath(path, AMG_SHADER), std::ios::in);
 	std::string ShaderCode;
@@ -123,7 +128,6 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
 	// Everything OK, create a uniform map
 	this->uniformsMap = std::tr1::unordered_map<std::string, int>();
 	lights = std::vector<Light*>();
-	this->defineUniform("AMG_MVP");
 	this->enableOptions(options);
 }
 
@@ -132,6 +136,9 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
  * @param options The options to use
  */
 void Shader::enableOptions(int options){
+	if(!(options &AMG_USE_INSTANCES)){
+		this->defineUniform("AMG_MVP");
+	}
 	if(options &AMG_USE_SKINNING){
 		this->defineUniform("AMG_BoneMatrix");
 	}
@@ -181,8 +188,10 @@ void Shader::enableOptions(int options){
 		this->defineUniform("AMG_CharOutlineColor");
 	}
 	if(options &AMG_USE_TEXANIM){
-		this->defineUniform("AMG_TexPosition");
 		this->defineUniform("AMG_TexScale");
+	}
+	if((options &AMG_USE_TEXANIM) && !(options &AMG_USE_INSTANCES)){
+		this->defineUniform("AMG_TexPosition");
 		this->defineUniform("AMG_TexProgress");
 	}
 }

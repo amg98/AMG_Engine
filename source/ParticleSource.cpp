@@ -9,6 +9,7 @@
 // Own includes
 #include "ParticleSource.h"
 #include "Renderer.h"
+#include "Debug.h"
 
 namespace AMG {
 
@@ -19,10 +20,33 @@ namespace AMG {
  * @param vframes Number of vertical frames
  */
 ParticleSource::ParticleSource(const char *texPath, int hframes, int vframes) {
+
+	// Setup instanced rendering stuff
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, AMG_MAX_PARTICLES * AMG_PVBO_STRIDE, NULL, GL_STREAM_DRAW);
+	addInstancedAttribute(2, 4, 0);			// MVP columns
+	addInstancedAttribute(3, 4, 4);
+	addInstancedAttribute(4, 4, 8);
+	addInstancedAttribute(5, 4, 12);
+	addInstancedAttribute(6, 4, 16);		// Texture frame position
+	addInstancedAttribute(7, 1, 20);		// Texture blend factor
+	vboData = (float*) malloc (AMG_MAX_PARTICLES * AMG_PVBO_STRIDE);
+
 	particles = std::list<Particle*>();
 	atlas = NULL;
 	atlas = new Texture(texPath, hframes, vframes);
 	atlas->setDependency(true);
+}
+
+/**
+ * @brief Add an instanced attribute to the bind VAO
+ */
+void ParticleSource::addInstancedAttribute(int attribute, int dataSize, int offset){
+	glVertexAttribPointer(attribute, dataSize, GL_FLOAT, GL_FALSE, AMG_PVBO_STRIDE, (void*)(offset * sizeof(float)));
+	glVertexAttribDivisor(attribute, 1);
 }
 
 /**
@@ -45,31 +69,51 @@ void ParticleSource::update(){
  */
 void ParticleSource::draw(GLuint alphaFunc){
 
+	// Set blending
 	glDepthMask(false);
 	glBlendFunc(GL_SRC_ALPHA, alphaFunc);
-	glBindVertexArray(Renderer::quadID);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
+
+	// Bind buffers
+	glBindVertexArray(vao);
+	for(int i=0;i<8;i++){
+		glEnableVertexAttribArray(i);
+	}
 	glBindBuffer(GL_ARRAY_BUFFER, Renderer::quadVertices);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, Renderer::quadTexcoords);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
-	// Render each particle
+	// Bind texture
+	atlas->bind(0);
+
+	// Fill particle's buffer
 	std::list<Particle*>::iterator i;
+	int offset = 0;
 	for(i = particles.begin(); i != particles.end(); i++){
 		Particle *p = *i;
 		atlas->currentFrame = p->life * atlas->getFrames();
-		atlas->enable(0);
+		atlas->animate();
 		Renderer::currentRenderer->setTransformationBillboard(p->position, p->rotation, p->scale);
 		Renderer::currentRenderer->updateMVP();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		Renderer::currentRenderer->storeMVP(vboData, offset * 21);
+		atlas->storeFrameData(vboData, offset * 21 + 16);
+		offset ++;
 	}
 
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
+	// Update particle's buffer VBO
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, particles.size() * AMG_PVBO_STRIDE, NULL, GL_STREAM_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, particles.size() * AMG_PVBO_STRIDE, vboData);
+
+	// Draw all particles
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particles.size());
+
+	// Restore blend function
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask(true);
+	for(int i=0;i<8;i++){
+		glDisableVertexAttribArray(i);
+	}
 }
 
 /**
@@ -82,6 +126,9 @@ ParticleSource::~ParticleSource() {
 		delete *i;
 	}
 	if(atlas) delete atlas;
+	glDeleteBuffers(1, &vbo);
+	glDeleteVertexArrays(1, &vao);
+	free(vboData);
 }
 
 }
