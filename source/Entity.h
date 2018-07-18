@@ -31,9 +31,10 @@ private:
 	static std::vector<Entity*> entities;		/**< Vector of registered entities */
 	bool dependant;								/**< If an entity depends on another the root entity must delete it */
 public:
+	void setDependency(bool dependency){ dependant = dependency; }
+
 	Entity();
 	static char *getFullPath(const char *path, int type);
-	void setDependency(bool dependency);
 	virtual ~Entity();
 	static void destroyEntities();
 };

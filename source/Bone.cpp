@@ -51,7 +51,7 @@ void Bone::createChildren(bone_t *bones, int nbones){
 	// If there are children
 	if(bones[id].nchildren > 0){
 		for(int i=0;i<bones[id].nchildren;i++){
-			Bone *bone = new Bone(bones[id].children[i], Renderer::currentRenderer->currentShader->getUniform("AMG_BoneMatrix"));
+			Bone *bone = new Bone(bones[id].children[i], Renderer::currentRenderer->getCurrentShader()->getUniform("AMG_BoneMatrix"));
 			bone->setDependency(true);
 			bone->createChildren(bones, nbones);		// Create children recursively
 			this->children.push_back(bone);
@@ -81,14 +81,6 @@ void Bone::calculateBoneMatrix(Bone *parent){
 	// Perform the final matrix and push it to the shader
 	this->transformMatrix *= this->modelMatrixInv;
 	glUniformMatrix4fv(this->openglid, 1, GL_FALSE, &this->transformMatrix[0][0]);
-}
-
-/**
- * @brief Get a bone's ID
- * @return This bone's ID
- */
-int Bone::getID(){
-	return this->id;
 }
 
 /**

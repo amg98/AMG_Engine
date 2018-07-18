@@ -3,7 +3,13 @@
  * @brief Environment mapping cubes utilities
  */
 
+// Includes C/C++
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 // Own includes
+#include "Renderer.h"
 #include "Skybox.h"
 #include "Texture.h"
 

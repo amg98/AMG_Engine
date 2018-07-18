@@ -89,13 +89,14 @@ void ParticleSource::draw(GLuint alphaFunc){
 	// Fill particle's buffer
 	std::list<Particle*>::iterator i;
 	int offset = 0;
+	Renderer *renderer = Renderer::currentRenderer;
 	for(i = particles.begin(); i != particles.end(); i++){
 		Particle *p = *i;
-		atlas->currentFrame = p->life * atlas->getFrames();
+		atlas->getCurrentFrame() = p->getLife() * atlas->getNFrames();
 		atlas->animate();
-		Renderer::currentRenderer->setTransformationBillboard(p->position, p->rotation, p->scale);
-		Renderer::currentRenderer->updateMVP();
-		Renderer::currentRenderer->storeMVP(vboData, offset * 21);
+		renderer->setTransformationBillboard(p->getPosition(), p->getRotation(), p->getScale());
+		renderer->updateMVP();
+		renderer->storeMVP(vboData, offset * 21);
 		atlas->storeFrameData(vboData, offset * 21 + 16);
 		offset ++;
 	}

@@ -7,10 +7,10 @@
 #define CAMERA_H_
 
 // Includes OpenGL
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 using namespace glm;
@@ -36,6 +36,7 @@ enum CameraMode {
 class Camera : private Entity {
 private:
 	mat4 camera;				/**< Camera matrix */
+	vec3 position;				/**< Camera position */
 	quat rotation;				/**< Camera rotation */
 	vec3 forward;				/**< Forward vector */
 	vec3 right;					/**< Right vector */
@@ -44,9 +45,10 @@ private:
 	int mode;					/**< Selected mode */
 	void computeTrihedron();
 public:
-	vec3 position;				/**< Camera position */
+	vec3 &getPosition(){ return position; }
+	mat4 &getMatrix(){ return camera; }
+
 	Camera(int mode);
-	mat4& getMatrix();
 	vec3 getRay();
 	void update(GLFWwindow *window, float delta);
 	void updateFPS(GLFWwindow *window, float delta);

@@ -18,10 +18,13 @@ namespace AMG {
  */
 class Light {
 private:
-public:
 	vec3 position;		/**< Position of the light */
 	vec3 color;			/**< Color of the light */
 	vec3 attenuation;	/**< Attenuation of the light, following a parabola */
+public:
+	vec3 &getPosition(){ return position; }
+	vec3 &getColor(){ return color; }
+	vec3 &getAttenuation(){ return attenuation; }
 
 	Light(vec3 position, vec3 color, vec3 attenuation);
 	Light(vec3 position, vec3 color);

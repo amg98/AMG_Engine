@@ -64,6 +64,12 @@ void Debug::showError(int code, void *param){
 		case 14:
 			fprintf(stderr, "Character %c is not supported in this font\n", *(char*)param);
 			break;
+		case 15:
+			fprintf(stderr, "Framebuffer object creation error\n");
+			break;
+		case 16:
+			fprintf(stderr, "Vertex data not existent in MeshData\n");
+			break;
 		default:
 			fprintf(stderr, "Unknown error\n");
 			break;

@@ -27,6 +27,8 @@ enum ErrorCodes {
 	NOT_POWER_OF_TWO_TEXTURE,		/**< When a texture has not power-of-two dimensions */
 	TOO_MANY_BONES,					/**< When the bones limit is exceeded */
 	UNSUPPORTED_CHARACTER,			/**< When a character is not supported by a font */
+	FRAMEBUFFER_CREATION,			/**< When it fails creating a framebuffer object */
+	NO_VERTEX_DATA,					/**< When accessing unexistent vertex data (in a MeshData) */
 };
 
 /**

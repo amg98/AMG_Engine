@@ -10,6 +10,7 @@
 // Own includes
 #include "Object.h"
 #include "Debug.h"
+#include "Renderer.h"
 
 namespace AMG {
 
@@ -25,6 +26,7 @@ Object::Object() {
 	this->materials = NULL;		// References from a Model object
 	this->nmaterials = 0;
 	this->rootBone = NULL;
+	this->bbox = vec3(0.0f, 0.0f, 0.0f);
 }
 
 /**
@@ -52,9 +54,10 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 		Debug::showError(TOO_MANY_BONES, NULL);
 	}
 	// Search root bone (must be only one)
+	Shader *shader = Renderer::currentRenderer->getCurrentShader();
 	for(unsigned int i=0;i<nbones;i++){
 		if(bones[i].parent == 0xFFFF){
-			rootBone = new Bone(i, Renderer::currentRenderer->currentShader->getUniform("AMG_BoneMatrix"));
+			rootBone = new Bone(i, shader->getUniform("AMG_BoneMatrix"));
 			rootBone->setDependency(true);
 			rootBone->createChildren(bones, nbones);
 		}
@@ -68,7 +71,7 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 void Object::draw(){
 
 	// Transform the object
-	Renderer::currentRenderer->setTransformation(position, rotation, scale);
+	Renderer::currentRenderer->setTransformationZ(position, rotation, scale);
 	Renderer::currentRenderer->updateMVP();
 
 	// Transform each bone

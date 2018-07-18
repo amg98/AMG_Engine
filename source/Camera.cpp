@@ -92,14 +92,6 @@ void Camera::updateFPS(GLFWwindow *window, float delta){
 }
 
 /**
- * @brief Get camera matrix
- * @return Camera matrix
- */
-mat4& Camera::getMatrix(){
-	return camera;
-}
-
-/**
  * @brief Get the current ray for this camera
  * @return The direction the user points with the mouse
  */
@@ -116,7 +108,7 @@ vec3 Camera::getRay(){
 	renderer->getMousePosition(&x, &y);
 
 	// Perform the inverse transformations
-	vec4 pos = vec4((2.0f * x)/renderer->width - 1, -(2.0f * y)/renderer->height + 1, -1, 1);
+	vec4 pos = vec4((2.0f * x)/renderer->getWidth() - 1, -(2.0f * y)/renderer->getHeight() + 1, -1, 1);
 	pos = invPerspective * pos;
 	pos.z = -1;
 	pos.w = 0;

@@ -26,12 +26,17 @@ namespace AMG {
 class Material: public Entity {
 private:
 	std::vector<Texture*> textures;	/**< Material textures */
+	vec4 diffuse;					/**< Material diffuse color */
+	vec4 specular;					/**< Material specular color */
+	float ambient;					/**< Material ambient color */
+	float diffusePower;				/**< Material diffuse power */
+	float specularPower;			/**< Material specular power */
 public:
-	vec4 diffuse;				/**< Material diffuse color */
-	vec4 specular;				/**< Material specular color */
-	float ambient;				/**< Material ambient color */
-	float diffusePower;			/**< Material diffuse power */
-	float specularPower;		/**< Material specular power */
+	vec4 &getDiffuse(){ return diffuse; }
+	vec4 &getSpecular(){ return specular; }
+	float &getAmbient(){ return ambient; }
+	float &getDiffusePower(){ return diffusePower; }
+	float &getSpecularPower(){ return specularPower; }
 
 	Material(const char *path);
 	Material(const char **names);

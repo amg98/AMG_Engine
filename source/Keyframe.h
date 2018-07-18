@@ -27,10 +27,11 @@ private:
 	vec3 *pos;					/**< Position for each bone */
 	quat *rot;					/**< Rotation for each bone */
 public:
+	float getInstant(){ return instant; }
+	vec3 &getPosition(int index){ return pos[index]; }
+	quat &getRotation(int index){ return rot[index]; }
+
 	Keyframe(float instant, float *data, int nbones);
-	float getInstant();
-	vec3 &getPosition(int index);
-	quat &getRotation(int index);
 	virtual ~Keyframe();
 };
 

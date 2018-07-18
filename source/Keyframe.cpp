@@ -39,32 +39,6 @@ Keyframe::Keyframe(float instant, float *data, int nbones) {
 }
 
 /**
- * @brief Get the Keyframe's frame in the animation
- * @return The Keyframe's frame in the animation
- */
-float Keyframe::getInstant(){
-	return instant;
-}
-
-/**
- * @brief Get the position of one bone
- * @param index Bone index
- * @return This bone's position
- */
-vec3 &Keyframe::getPosition(int index){
-	return pos[index];
-}
-
-/**
- * @brief Get the rotation of one bone
- * @param index Bone index
- * @return This bone's rotation
- */
-quat &Keyframe::getRotation(int index){
-	return rot[index];
-}
-
-/**
  * @brief Destructor for a Keyframe
  */
 Keyframe::~Keyframe() {

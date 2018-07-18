@@ -10,7 +10,6 @@
 #include <vector>
 
 // Includes OpenGL
-#define GLEW_STATIC
 #include <GL/glew.h>
 
 // Own includes
@@ -88,13 +87,16 @@ int Shader::loadShader(const char *path, int type){
  * @brief Constructor for a Shader object
  * @param vertex_file_path Location of the vertex shader file, any extension allowed
  * @param fragment_file_path Location of the fragment shader file, any extension allowed
+ * @param geometry_file_path Location of the geometry shader file, any extension allowed (NULL if it is not used)
  * @param options Options to use in this shader, see the defined macros
  */
-Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int options) {
+Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, const char *geometry_file_path, int options) {
 
 	// Create shader objects
 	GLuint VertexShaderID = loadShader(vertex_file_path, GL_VERTEX_SHADER);
 	GLuint FragmentShaderID = loadShader(fragment_file_path, GL_FRAGMENT_SHADER);
+	GLuint GeometryShaderID = 0;
+	if(geometry_file_path) GeometryShaderID = loadShader(geometry_file_path, GL_GEOMETRY_SHADER);
 
 	// Create a shader program and attach the loaded shaders
 	programID = glCreateProgram();
@@ -102,6 +104,7 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
 		Debug::showError(7, NULL);
 	glAttachShader(programID, VertexShaderID);
 	glAttachShader(programID, FragmentShaderID);
+	if(GeometryShaderID) glAttachShader(programID, GeometryShaderID);
 
 	// Link the shader program
 	glLinkProgram(programID);
@@ -114,9 +117,11 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, int
 	// Delete shader objects
 	glDetachShader(programID, VertexShaderID);
 	glDetachShader(programID, FragmentShaderID);
+	if(GeometryShaderID) glDetachShader(programID, GeometryShaderID);
 
 	glDeleteShader(VertexShaderID);
 	glDeleteShader(FragmentShaderID);
+	if(GeometryShaderID) glDeleteShader(GeometryShaderID);
 
 	// Show errors
 	if(InfoLogLength > 0){
@@ -279,18 +284,10 @@ void Shader::setUniform(const std::string &name, mat4 &v){
  * @brief Enable a shader program
  */
 void Shader::enable(){
-	if(Renderer::currentRenderer->currentShader != this){
+	if(Renderer::currentRenderer->getCurrentShader() != this){
 		glUseProgram(programID);
-		Renderer::currentRenderer->currentShader = this;
+		Renderer::currentRenderer->setCurrentShader(this);
 	}
-}
-
-/**
- * @brief Get this shader's program ID
- * @return The shader ID
- */
-int Shader::getProgram(){
-	return this->programID;
 }
 
 /**

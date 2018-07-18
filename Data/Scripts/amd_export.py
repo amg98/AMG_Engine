@@ -5,6 +5,15 @@ import struct
 import os
 from mathutils import *
 
+# Search a material and return its ID
+def searchMaterialID(name):
+    i = 0
+    for m in bpy.data.materials:
+        if(m.name == name):
+            return i
+        i += 1
+    return -1
+
 # Triangulate an object
 def triangulate_object(obj):
     me = obj.data
@@ -67,20 +76,23 @@ def export(context, filepath, use_some_setting):
     
     # Write material data
     f.write(struct.pack("@B", len(bpy.data.materials)))
-    #f.write("NMaterials: " + str(len(bpy.data.materials)) + "\n");
+    print("NMaterials: " + str(len(bpy.data.materials)) + "\n");
     for mat in bpy.data.materials:
-        #f.write(mat.name + "\n");
-        #f.write("Diffuse: " + str(mat.diffuse_color) + " " + str(mat.diffuse_intensity) + " " + str(mat.alpha) + "\n");
-        #f.write("Specular: " + str(mat.specular_color) + " " + str(mat.specular_intensity) + str(mat.specular_alpha) + "\n");
-        #f.write("Ambient: " + str(mat.ambient) + "\n");
+        print(mat.name + "\n");
+        print("Diffuse: " + str(mat.diffuse_color) + " " + str(mat.diffuse_intensity) + " " + str(mat.alpha) + "\n");
+        print("Specular: " + str(mat.specular_color) + " " + str(mat.specular_intensity) + str(mat.specular_alpha) + "\n");
+        print("Ambient: " + str(mat.ambient) + "\n");
         f.write(struct.pack("@fffff", mat.diffuse_color[0], mat.diffuse_color[1], mat.diffuse_color[2], mat.diffuse_intensity, mat.alpha))
         f.write(struct.pack("@fffff", mat.specular_color[0], mat.specular_color[1], mat.specular_color[2], mat.specular_intensity, mat.specular_alpha))
         f.write(struct.pack("@f", mat.ambient))
-        if(len(mat.texture_slots) > 0):
-            #f.write("Texture: " + str(mat.texture_slots[0].texture.image.filepath) + "\n")
-            texturepath = os.path.splitext(os.path.basename(mat.texture_slots[0].texture.image.filepath))[0]+'.dds'
-            f.write(struct.pack("@B", len(texturepath)))
-            f.write(bytes(texturepath, "utf-8"))
+        if(len(mat.texture_slots) > 0 and mat.texture_slots[0] != None):
+            try:
+                print("Texture: " + str(mat.texture_slots[0].texture.image.filepath) + "\n")
+                texturepath = os.path.splitext(os.path.basename(mat.texture_slots[0].texture.image.filepath))[0]+'.dds'
+                f.write(struct.pack("@B", len(texturepath)))
+                f.write(bytes(texturepath, "utf-8"))
+            except AttributeError:
+                f.write(struct.pack("@B", 0))
         else:
             f.write(struct.pack("@B", 0))
     
@@ -90,7 +102,9 @@ def export(context, filepath, use_some_setting):
     for obj in bpy.data.objects:
         if(obj.type == "MESH"):
             triangulate_object(obj)
-            #f.write(obj.name + "\n")
+            
+            print(obj.name + "\n")
+            
             vertices = []
             normals = []
             texcoords = []
@@ -145,44 +159,60 @@ def export(context, filepath, use_some_setting):
                 if(face.material_index != currentMaterial):
                     if(len(groups) > 0):
                         groups[len(groups)-1][1] = len(indices)/3
-                    groups.append([len(indices)/3-1, -1, face.material_index])
+                    matid = searchMaterialID(obj.material_slots[face.material_index].material.name)
+                    groups.append([len(indices)/3-1, -1, matid])
                     currentMaterial = face.material_index
             groups[len(groups)-1][1] = len(indices)/3
-            objects.append([vertices, texcoords, normals, indices, groups, weights, weight_bones, bones])
-    #f.write("NObjects: " + str(len(objects)) + "\n")
+            objects.append([vertices, texcoords, normals, indices, groups, weights, weight_bones, bones, obj])
+    print("NObjects: " + str(len(objects)) + "\n")
     f.write(struct.pack("@B", len(objects)))
     for o in objects:
-        #f.write("NVertices: " + str(len(o[0]))+"\n")
+        print("NVertices: " + str(len(o[0]))+"\n")
         f.write(struct.pack("@H", len(o[0])))       # Numero de elementos
         for v in o[0]:
-            #f.write("{" + str(v[0]) + ", " + str(v[1]) + ", " + str(v[2]) + "}\n")
+            #print("{" + str(v[0]) + ", " + str(v[1]) + ", " + str(v[2]) + "}\n")
             f.write(struct.pack("@fff", v[0], v[1], v[2]))
-        #f.write("\n")
-        #f.write("NTexcoords: " + str(len(o[1]))+"\n")
+        print("\n")
+        print("NTexcoords: " + str(len(o[1]))+"\n")
         for t in o[1]:
-            #f.write("{" + str(t[0]) + ", " + str(t[1]) + "}\n")
+            #print("{" + str(t[0]) + ", " + str(t[1]) + "}\n")
             f.write(struct.pack("@ff", t[0], t[1]))
-        #f.write("\n")
-        #f.write("NNormals: " + str(len(o[2]))+"\n")
+        print("\n")
+        print("NNormals: " + str(len(o[2]))+"\n")
         for n in o[2]:
-            #f.write("{" + str(n[0]) + ", " + str(n[1]) + ", " + str(n[2]) + "}\n")
+            #print("{" + str(n[0]) + ", " + str(n[1]) + ", " + str(n[2]) + "}\n")
             f.write(struct.pack("@fff", n[0], n[1], n[2]))
-        #f.write("\n")
-        #f.write("NTriangles: " + str(len(o[3])/3)+"\n")
+        print("\n")
+        print("NTriangles: " + str(len(o[3])/3)+"\n")
         f.write(struct.pack("@H", len(o[3])))       # Tamaño del buffer de indices
         #newline = 0
         for i in o[3]:
             #f.write(str(i))
             f.write(struct.pack("@H", i))
-        #f.write("NGroups: " + str(len(o[4]))+"\n")
+        print("NGroups: " + str(len(o[4]))+"\n")
         f.write(struct.pack("@B", len(o[4])))
         for g in o[4]:
-            #f.write("From " + str(g[0]) + " to " + str(g[1]) + "\n")
+            print("From " + str(g[0]) + " to " + str(g[1]) + " (mat " + str(g[2]) + ")\n")
             f.write(struct.pack("@HHH", int(g[0]), int(g[1]), int(g[2])))
-        #f.write("\n")
+        print("\n")
+        
+        # Print Bounding Box
+        min = o[8].bound_box[0]
+        max = o[8].bound_box[6]
+        delta = Vector((max[0]+min[0], max[1]+min[1], max[2]+min[2])) 
+        if(delta.length > 8e-6):
+            print("Warning: Bounding box is not centered!")
+            print(delta)
+        f.write(struct.pack("@fff", max[0], max[1], max[2]))
+        
+        # Print position, rotation and scale
+        f.write(struct.pack("@fff", o[8].location.x, o[8].location.y, o[8].location.z))
+        f.write(struct.pack("@ffff", o[8].rotation_quaternion.x, o[8].rotation_quaternion.y, o[8].rotation_quaternion.z, o[8].rotation_quaternion.w))
+        f.write(struct.pack("@fff", o[8].scale.x, o[8].scale.y, o[8].scale.z))
         
         # If we have an armature
         if o[7] != None:
+            print("NBones: " + str(len(o[7])))
             f.write(struct.pack("@B", len(o[7])))
             for b in o[7]:
                 # Parent bone
@@ -230,8 +260,14 @@ def export(context, filepath, use_some_setting):
     # weight 1 on all vertices, then animate the bone
     if(nobjects > 1 and nactions > 0):
         f.write(struct.pack("@B", 0))
-        print("Multiobject actions are unsupported")
+        print("Multiobject actions are unsupported, export correct")
         f.close()
+        return {'FINISHED'}
+    
+    if(nactions == 0):
+        f.write(struct.pack("@B", 0))
+        f.close()
+        print("Export correct")
         return {'FINISHED'}
 
     ob = None
@@ -277,6 +313,7 @@ def export(context, filepath, use_some_setting):
                 #print("\n")
             
     f.close()
+    print("Export correct")
     return {'FINISHED'}
 
 bl_info = \

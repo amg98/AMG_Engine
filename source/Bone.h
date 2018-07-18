@@ -11,7 +11,6 @@
 #include <vector>
 
 // Includes OpenGL
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -44,15 +43,18 @@ private:
 	int openglid;				/**< ID of the bone matrix in the shader */
 	int id;						/**< ID of this bone, it is object-specific */
 	mat4 transformMatrix;		/**< Final bone matrix, which is passed to the shader */
-public:
 	mat4 localBindMatrix;			/**< Local binding matrix */
 	mat4 currentBindMatrix;			/**< Current local binding matrix */
 	std::vector<Bone*> children;	/**< Vector holding this bone's children */
+public:
+	mat4 &getLocalBindMatrix(){ return localBindMatrix; }
+	mat4 &getCurrentBindMatrix(){ return currentBindMatrix; }
+	std::vector<Bone*> &getChildren(){ return children; }
+	int getID(){ return id;}
 
 	Bone(int id, int glid);
 	void createChildren(bone_t *bones, int nbones);
 	void calculateBoneMatrix(Bone *parent);
-	int getID();
 	virtual ~Bone();
 };
 

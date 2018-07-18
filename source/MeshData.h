@@ -10,7 +10,6 @@
 #include <vector>
 
 // Includes OpenGL
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -39,7 +38,12 @@ protected:
 	GLuint indexid;						/**< ID of the indices buffer */
 	std::vector<buffer_info> info;		/**< Vector holding information of all the defined buffers */
 	int count;							/**< Number of indices / vertices in the mesh */
+	float *vertices;					/**< Buffer holding a mesh's vertices */
+	int nvertices;						/**< Number of vertices in the mesh */
 public:
+	float *getVertices(){ return vertices; }
+	int getNVertices(){ return nvertices; }
+
 	MeshData();
 	void addBuffer(void *data, int size, int comps, GLuint type, bool drawRaw=false);
 	void setIndexBuffer(void *data, int size);

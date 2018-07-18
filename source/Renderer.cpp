@@ -52,8 +52,8 @@ static float uv_vertices[] = {				/**< The quad's UV coordinates */
 static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
 	Renderer *renderer = (Renderer*) glfwGetWindowUserPointer(window);
 	if(renderer && newWidth > 0 && newHeight > 0){
-		renderer->width = newWidth;
-		renderer->height = newHeight;
+		renderer->getWidth() = newWidth;
+		renderer->getHeight() = newHeight;
 		renderer->calculateProjection();
 		glViewport(0, 0, newWidth, newHeight);
 	}
@@ -66,8 +66,9 @@ static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
  * @param title Title for this new window
  * @param resize Resizable window?
  * @param fullscreen Full screen window?
+ * @param samples Number of samples per pixel
  */
-Renderer::Renderer(int width, int height, const char *title, bool resize, bool fullscreen) {
+Renderer::Renderer(int width, int height, const char *title, bool resize, bool fullscreen, int samples) {
 
 	// Initialise variables
 	this->model = glm::mat4(1.0f);
@@ -82,13 +83,14 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 	this->fogDensity = 0.0f;
 	this->fogGradient = 1.0f;
 	this->window = NULL;
+	this->world = NULL;
 
 	// Initialise GLFW
 	if(!glfwSetup){
 		if(!glfwInit())
 			Debug::showError(1, NULL);
 
-		glfwWindowHint(GLFW_SAMPLES, 4);
+		glfwWindowHint(GLFW_SAMPLES, samples);
 		glfwWindowHint(GLFW_RESIZABLE, resize);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -107,7 +109,6 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 
 	// Set OpenGL context owner to this renderer
 	this->setCurrent();
-	glfwSwapInterval(1);		// V-sync always enabled
 
 	// Initialise GLEW
 	if(!glewSetup){
@@ -116,6 +117,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 			Debug::showError(3, NULL);
 		}
 		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW);
 		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -134,6 +136,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 
 	// Calculate matrices
 	this->calculateProjection();
+	this->zupConversion = glm::scale(vec3(1, 1, -1)) * glm::rotate(3.141592f/2, vec3(1, 0, 0));
 	this->set3dMode(true);
 
 	// Create the sample quad for 2D drawing and particles
@@ -147,6 +150,13 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
 }
 
+/**
+ * @brief Creates a physics world for this Renderer
+ */
+void Renderer::createWorld(){
+	this->world = new World();
+	this->world->setDependency(true);
+}
 /**
  * @brief Calculate projection matrices
  * @note Called whenever a window is created or resized
@@ -169,6 +179,9 @@ void Renderer::update(){
 	double b = glfwGetTime();
 	double lastframe = b;
 	int frames = 0;
+
+	// Enable V-Sync
+	glfwSwapInterval(1);
 
 	while(running){
 
@@ -199,6 +212,10 @@ void Renderer::update(){
 
 		glfwSwapBuffers(window);
 		frames ++;
+
+		if(world){
+			world->update(getDelta());
+		}
 	}
 }
 
@@ -215,6 +232,7 @@ void Renderer::setCurrent(){
  */
 Renderer::~Renderer() {
 	if(window) glfwDestroyWindow(window);
+	if(world) delete world;
 	glDeleteBuffers(1, &quadVertices);
 	glDeleteBuffers(1, &quadTexcoords);
 	glDeleteVertexArrays(1, &quadID);
@@ -240,6 +258,17 @@ int Renderer::exitProcess(){
  */
 void Renderer::setRenderCallback(renderCallback cb){
 	this->renderCb = cb;
+}
+
+/**
+ * @brief Calculate model matrix from translation, rotation and scale vectors (Z up axis)
+ * @param pos Position vector
+ * @param rot Rotation quaternion
+ * @param scale Vector of scale (1.0f, 1.0f, 1.0f) is default size
+ * @note This coordinate system is used in programs like Blender
+ */
+void Renderer::setTransformationZ(vec3 pos, quat rot, vec3 scale){
+	model = glm::translate(mat4(1.0f), pos) * glm::toMat4(rot) * glm::scale(scale) * zupConversion;
 }
 
 /**
@@ -335,14 +364,6 @@ void Renderer::setCamera(Camera *camera){
 }
 
 /**
- * @brief Get the delta value for this Renderer
- * @return The renderer's delta time
- */
-double Renderer::getDelta(){
-	return 1.0f/FPS;
-}
-
-/**
  * @brief Update fog to the current shader
  */
 void Renderer::updateFog(){
@@ -355,17 +376,10 @@ void Renderer::updateFog(){
  * @brief Update lighting to the current shader
  */
 void Renderer::updateLighting(){
-	for(unsigned int i=0;i<currentShader->lights.size();i++){
-		currentShader->lights[i]->enable(i);
+	std::vector<Light*> lights = currentShader->getLights();
+	for(unsigned int i=0;i<lights.size();i++){
+		lights[i]->enable(i);
 	}
-}
-
-/**
- * @brief Get the inverse perspective matrix
- * @return The inverse perspective matrix
- */
-mat4 &Renderer::getInversePerspective(){
-	return this->invPerspective;
 }
 
 /**

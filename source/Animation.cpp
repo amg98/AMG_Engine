@@ -78,9 +78,10 @@ void Animation::animateBone(Bone *bone, Keyframe *first, Keyframe *last, float p
 	vec3 pos = first->getPosition(id) + (last->getPosition(id) - first->getPosition(id)) * progress;
 	quat rot = glm::slerp(first->getRotation(id), last->getRotation(id), progress);
 
-	bone->currentBindMatrix = glm::translate(mat4(1.0f), pos) * glm::toMat4(rot);
-	for(unsigned int i=0;i<bone->children.size();i++){
-		this->animateBone(bone->children[i], first, last, progress);
+	bone->getCurrentBindMatrix() = glm::translate(mat4(1.0f), pos) * glm::toMat4(rot);
+	std::vector<Bone*> &children = bone->getChildren();
+	for(unsigned int i=0;i<children.size();i++){
+		this->animateBone(children[i], first, last, progress);
 	}
 }
 

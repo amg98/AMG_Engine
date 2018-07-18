@@ -23,7 +23,6 @@ namespace AMG {
 class Text: public MeshData {
 private:
 	Texture *texture;		/**< Texture from a Font object */
-public:
 	vec3 position;			/**< Text position */
 	vec4 color;				/**< Text color */
 	float charWidth;		/**< Character width */
@@ -32,6 +31,17 @@ public:
 	float charBorderEdge;	/**< Character border edge */
 	vec2 charShadowOffset;	/**< Character shadow offset */
 	vec3 charOutlineColor;	/**< Character outline color */
+public:
+
+	vec3 &getPosition(){ return position; }
+	vec4 &getColor(){ return color; }
+	float &getCharWidth(){ return charWidth; }
+	float &getCharEdge(){ return charEdge; }
+	float &getCharBorderWidth(){ return charBorderWidth; }
+	float &getCharBorderEdge(){ return charBorderEdge; }
+	vec2 &getCharShadowOffset(){ return charShadowOffset; }
+	vec3 &getCharOutlineColor(){ return charOutlineColor; }
+
 
 	Text(float *vertices, float *texcoords, int size, Texture *texture);
 	void draw();

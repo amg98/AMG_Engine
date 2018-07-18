@@ -48,8 +48,9 @@ bool Particle::update(){
  * @return Whether this is less than p
  */
 bool Particle::operator<(Particle* p){
-	vec3 v1 = this->position - Renderer::currentRenderer->camera->position;
-	vec3 v2 = p->position - Renderer::currentRenderer->camera->position;
+	Camera *cam = Renderer::currentRenderer->getCamera();
+	vec3 v1 = this->position - cam->getPosition();
+	vec3 v2 = p->position - cam->getPosition();
 	float d1 = glm::dot(v1, v1);
 	float d2 = glm::dot(v2, v2);
 	return d1 > d2;

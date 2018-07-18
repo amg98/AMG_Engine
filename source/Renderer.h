@@ -7,7 +7,6 @@
 #define RENDERER_H_
 
 // Includes OpenGL
-#define GLEW_STATIC
 #define GLM_ENABLE_EXPERIMENTAL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -20,6 +19,7 @@ using namespace glm;
 #include "Shader.h"
 #include "Camera.h"
 #include "Entity.h"
+#include "World.h"
 
 namespace AMG {
 
@@ -45,26 +45,42 @@ private:
 	mat4 model;						/**< Model matrix */
 	mat4 mvp;						/**< Concatenation of Model, Projection and Camera matrices */
 	mat4 mv;						/**< Model view matrix */
-public:
-	int width;							/**< Window width, in pixels (don't write) */
-	int height;							/**< Window height, in pixels (don't write) */
-	int FPS;							/**< The actual frames per second */
+	int width;						/**< Window width, in pixels (don't write) */
+	int height;						/**< Window height, in pixels (don't write) */
+	int FPS;						/**< The actual frames per second */
+	float fogDensity;				/**< Fog density */
+	float fogGradient;				/**< Fog gradient */
+	vec4 fogColor;					/**< Fog color, same as clear color */
 	Camera *camera;					/**< Current set camera */
-	float fogDensity;					/**< Fog density */
-	float fogGradient;					/**< Fog gradient */
-	vec4 fogColor;						/**< Fog color, same as clear color */
-	Shader *currentShader;				/**< Current used shader */
+	Shader *currentShader;			/**< Current used shader */
+	mat4 zupConversion;				/**< Matrix to use with Z up coordinate systems */
+	World *world;					/**< Physics world, optional */
+public:
+	int &getWidth(){ return width; }
+	int &getHeight(){ return height; }
+	int getFPS(){ return FPS; }
+	float &getFogDensity(){ return fogDensity; }
+	float &getFogGradient(){ return fogGradient; }
+	vec4 &getFogColor(){ return fogColor; }
+	double getDelta(){ return 1.0f / FPS; }
+	mat4 &getInversePerspective(){ return invPerspective; }
+	Camera *getCamera(){ return camera; }
+	Shader *getCurrentShader(){ return currentShader; }
+	World *getWorld(){ return world; }
+	void setCurrentShader(Shader *shader){ currentShader = shader; }
+
 	static Renderer *currentRenderer;	/**< Current renderer drawing */
 	static GLuint quadID;				/**< OpenGL buffer ID for a quad */
 	static GLuint quadVertices;			/**< OpenGL buffer ID for the quad's vertices */
 	static GLuint quadTexcoords;		/**< OpenGL buffer ID for the quad's texture coordinates */
 
-	Renderer(int width, int height, const char *title, bool resize, bool fullscreen);
+	Renderer(int width, int height, const char *title, bool resize, bool fullscreen, int samples=4);
 	void update();
 	void setCurrent();
 	virtual ~Renderer();
 	static int exitProcess();
 	void setRenderCallback(renderCallback cb);
+	void setTransformationZ(vec3 pos, quat rot, vec3 scale);
 	void setTransformation(vec3 pos, quat rot, vec3 scale);
 	void setTransformation(vec3 pos);
 	void setTransformationBillboard(vec3 pos, float rot, float scale);
@@ -75,10 +91,9 @@ public:
 	void setCamera(Camera *camera);
 	void updateFog();
 	void updateLighting();
-	double getDelta();
-	mat4 &getInversePerspective();
 	void getMousePosition(double *x, double *y);
 	bool getKey(int code);
+	void createWorld();
 };
 
 }

@@ -85,7 +85,7 @@ void Material::apply(){
 	}else{
 		glEnable(GL_CULL_FACE);
 	}
-	Shader *shader = Renderer::currentRenderer->currentShader;
+	Shader *shader = Renderer::currentRenderer->getCurrentShader();
 	shader->setUniform("AMG_MaterialDiffuse", diffuse);
 	shader->setUniform("AMG_MaterialSpecular", specular);
 	shader->setUniform("AMG_MaterialAmbient", ambient);

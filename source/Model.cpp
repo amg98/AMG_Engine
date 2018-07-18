@@ -21,7 +21,7 @@ namespace AMG {
  */
 Model::Model(const char *path, Shader *shader) {
 
-	// Initialise variables
+	// Initialize variables
 	this->nobjects = 0;
 	this->nmaterials = 0;
 	this->nanimations = 0;
@@ -59,7 +59,7 @@ Model::Model(const char *path, Shader *shader) {
 		}
 		materials[i] = new Material(buff, path);
 		materials[i]->setDependency(true);
-		free(path);
+		if(path) free(path);
 	}
 
 	// Set up object information
@@ -71,6 +71,7 @@ Model::Model(const char *path, Shader *shader) {
 	unsigned short nindices;
 	unsigned char ngroups;
 	unsigned char nbones;
+	float posdata[13];
 
 	// Read each object
 	for(unsigned int i=0;i<nobjects;i++){
@@ -90,8 +91,15 @@ Model::Model(const char *path, Shader *shader) {
 		unsigned short *groups = (unsigned short*) malloc (ngroups*3*sizeof(unsigned short));
 		fread(groups, sizeof(unsigned short), 3*ngroups, f);
 
+		// Read bounding box, pos-rot-scale information
+		fread(posdata, sizeof(float), 13, f);
+
 		// Create a new object
 		objects[i] = new Object();
+		objects[i]->getBBox() = vec3(posdata[0], posdata[2], posdata[1]);
+		objects[i]->getPosition() = vec3(posdata[3], posdata[5], -posdata[4]);
+		objects[i]->getRotation() = quat(posdata[6], posdata[8], -posdata[7], posdata[9]);
+		objects[i]->getScale() = vec3(posdata[10], posdata[12], posdata[11]);
 		objects[i]->setDependency(true);
 		objects[i]->addBuffer(vertices, vertices_size, 3, GL_FLOAT);
 		objects[i]->addBuffer(texcoords, texcoords_size, 2, GL_FLOAT);
@@ -131,37 +139,37 @@ Model::Model(const char *path, Shader *shader) {
 			free(weights_bones);
 		}
 
-		// Read animation data
-		fread(&this->nanimations, sizeof(unsigned char), 1, f);
+		// Free temporary data
+		free(texcoords);
+		free(normals);
+		free(indices);
+		// Vertices and groups are deleted in its Object
+	}
+
+	// Read animation data
+	fread(&this->nanimations, sizeof(unsigned char), 1, f);
+	if(this->nanimations > 0){
 		fread(&this->fps, sizeof(unsigned char), 1, f);
 
 		// Prepare temporary buffers
 		float *data = (float*) malloc (7*nbones*sizeof(float));
 		float instant;
 
-		if(this->nanimations > 0){
-			this->animations = (Animation**) calloc (this->nanimations, sizeof(Animation*));
-			for(unsigned int j=0;j<this->nanimations;j++){
-				unsigned int nkeyframes = 0;
-				fread(&nkeyframes, sizeof(unsigned short), 1, f);
-				Keyframe **keyframes = (Keyframe**) calloc (nkeyframes, sizeof(Keyframe*));
-				for(unsigned int i=0;i<nkeyframes;i++){
-					fread(&instant, sizeof(float), 1, f);
-					fread(data, sizeof(float), 7*nbones, f);
-					keyframes[i] = new Keyframe(instant, data, nbones);
-				}
-				this->animations[j] = new Animation(keyframes, nkeyframes);
-				this->animations[j]->setDependency(true);
+		this->animations = (Animation**) calloc (this->nanimations, sizeof(Animation*));
+		for(unsigned int j=0;j<this->nanimations;j++){
+			unsigned int nkeyframes = 0;
+			fread(&nkeyframes, sizeof(unsigned short), 1, f);
+			Keyframe **keyframes = (Keyframe**) calloc (nkeyframes, sizeof(Keyframe*));
+			for(unsigned int i=0;i<nkeyframes;i++){
+				fread(&instant, sizeof(float), 1, f);
+				fread(data, sizeof(float), 7*nbones, f);
+				keyframes[i] = new Keyframe(instant, data, nbones);
 			}
+			this->animations[j] = new Animation(keyframes, nkeyframes);
+			this->animations[j]->setDependency(true);
 		}
 
-		// Free temporary data
-		free(vertices);
-		free(texcoords);
-		free(normals);
-		free(indices);
 		free(data);
-		// Groups are deleted in its Object
 	}
 
 	// Close file
@@ -172,11 +180,13 @@ Model::Model(const char *path, Shader *shader) {
  * @brief Draw a 3D model previously loaded
  */
 void Model::draw(){
+	glFrontFace(GL_CW);
 	Renderer::currentRenderer->updateLighting();
 	Renderer::currentRenderer->updateFog();
 	for(unsigned int i=0;i<nobjects;i++){
 		objects[i]->draw();
 	}
+	glFrontFace(GL_CCW);
 }
 
 /**
@@ -189,7 +199,7 @@ void Model::animate(unsigned int objIndex, unsigned int animIndex){
 		animations[animIndex]->increaseTime(fps * Renderer::currentRenderer->getDelta());
 		Keyframe *first, *last;
 		float progress = animations[animIndex]->getKeyframes(&first, &last);
-		animations[animIndex]->animateBone(objects[objIndex]->rootBone, first, last, progress);
+		animations[animIndex]->animateBone(objects[objIndex]->getRootBone(), first, last, progress);
 	}
 }
 

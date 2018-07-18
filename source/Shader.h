@@ -39,11 +39,14 @@ class Shader : private Entity {
 private:
 	int programID;											/**< Internal OpenGL program ID */
 	std::tr1::unordered_map<std::string, int> uniformsMap;	/**< Hash map holding uniform variables in the shader */
+	std::vector<Light*> lights;								/**< Vector holding all lights used in the shader */
 	int loadShader(const char *path, int type);
 	std::string loadShaderCode(const char *path);
 public:
-	std::vector<Light*> lights;								/**< Vector holding all lights used in the shader */
-	Shader(const char *vertex_file_path, const char *fragment_file_path, int options);
+	std::vector<Light*> &getLights(){ return lights; }
+	int getProgram(){ return programID; }
+
+	Shader(const char *vertex_file_path, const char *fragment_file_path, const char *geometry_file_path, int options);
 	void enableOptions(int options);
 	void defineUniform(std::string name);
 	int getUniform(const std::string &name);
@@ -54,7 +57,6 @@ public:
 	void setUniform(const std::string &name, vec4 &v);
 	void setUniform(const std::string &name, mat4 &v);
 	void enable();
-	int getProgram();
 	virtual ~Shader();
 };
 

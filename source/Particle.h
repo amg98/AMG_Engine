@@ -19,7 +19,6 @@ namespace AMG {
 class Particle {
 private:
 	float elapsedTime;	/**< How much time it passed from this particle's creation */
-public:
 	vec3 position;		/**< This particle's position */
 	vec3 velocity;		/**< This particle's velocity */
 	float mass;			/**< How much this particle is affected by gravity */
@@ -27,6 +26,15 @@ public:
 	float rotation;		/**< Particle rotation, in radians */
 	float scale;		/**< Particle scale, 1.0f is the default size */
 	float life;			/**< Life percentage */
+public:
+	vec3 &getPosition(){ return position; }
+	vec3 &getVelocity(){ return velocity; }
+	float &getMass(){ return mass; }
+	float &getLifeLength(){ return lifeLength; }
+	float &getRotation(){ return rotation; }
+	float &getScale(){ return scale; }
+	float &getLife(){ return life; }
+
 	Particle(vec3 position, vec3 velocity, float mass, float lifeLength, float rotation, float scale);
 	bool update();
 	bool operator<(Particle* p);

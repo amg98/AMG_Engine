@@ -65,14 +65,6 @@ Entity::~Entity() {
 }
 
 /**
- * @brief Sets this entity's dependency towards another entity
- * @param dependency true if it depends, false otherwise
- */
-void Entity::setDependency(bool dependency){
-	this->dependant = dependency;
-}
-
-/**
  * @brief Static method to destroy all entities
  * @note Called internally by Renderer::exitProcess()
  */

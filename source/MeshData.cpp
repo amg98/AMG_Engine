@@ -3,6 +3,9 @@
  * @brief File which contains definitions of mesh data
  */
 
+// Includes C/C++
+#include <stdlib.h>
+
 // Own includes
 #include "MeshData.h"
 
@@ -16,6 +19,8 @@ MeshData::MeshData() {
 	info = std::vector<buffer_info>();
 	this->count = 0;
 	this->indexid = 0;
+	this->vertices = NULL;
+	this->nvertices = 0;
 }
 
 /**
@@ -25,8 +30,11 @@ MeshData::MeshData() {
  * @param comps Number of components per buffer element
  * @param type Type of buffer (GL_FLOAT, ...)
  * @param drawRaw This is the vertex buffer to be drawn without indices? (only float buffers)
+ * @note It saves data as vertices if it's the first call
  */
 void MeshData::addBuffer(void *data, int size, int comps, GLuint type, bool drawRaw){
+
+	// Add a buffer to the list
 	glBindVertexArray(this->id);
 	GLuint bufId;
 	glGenBuffers(1, &bufId);
@@ -35,6 +43,12 @@ void MeshData::addBuffer(void *data, int size, int comps, GLuint type, bool draw
 	info.push_back((buffer_info){bufId, comps, type});
 	if(drawRaw && type == GL_FLOAT){
 		this->count = size / (comps * sizeof(float));
+	}
+
+	// Save this data as vertex data (for further use e.g. modifying vertices in real time, building hulls...)
+	if(info.size() == 1){
+		vertices = (float*) data;
+		nvertices = size / (comps * sizeof(float));
 	}
 }
 
@@ -111,6 +125,7 @@ MeshData::~MeshData() {
 		glDeleteBuffers(1, &info.at(i).id);
 	}
 	if(this->indexid) glDeleteBuffers(1, &this->indexid);
+	if(this->vertices) free(vertices);
 	glDeleteVertexArrays(1, &this->id);
 	info.clear();
 }

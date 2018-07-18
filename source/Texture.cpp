@@ -22,6 +22,42 @@
 namespace AMG {
 
 /**
+ * @brief Constructor for a Texture, do not use
+ */
+Texture::Texture(){
+	this->target = GL_TEXTURE_2D;
+	this->progress = 0.0f;
+	this->width = 0;
+	this->height = 0;
+	this->currentFrame = 0.0f;
+	this->texScale = vec2(1.0f, 1.0f);
+	this->texPosition = vec4(0, 0, 0, 0);
+	this->horizontalFrames = 1;
+	this->verticalFrames = 1;
+	this->nframes = 1;
+	this->id = 0;
+}
+
+/**
+ * @brief Setup texture options (used to create render-to-texture objects)
+ * @param w Width of the texture, in pixels
+ * @param h Height of the texture, in pixels
+ * @param mode How to generate the texture: GL_RGB/GL_DEPTH_COMPONENT32
+ * @param mode2 Second mode for glTexImage2D
+ * @param attachment Where to attach the texture
+ */
+void Texture::setup(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
+	this->width = w;
+	this->height = h;
+	glGenTextures(1, &id);
+	glBindTexture(target, id);
+	glTexImage2D(target, 0, mode, w, h, 0, mode2, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture(GL_FRAMEBUFFER, attachment, id, 0);
+}
+
+/**
  * @brief Constructor for a Texture (1 frame version)
  * @param path File to load as a Texture
  */
@@ -208,7 +244,7 @@ void Texture::bind(int slot){
 	glBindTexture(this->target, this->id);
 
 	// Update uniforms in the shader
-	Shader *shader = Renderer::currentRenderer->currentShader;
+	Shader *shader = Renderer::currentRenderer->getCurrentShader();
 	shader->setUniform("AMG_TexPosition", texPosition);
 	shader->setUniform("AMG_TexScale", texScale);
 	shader->setUniform("AMG_TexProgress", progress);
@@ -257,34 +293,10 @@ void Texture::storeFrameData(float *data, int offset){
 }
 
 /**
- * @brief Get texture's width, in pixels
- * @return The actual texture width
- */
-int Texture::getWidth(){
-	return this->width;
-}
-
-/**
- * @brief Get texture's height, in pixels
- * @return The actual texture height
- */
-int Texture::getHeight(){
-	return this->height;
-}
-
-/**
- * @brief Get texture's number of frames
- * @return The texture's number of frames
- */
-int Texture::getFrames(){
-	return this->nframes;
-}
-
-/**
  * @brief Destructor for a Texture
  */
 Texture::~Texture() {
-	glDeleteTextures(1, &this->id);
+	if(this->id) glDeleteTextures(1, &this->id);
 }
 
 }

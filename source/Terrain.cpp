@@ -2,6 +2,12 @@
  * @file Terrain.cpp
  * @brief Description of terrain objects
  */
+
+// Includes C/C++
+#include <stdlib.h>
+
+// Own includes
+#include "Renderer.h"
 #include "Terrain.h"
 
 namespace AMG {
@@ -14,7 +20,7 @@ const int Terrain::VERTEX_COUNT = 128;
  * @brief Constructor for a Terrain
  * @param texture Texture to use for this Terrain
  */
-Terrain::Terrain(float x, float y, const char *texture) {
+Terrain::Terrain(float x, float y, const char *texture){
 
 	// Set position
 	this->position.x = x * SIZE;
@@ -82,9 +88,22 @@ Terrain::Terrain(float x, float y, const char *texture) {
  * @param renderer Window to draw this terrain
  */
 void Terrain::draw(){
-	Renderer::currentRenderer->updateFog();
-	Renderer::currentRenderer->updateLighting();
-	Object::draw();
+	Renderer *renderer = Renderer::currentRenderer;
+	renderer->updateFog();
+	renderer->updateLighting();
+	renderer->setTransformation(position, rotation, scale);
+	renderer->updateMVP();
+
+	this->enableBuffers();
+
+	int first = groups[0]*3;
+	int last = groups[1]*3;
+	if(groups[2] < nmaterials){		// Valid range of materials
+		materials[groups[2]]->apply();
+		glDrawElements(GL_TRIANGLES, last - first, GL_UNSIGNED_SHORT, (void*)(first << 1));
+	}
+
+	this->disableBuffers();
 }
 
 /**

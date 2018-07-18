@@ -7,7 +7,6 @@
 #define TEXTURE_H_
 
 // Includes OpenGL
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -32,25 +31,29 @@ private:
 	int verticalFrames;		/**< Number of vertical frames in the sprite */
 	GLuint target;			/**< Texture mode */
 	float progress;			/**< Blending between frames */
+	float currentFrame;				/**< Current frame to show, it will be truncated */
+	void loadTexture(const char *path);
 protected:
 	int width;						/**< Texture width, in pixels (must be a power of two) */
 	int height;						/**< Texture height, in pixels (must be a power of two) */
 	vec4 texPosition;				/**< Shader texture position (for 2 frames) */
 	vec2 texScale;					/**< Shader texture scale */
 public:
-	float currentFrame;				/**< Current frame to show, it will be truncated */
+	int getWidth(){ return width; }
+	int getHeight(){ return height; }
+	int getNFrames(){ return nframes; }
+	float &getCurrentFrame(){ return currentFrame; }
+
 	static void loadTexture(const char *path, GLuint target, int *w, int *h);
-	void loadTexture(const char *path);
+	Texture();
 	Texture(const char *path);
 	Texture(const char **names);
 	Texture(const char *path, int frameWidth, int frameHeight);
+	void setup(int w, int h, GLuint mode, GLuint mode2, GLuint attachment);
 	void setLod(float bias);
 	void setAniso(float aniso);
 	void bind(int slot);
 	void animate();
-	int getWidth();
-	int getHeight();
-	int getFrames();
 	void storeFrameData(float *data, int offset);
 	virtual ~Texture();
 };

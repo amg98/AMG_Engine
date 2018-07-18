@@ -34,7 +34,7 @@ Text::Text(float *vertices, float *texcoords, int size, Texture *texture) {
  * @brief Draws a prepared Text
  */
 void Text::draw(){
-	Shader *shader = Renderer::currentRenderer->currentShader;
+	Shader *shader = Renderer::currentRenderer->getCurrentShader();
 	texture->bind(0);
 	shader->setUniform("AMG_CharWidth", charWidth);
 	shader->setUniform("AMG_CharEdge", charEdge);

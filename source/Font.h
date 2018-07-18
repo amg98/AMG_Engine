@@ -41,9 +41,11 @@ private:
 	float spaceSize;			/**< Space size */
 	Texture *font;				/**< Font texture */
 	AMG_Glyph *glyphBuffer;		/**< Buffer holding the font glyphs */
+	float lineHeight;			/**< Height of one line */
 	AMG_Glyph *getCharacter(char c);
 public:
-	float lineHeight;			/**< Height of one line */
+	float getLineHeight(){ return lineHeight; }
+
 	Font(const char *tex, const char *fnt);
 	Text *createText(char *text, float size, float width, float height, int *remaining);
 	virtual ~Font();

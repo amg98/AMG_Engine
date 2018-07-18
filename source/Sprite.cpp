@@ -10,6 +10,13 @@
 namespace AMG {
 
 /**
+ * @brief Constructor for a Sprite (do not use)
+ */
+Sprite::Sprite(){
+	initData();
+}
+
+/**
  * @brief Constructor for an Sprite, extends a Texture
  * @param path Location of the sprite image (*.dds)
  */
@@ -46,7 +53,7 @@ Sprite::Sprite(const char *path, int frameWidth, int frameHeight) : Texture(path
  */
 void Sprite::draw(){
 	Renderer *renderer = Renderer::currentRenderer;
-	renderer->currentShader->setUniform("AMG_SprColor", color);
+	renderer->getCurrentShader()->setUniform("AMG_SprColor", color);
 	renderer->setTransformation(position, glm::quat(glm::vec3(0, 0, rotation)), glm::vec3(sx * texScale.x * width, sy * texScale.y * height, 1.0f));
 	renderer->updateMVP();
 	animate();		// Animate texture
@@ -68,7 +75,7 @@ void Sprite::draw(){
  */
 void Sprite::drawBillboard(){
 	Renderer *renderer = Renderer::currentRenderer;
-	renderer->currentShader->setUniform("AMG_SprColor", color);
+	renderer->getCurrentShader()->setUniform("AMG_SprColor", color);
 	renderer->setTransformationBillboard(position, rotation, billboardScale);
 	renderer->updateMVP();
 	glBindVertexArray(Renderer::quadID);
