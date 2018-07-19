@@ -33,6 +33,7 @@ private:
 	float progress;			/**< Blending between frames */
 	float currentFrame;				/**< Current frame to show, it will be truncated */
 	void loadTexture(const char *path);
+	static void loadTexture(const char *path, GLuint target, int *w, int *h);
 protected:
 	int width;						/**< Texture width, in pixels (must be a power of two) */
 	int height;						/**< Texture height, in pixels (must be a power of two) */
@@ -44,15 +45,16 @@ public:
 	int getNFrames(){ return nframes; }
 	float &getCurrentFrame(){ return currentFrame; }
 
-	static void loadTexture(const char *path, GLuint target, int *w, int *h);
 	Texture();
+	Texture(Texture *texture);
 	Texture(const char *path);
 	Texture(const char **names);
 	Texture(const char *path, int frameWidth, int frameHeight);
-	void setup(int w, int h, GLuint mode, GLuint mode2, GLuint attachment);
+	Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment);
 	void setLod(float bias);
 	void setAniso(float aniso);
 	void bind(int slot);
+	void set(Texture *texture);
 	void animate();
 	void storeFrameData(float *data, int offset);
 	virtual ~Texture();

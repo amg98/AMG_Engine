@@ -74,6 +74,8 @@ Skybox::Skybox(const char *dir) {
 
 	// Bind the vertices buffer and enable raw drawing for this object
 	addBuffer(skyboxData, sizeof(skyboxData), 3, GL_FLOAT, true);
+	this->vertices = NULL;
+	this->nvertices = 0;
 
 	// Create the material
 	materials = (Material**) calloc (1, sizeof(Material*));
@@ -83,7 +85,7 @@ Skybox::Skybox(const char *dir) {
 		sprintf(names[i], "%s/%s.dds", dir, skyboxFiles[i]);
 	}
 	materials[0] = new Material((const char**)names);
-	materials[0]->setDependency(true);
+	materials[0]->setDependency();
 	for(int i=0;i<AMG_CUBE_SIDES;i++){
 		free(names[i]);
 	}

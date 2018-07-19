@@ -38,7 +38,7 @@ ParticleSource::ParticleSource(const char *texPath, int hframes, int vframes) {
 	particles = std::list<Particle*>();
 	atlas = NULL;
 	atlas = new Texture(texPath, hframes, vframes);
-	atlas->setDependency(true);
+	atlas->setDependency();
 }
 
 /**
@@ -123,8 +123,8 @@ void ParticleSource::draw(GLuint alphaFunc){
 ParticleSource::~ParticleSource() {
 	std::list<Particle*>::iterator i;
 	for(i = particles.begin(); i != particles.end(); i++){
-		particles.remove(*i);
-		delete *i;
+		particles.erase(i);
+		delete (*i);
 	}
 	if(atlas) delete atlas;
 	glDeleteBuffers(1, &vbo);

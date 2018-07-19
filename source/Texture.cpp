@@ -22,15 +22,15 @@
 namespace AMG {
 
 /**
- * @brief Constructor for a Texture, do not use
+ * @brief Default constructor for a Texture
  */
 Texture::Texture(){
 	this->target = GL_TEXTURE_2D;
-	this->progress = 0.0f;
+	this->progress = 0;
 	this->width = 0;
 	this->height = 0;
-	this->currentFrame = 0.0f;
-	this->texScale = vec2(1.0f, 1.0f);
+	this->currentFrame = 0;
+	this->texScale = vec2(1, 1);
 	this->texPosition = vec4(0, 0, 0, 0);
 	this->horizontalFrames = 1;
 	this->verticalFrames = 1;
@@ -39,19 +39,67 @@ Texture::Texture(){
 }
 
 /**
- * @brief Setup texture options (used to create render-to-texture objects)
+ * @brief Copies information from another texture
+ * @param texture Texture to copy
+ */
+void Texture::set(Texture *texture){
+	this->target = texture->target;
+	this->progress = texture->progress;
+	this->width = texture->getWidth();
+	this->height = texture->getHeight();
+	this->currentFrame = texture->getCurrentFrame();
+	this->texScale = texture->texScale;
+	this->texPosition = texture->texPosition;
+	this->horizontalFrames = texture->horizontalFrames;
+	this->verticalFrames = texture->verticalFrames;
+	this->nframes = texture->getNFrames();
+	this->id = texture->id;
+}
+
+/**
+ * @brief Constructor for a Texture using another Texture (so it makes a copy)
+ * @param texture Texture to copy
+ */
+Texture::Texture(Texture *texture){
+	this->target = texture->target;
+	this->progress = texture->progress;
+	this->width = texture->getWidth();
+	this->height = texture->getHeight();
+	this->currentFrame = texture->getCurrentFrame();
+	this->texScale = texture->texScale;
+	this->texPosition = texture->texPosition;
+	this->horizontalFrames = texture->horizontalFrames;
+	this->verticalFrames = texture->verticalFrames;
+	this->nframes = texture->getNFrames();
+	this->id = texture->id;
+}
+
+/**
+ * @brief Constructor for a Texture (assigns it to the current Framebuffer)
  * @param w Width of the texture, in pixels
  * @param h Height of the texture, in pixels
  * @param mode How to generate the texture: GL_RGB/GL_DEPTH_COMPONENT32
  * @param mode2 Second mode for glTexImage2D
  * @param attachment Where to attach the texture
  */
-void Texture::setup(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
+Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
+	this->target = GL_TEXTURE_2D;
+	this->progress = 0.0f;
+	this->width = w;
+	this->height = h;
+	this->currentFrame = 0.0f;
+	this->texScale = vec2(1, 1);
+	this->texPosition = vec4(0, 0, 0, 0);
+	this->horizontalFrames = 1;
+	this->verticalFrames = 1;
+	this->nframes = 1;
 	this->width = w;
 	this->height = h;
 	glGenTextures(1, &id);
 	glBindTexture(target, id);
 	glTexImage2D(target, 0, mode, w, h, 0, mode2, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture(GL_FRAMEBUFFER, attachment, id, 0);
@@ -64,8 +112,7 @@ void Texture::setup(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
 Texture::Texture(const char *path){
 	loadTexture(path);
 	this->currentFrame = 0.0f;
-	this->texScale.x = 1.0f;
-	this->texScale.y = 1.0f;
+	this->texScale = vec2(1, 1);
 	this->texPosition = vec4(0, 0, 0, 0);
 	this->horizontalFrames = 1;
 	this->verticalFrames = 1;

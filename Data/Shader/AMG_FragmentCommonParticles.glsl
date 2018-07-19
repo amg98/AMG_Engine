@@ -3,7 +3,7 @@ in float texblend;
 const int AMG_TEXTURES = 1;
 
 // Output data
-out vec4 AMG_Color;							/**< Final color for this fragment */
+layout (location = 0) out vec4 AMG_Color;				/**< Final color for this fragment */
 
 // Uniforms
 uniform sampler2D AMG_TextureSampler[AMG_TEXTURES];		/**< Texture samplers */

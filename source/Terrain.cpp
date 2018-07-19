@@ -67,6 +67,8 @@ Terrain::Terrain(float x, float y, const char *texture){
 	addBuffer(textureCoords, count * 2 * sizeof(float), 2, GL_FLOAT);
 	addBuffer(normals, count * 3 * sizeof(float), 3, GL_FLOAT);
 	setIndexBuffer(indices, 6*(VERTEX_COUNT-1)*(VERTEX_COUNT-1) * sizeof(unsigned short));
+	this->vertices = NULL;
+	this->nvertices = 0;
 	free(vertices);
 	free(normals);
 	free(textureCoords);
@@ -75,7 +77,7 @@ Terrain::Terrain(float x, float y, const char *texture){
 	// Create the material
 	Material **mat = (Material**) malloc (sizeof(Material*));
 	mat[0] = new Material(texture);
-	mat[0]->setDependency(true);
+	mat[0]->setDependency();
 	unsigned short *groups = (unsigned short*) malloc (3 * sizeof(unsigned short));
 	groups[0] = 0;
 	groups[1] = 2*(VERTEX_COUNT-1)*(VERTEX_COUNT-1)-1;

@@ -21,13 +21,13 @@ namespace AMG {
  */
 class Sprite : public Texture {
 private:
-	void initData();
 	vec3 position;							/**< Sprite position, in pixels */
 	float rotation;							/**< Sprite rotation angle, in radians */
 	float sx;								/**< Sprite horizontal scale */
 	float sy;								/**< Sprite vertical scale */
 	float billboardScale;					/**< Scale of the billboard */
 	vec4 color;								/**< Sprite color and transparency */
+	void initData();
 public:
 	vec3 &getPosition(){ return position; }
 	float &getRotation(){ return rotation; }
@@ -37,9 +37,9 @@ public:
 	vec4 &getColor(){ return color; }
 
 	Sprite();
+	Sprite(Texture *texture);
 	Sprite(const char *path);
 	Sprite(const char *path, int frameWidth, int frameHeight);
-	void setupTexture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment);
 	void draw();
 	void drawBillboard();
 	virtual ~Sprite();

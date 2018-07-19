@@ -10,14 +10,22 @@
 namespace AMG {
 
 /**
- * @brief Constructor for a Sprite (do not use)
+ * @brief Default constructor for a Sprite
  */
 Sprite::Sprite(){
 	initData();
 }
 
 /**
- * @brief Constructor for an Sprite, extends a Texture
+ * @brief Constructor for a Sprite from a Texture
+ * @param texture Texture to make this Sprite
+ */
+Sprite::Sprite(Texture *texture) : Texture(texture){
+	initData();
+}
+
+/**
+ * @brief Constructor for a Sprite, extends a Texture
  * @param path Location of the sprite image (*.dds)
  */
 Sprite::Sprite(const char *path) : Texture(path){
@@ -28,8 +36,6 @@ Sprite::Sprite(const char *path) : Texture(path){
  * @brief Initialize Sprite data
  */
 void Sprite::initData(){
-
-	// Initialise data
 	this->position = vec3(0.0f, 0.0f, 0.0f);
 	this->rotation = 0.0f;
 	this->sx = 1.0f;

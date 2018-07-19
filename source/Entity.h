@@ -29,12 +29,13 @@ enum EntityTypes {
 class Entity {
 private:
 	static std::vector<Entity*> entities;		/**< Vector of registered entities */
-	bool dependant;								/**< If an entity depends on another the root entity must delete it */
+protected:
+	int index;									/**< Index in the vector */
 public:
-	void setDependency(bool dependency){ dependant = dependency; }
-
 	Entity();
+	void setDependency();
 	static char *getFullPath(const char *path, int type);
+	static std::vector<Entity*> &getEntities(){ return entities; }
 	virtual ~Entity();
 	static void destroyEntities();
 };

@@ -16,6 +16,7 @@
 #include "ParticleSource.h"
 #include "Framebuffer.h"
 #include "World.h"
+#include "BloomEffect.h"
 using namespace AMG;
 
 // Definition of objects
@@ -29,8 +30,11 @@ Text *hello;
 Sprite *sprite;
 ParticleSource *source;
 Framebuffer *fb;
+Sprite *screen;
 
 void render(){
+
+	fb->bind();
 
 	window->setCamera(cam);
 
@@ -41,11 +45,9 @@ void render(){
 		b->setLinearVelocity(btVector3(0, 3, 0));
 	}
 
-	fb->bind();
 	s0->enable();
 	link->animate(0, 0);
 	link->draw();
-	fb->unbind();
 
 	s6->enable();
 	bullet->draw();
@@ -66,10 +68,13 @@ void render(){
 	source->update();
 	source->draw(GL_ONE);
 
+	fb->unbind();
+
 	window->set3dMode(false);
+	screen->set(BloomEffect::render(fb)->getColorTexture());
 	s3->enable();
+	screen->draw();
 	sprite->draw();
-	fb->draw();
 	s4->enable();
 	hello->draw();
 	window->set3dMode(true);
@@ -77,7 +82,7 @@ void render(){
 
 int main(int argc, char **argv){
 
-	window = new Renderer(1024, 768, "Window1", true, false);
+	window = new Renderer(1440, 900, "Window1", false, false, 0);
 	window->createWorld();
 	window->setRenderCallback(render);
 	window->getFogDensity() = 0.1f;
@@ -101,7 +106,7 @@ int main(int argc, char **argv){
 
 	link = new Model("model2.amd", s0);
 	link->getObject(0)->getScale() = vec3(0.1f, 0.1f, 0.1f);
-	link->getObject(0)->getPosition() = vec3(0.0f, 0.0f, 3.0f);
+	link->getObject(0)->getPosition() = vec3(0.0f, 3.0f, 3.0f);
 
 	bullet = new Model("bullet.amd", s0);
 	bullet->getObject(1)->getScale() = vec3(0.2f, 0.2f, 0.2f);
@@ -134,16 +139,19 @@ int main(int argc, char **argv){
 	sprite->getScaleX() = tbx / 256;
 	sprite->getScaleY() = tby / 256;
 
-	fb = new Framebuffer(256, 256);
-	fb->createRenderTexture(0);
-	fb->getPosition() = vec3(700, 500, 0);
-	fb->getScaleY() = -1.0f;
-
 	source = new ParticleSource("cosmic.dds", 32, 32);
 
 	window->getWorld()->addObjectBox(bullet->getObject(0), 0.0f);
 	window->getWorld()->addObjectBox(bullet->getObject(1), 5.0f);
 	window->getWorld()->addObjectConvexHull(bullet->getObject(2), 7.0f);
+
+	fb = new Framebuffer(1440, 900);
+	fb->createColorTexture(0);
+	BloomEffect::initialize(1440, 900);
+
+	screen = new Sprite();
+	screen->getPosition() = vec3(720, 450, 0);
+	screen->getScaleY() = -1.0f;
 
 	window->update();
 

@@ -52,7 +52,7 @@ void Bone::createChildren(bone_t *bones, int nbones){
 	if(bones[id].nchildren > 0){
 		for(int i=0;i<bones[id].nchildren;i++){
 			Bone *bone = new Bone(bones[id].children[i], Renderer::currentRenderer->getCurrentShader()->getUniform("AMG_BoneMatrix"));
-			bone->setDependency(true);
+			bone->setDependency();
 			bone->createChildren(bones, nbones);		// Create children recursively
 			this->children.push_back(bone);
 		}

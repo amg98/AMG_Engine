@@ -58,7 +58,7 @@ Model::Model(const char *path, Shader *shader) {
 			path[len] = 0;
 		}
 		materials[i] = new Material(buff, path);
-		materials[i]->setDependency(true);
+		materials[i]->setDependency();
 		if(path) free(path);
 	}
 
@@ -100,7 +100,7 @@ Model::Model(const char *path, Shader *shader) {
 		objects[i]->getPosition() = vec3(posdata[3], posdata[5], -posdata[4]);
 		objects[i]->getRotation() = quat(posdata[6], posdata[8], -posdata[7], posdata[9]);
 		objects[i]->getScale() = vec3(posdata[10], posdata[12], posdata[11]);
-		objects[i]->setDependency(true);
+		objects[i]->setDependency();
 		objects[i]->addBuffer(vertices, vertices_size, 3, GL_FLOAT);
 		objects[i]->addBuffer(texcoords, texcoords_size, 2, GL_FLOAT);
 		objects[i]->addBuffer(normals, vertices_size, 3, GL_FLOAT);
@@ -166,7 +166,7 @@ Model::Model(const char *path, Shader *shader) {
 				keyframes[i] = new Keyframe(instant, data, nbones);
 			}
 			this->animations[j] = new Animation(keyframes, nkeyframes);
-			this->animations[j]->setDependency(true);
+			this->animations[j]->setDependency();
 		}
 
 		free(data);

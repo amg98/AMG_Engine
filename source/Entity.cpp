@@ -44,9 +44,10 @@ char *Entity::getFullPath(const char *path, int type){
  * @brief Constructor of an Entity
  */
 Entity::Entity() {
-	this->dependant = false;
+	this->index = entities.size();
+	//fprintf(stderr, "i=%d, Size: %d, ", index, entities.size());
 	entities.push_back(this);
-	/*fprintf(stderr, "Size: %d\n", entities.size());
+	/*fprintf(stderr, "Newsize: %d\n", entities.size());
 	fflush(stderr);*/
 }
 
@@ -54,13 +55,21 @@ Entity::Entity() {
  * @brief Destructor of an entity
  */
 Entity::~Entity() {
-	for(unsigned int i=0;i<entities.size();i++){
-		if(entities.at(i) == this){
-			entities.erase(entities.begin()+i);
-			/*fprintf(stderr, "Element %d erased, new size %d\n", i, entities.size());
-			fflush(stderr);*/
-			i = entities.size();
+	setDependency();
+}
+
+/**
+ * @brief Set an Entity's dependant of other (delete it from the vector)
+ */
+void Entity::setDependency(){
+	if(index != -1){
+		for(unsigned int i=index+1;i<entities.size();i++){
+			entities[i]->index -= 1;
 		}
+		entities.erase(entities.begin()+index);
+		/*fprintf(stderr, "erased %d, new size %d\n", index, entities.size());
+		fflush(stderr);*/
+		index = -1;
 	}
 }
 
@@ -69,9 +78,8 @@ Entity::~Entity() {
  * @note Called internally by Renderer::exitProcess()
  */
 void Entity::destroyEntities(){
-	for(unsigned int i=entities.size()-1;i>0;i--){		// Backwards (first delete a model, then the window)
-		if(!entities[i]->dependant)
-			delete entities[i];
+	while(entities.size() > 0){
+		delete entities[entities.size() - 1];
 	}
 	entities.clear();
 }

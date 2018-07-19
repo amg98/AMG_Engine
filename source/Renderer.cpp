@@ -155,7 +155,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
  */
 void Renderer::createWorld(){
 	this->world = new World();
-	this->world->setDependency(true);
+	this->world->setDependency();
 }
 /**
  * @brief Calculate projection matrices
@@ -236,7 +236,6 @@ Renderer::~Renderer() {
 	glDeleteBuffers(1, &quadVertices);
 	glDeleteBuffers(1, &quadTexcoords);
 	glDeleteVertexArrays(1, &quadID);
-
 }
 
 /**

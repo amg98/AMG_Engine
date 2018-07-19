@@ -39,7 +39,7 @@ Material::Material(const char **names){
 	this->specularPower = 1.0f;
 	this->textures = std::vector<Texture*>();
 	Texture *tex = new Texture(names);
-	tex->setDependency(true);
+	tex->setDependency();
 	this->textures.push_back(tex);
 }
 
@@ -65,7 +65,7 @@ void Material::addTexture(const char *texture){
 	Texture *tex = NULL;
 	if(texture){
 		tex = new Texture(texture);
-		tex->setDependency(true);
+		tex->setDependency();
 		tex->setLod(-0.4f);			// -0.4 level of detail
 		tex->setAniso(4.0f);		// 4x anisotropic filtering
 		this->textures.push_back(tex);

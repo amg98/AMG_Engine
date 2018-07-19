@@ -24,7 +24,7 @@ Font::Font(const char *tex, const char *fnt){
 	// Load the texture
 	glyphBuffer = NULL;
 	font = new Texture(tex);
-	font->setDependency(true);
+	font->setDependency();
 
 	// Create the glyph map
 	glyphs = std::tr1::unordered_map<char, AMG_Glyph*>();

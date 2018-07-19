@@ -33,7 +33,7 @@ typedef void (*renderCallback)(void);
  * @class Renderer
  * @brief Class that holds a window capable of rendering 3D stuff
  */
-class Renderer : private Entity {
+class Renderer : public Entity {
 private:
 	GLFWwindow* window;				/**< Internal window object */
 	static bool glfwSetup;			/**< Whether GLFW is setup */

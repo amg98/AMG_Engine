@@ -14,79 +14,70 @@ namespace AMG {
  * @brief Constructor for a Framebuffer
  * @param w Width of the texture, in pixels
  * @param h Height of the texture, in pixels
- * @param n Number of color buffers to use
+ * @param n Number of multisampled color buffers to use (only if you use multisampling)
  * @param samples Samples used
  */
 Framebuffer::Framebuffer(int w, int h, int n, int samples) {
 
-	// Initialise data
-	depthTexture = NULL;
+	// Initialize data
 	this->width = w;
 	this->height = h;
+	this->colorTexture = NULL;
+	this->depthTexture = NULL;
 
-	// Create the framebuffer object
+	// Create a framebuffer object
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	if(n < 2){
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	}else{
+		GLuint *colorAttachments = (GLuint*) malloc (n * sizeof(GLuint));
+		for(int i=0;i<n;i++){
+			colorAttachments[i] = GL_COLOR_ATTACHMENT0 + i;
+		}
+		glDrawBuffers(n, colorAttachments);
+		free(colorAttachments);
+	}
 
 	// Create the depth buffer
 	glGenRenderbuffers(1, &depthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-	if(samples == 1){
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	if(samples == 0){
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
 	}else{
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT, width, height);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT24, w, h);
 	}
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
-	// Set up color attachments
-	GLuint *colorAttachments = (GLuint*) malloc (n * sizeof(GLuint));
-	for(int i=0;i<n;i++){
-		colorAttachments[i] = GL_COLOR_ATTACHMENT0 + i;
-	}
-	glDrawBuffers(n, colorAttachments);
-	free(colorAttachments);
-
 	// Create the color buffers
-	colorBuffer = (GLuint*) calloc (n, sizeof(GLuint));
-	glGenRenderbuffers(n, colorBuffer);
-	for(int i=0;i<n;i++){
-		glBindRenderbuffer(GL_RENDERBUFFER, colorBuffer[i]);
-		if(samples == 1){
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, width, height);
-		}else{
-			glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, width, height);
+	colorBuffer = NULL;
+	if(n > 0 && samples > 0){
+		colorBuffer = (GLuint*) malloc (n * sizeof(GLuint));
+		nColorBuffers = n;
+		glGenRenderbuffers(n, colorBuffer);
+		for(int i=0;i<n;i++){
+			glBindRenderbuffer(GL_RENDERBUFFER, colorBuffer[i]);
+			glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_RGBA8, w, h);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, colorBuffer[i]);
 		}
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, colorBuffer[i]);
 	}
-
-	// Check that everything is OK
-	nColorBuffers = n;
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-		Debug::showError(FRAMEBUFFER_CREATION, NULL);
-	}
-
-	// Set the default framebuffer
-	unbind();
 }
 
 /**
  * @brief Creates a depth texture for this Framebuffer
  */
 void Framebuffer::createDepthTexture(){
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	depthTexture = new Texture();
-	depthTexture->setup(width, height, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT);
+	depthTexture->setDependency();
 }
 
 /**
- * @brief Create a render texture for this Framebuffer
+ * @brief Create a render texture for this Framebuffer (not multisampled)
  * @param attachment Color attachment to use
  */
-void Framebuffer::createRenderTexture(int attachment){
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	setup(width, height, GL_RGB, GL_RGB, GL_COLOR_ATTACHMENT0 + attachment);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+void Framebuffer::createColorTexture(int attachment){
+	colorTexture = new Texture(width, height, GL_RGB, GL_RGB, GL_COLOR_ATTACHMENT0 + attachment);
+	colorTexture->setDependency();
 }
 
 /**
@@ -115,10 +106,10 @@ void Framebuffer::unbind(){
  */
 void Framebuffer::blit(int attachment, Framebuffer *fb){
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->getFbo());
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->fbo);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
-	glBlitFramebuffer(0, 0, width, height, 0, 0, fb->width, fb->height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	unbind();
+	glBlitFramebuffer(0, 0, width, height, 0, 0, fb->getWidth(), fb->getHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 /**
@@ -126,10 +117,10 @@ void Framebuffer::blit(int attachment, Framebuffer *fb){
  */
 void Framebuffer::blit(){
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, this->fbo);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	glDrawBuffer(GL_BACK);
 	glBlitFramebuffer(0, 0, width, height, 0, 0, Renderer::currentRenderer->getWidth(), Renderer::currentRenderer->getHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	unbind();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 /**
@@ -137,10 +128,11 @@ void Framebuffer::blit(){
  */
 Framebuffer::~Framebuffer() {
 	glDeleteFramebuffers(1, &fbo);
+	glDeleteRenderbuffers(1, &depthBuffer);
+	if(colorTexture) delete colorTexture;
 	if(depthTexture) delete depthTexture;
-	if(depthBuffer) glDeleteRenderbuffers(1, &depthBuffer);
 	if(colorBuffer){
-		glDeleteRenderbuffers(nColorBuffers, colorBuffer);
+		glDeleteRenderbuffers(1, colorBuffer);
 		free(colorBuffer);
 	}
 }

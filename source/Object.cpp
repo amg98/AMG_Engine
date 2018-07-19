@@ -58,7 +58,7 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 	for(unsigned int i=0;i<nbones;i++){
 		if(bones[i].parent == 0xFFFF){
 			rootBone = new Bone(i, shader->getUniform("AMG_BoneMatrix"));
-			rootBone->setDependency(true);
+			rootBone->setDependency();
 			rootBone->createChildren(bones, nbones);
 		}
 	}
