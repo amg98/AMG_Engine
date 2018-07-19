@@ -33,10 +33,10 @@ private:
 	GLuint vbo;							/**< VBO for instanced rendering */
 	GLuint vao;							/**< VAO for this source */
 	float *vboData;						/**< VBO data to be updated */
-	std::list<Particle*> particles;		/**< Vector holding all the particles for this source */
+	std::vector<Particle*> particles;		/**< Vector holding all the particles for this source */
 	void addInstancedAttribute(int attribute, int dataSize, int offset);
 public:
-	std::list<Particle*> &getParticles(){ return particles; }
+	std::vector<Particle*> &getParticles(){ return particles; }
 
 	ParticleSource(const char *texPath, int hframes, int vframes);
 	void update();

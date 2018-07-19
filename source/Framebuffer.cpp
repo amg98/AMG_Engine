@@ -67,8 +67,10 @@ Framebuffer::Framebuffer(int w, int h, int n, int samples) {
  * @brief Creates a depth texture for this Framebuffer
  */
 void Framebuffer::createDepthTexture(){
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT);
 	depthTexture->setDependency();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 /**
@@ -76,8 +78,10 @@ void Framebuffer::createDepthTexture(){
  * @param attachment Color attachment to use
  */
 void Framebuffer::createColorTexture(int attachment){
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	colorTexture = new Texture(width, height, GL_RGB, GL_RGB, GL_COLOR_ATTACHMENT0 + attachment);
 	colorTexture->setDependency();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 /**

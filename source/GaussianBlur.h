@@ -26,8 +26,8 @@ private:
 	static bool init;					/**< Whether the class is initialized */
 protected:
 	GaussianBlur(){}
-	static Sprite *blurSprite;			/**< General purpose sprite */
 public:
+	static Sprite *blurSprite;			/**< General purpose sprite */
 	static void initialize(int width, int height);
 	static Framebuffer *render(Framebuffer *fb);
 };

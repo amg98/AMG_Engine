@@ -36,8 +36,12 @@ void GaussianBlur::initialize(int width, int height){
 	hblurFB->createColorTexture(0);
 	vblurFB = new Framebuffer(width, height);
 	vblurFB->createColorTexture(0);
-	blurSprite = new Sprite();
-	blurSprite->getScaleY() = -1.0f;
+
+	if(blurSprite == NULL){
+		blurSprite = new Sprite();
+		blurSprite->getScaleY() = -1.0f;
+	}
+
 	init = true;
 }
 

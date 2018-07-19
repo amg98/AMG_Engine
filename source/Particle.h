@@ -37,7 +37,7 @@ public:
 
 	Particle(vec3 position, vec3 velocity, float mass, float lifeLength, float rotation, float scale);
 	bool update();
-	bool operator<(Particle* p);
+	bool operator<(Particle &p);
 	virtual ~Particle();
 };
 

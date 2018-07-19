@@ -37,6 +37,7 @@ public:
 	float &getAmbient(){ return ambient; }
 	float &getDiffusePower(){ return diffusePower; }
 	float &getSpecularPower(){ return specularPower; }
+	Texture *getTexture(int id){ return textures[id]; }
 
 	Material(const char *path);
 	Material(const char **names);

@@ -14,9 +14,8 @@
 #include "Skybox.h"
 #include "Font.h"
 #include "ParticleSource.h"
-#include "Framebuffer.h"
 #include "World.h"
-#include "BloomEffect.h"
+#include "MotionBlur.h"
 using namespace AMG;
 
 // Definition of objects
@@ -29,12 +28,11 @@ Shader *s0, *s1, *s2, *s3, *s4, *s5, *s6;
 Text *hello;
 Sprite *sprite;
 ParticleSource *source;
-Framebuffer *fb;
 Sprite *screen;
 
 void render(){
 
-	fb->bind();
+	MotionBlur::bind();
 
 	window->setCamera(cam);
 
@@ -50,6 +48,7 @@ void render(){
 	link->draw();
 
 	s6->enable();
+	skybox->bindCubeMap(0);
 	bullet->draw();
 
 	link->getObject(0)->getRotation() *= quat(vec3(0, 0.05f, 0));
@@ -60,18 +59,19 @@ void render(){
 	s2->enable();
 	skybox->draw();
 
+	// FIX
 	if(window->getKey(GLFW_KEY_Q)){
-		source->getParticles().push_front(new Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
+		source->getParticles().push_back(new Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
 	}
 
 	s5->enable();
 	source->update();
 	source->draw(GL_ONE);
 
-	fb->unbind();
+	MotionBlur::unbind();
 
 	window->set3dMode(false);
-	screen->set(BloomEffect::render(fb)->getColorTexture());
+	screen->set(MotionBlur::render()->getColorTexture());
 	s3->enable();
 	screen->draw();
 	sprite->draw();
@@ -145,9 +145,7 @@ int main(int argc, char **argv){
 	window->getWorld()->addObjectBox(bullet->getObject(1), 5.0f);
 	window->getWorld()->addObjectConvexHull(bullet->getObject(2), 7.0f);
 
-	fb = new Framebuffer(1440, 900);
-	fb->createColorTexture(0);
-	BloomEffect::initialize(1440, 900);
+	MotionBlur::initialize(1440, 900);
 
 	screen = new Sprite();
 	screen->getPosition() = vec3(720, 450, 0);

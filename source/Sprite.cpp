@@ -14,6 +14,7 @@ namespace AMG {
  */
 Sprite::Sprite(){
 	initData();
+	this->setDependency();
 }
 
 /**

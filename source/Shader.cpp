@@ -77,6 +77,7 @@ int Shader::loadShader(const char *path, int type){
 	if(InfoLogLength > 0){
 		std::vector<char> ShaderErrorMessage(InfoLogLength+1);
 		glGetShaderInfoLog(id, InfoLogLength, NULL, &ShaderErrorMessage[0]);
+		fprintf(stderr, "[%s]\n", path);
 		Debug::showError(6, &ShaderErrorMessage[0]);
 	}
 
@@ -182,6 +183,10 @@ void Shader::enableOptions(int options){
 			std::string name = std::string(text);
 			this->defineUniform(name);
 			this->setUniform(name, i);
+		}
+		if(options &AMG_USE_CUBEMAP){
+			this->defineUniform("AMG_TextureCubeSampler");
+			this->setUniform("AMG_TextureCubeSampler", ntextures);
 		}
 	}
 	if(options &AMG_USE_TEXT){

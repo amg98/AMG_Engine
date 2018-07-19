@@ -7,7 +7,9 @@
 #define BLOOMEFFECT_H_
 
 // Own includes
-#include "GaussianBlur.h"
+#include "Shader.h"
+#include "Framebuffer.h"
+#include "Sprite.h"
 
 namespace AMG {
 
@@ -15,7 +17,7 @@ namespace AMG {
  * @class BloomEffect
  * @brief Makes this effect possible
  */
-class BloomEffect : public GaussianBlur {
+class BloomEffect {
 private:
 	BloomEffect(){}
 	static Shader *brightShader;		/**< Bright shader */

@@ -5,6 +5,7 @@
 
 // Own includes
 #include "BloomEffect.h"
+#include "GaussianBlur.h"
 
 namespace AMG {
 
@@ -35,21 +36,21 @@ void BloomEffect::initialize(int width, int height){
  * @return The final framebuffer
  */
 Framebuffer *BloomEffect::render(Framebuffer *fb){
-	blurSprite->getPosition().x = fb->getWidth() / 2.0f;
-	blurSprite->getPosition().y = fb->getHeight() / 2.0f;
+	GaussianBlur::blurSprite->getPosition().x = fb->getWidth() / 2.0f;
+	GaussianBlur::blurSprite->getPosition().y = fb->getHeight() / 2.0f;
 
 	brightFB->bind();
 	brightShader->enable();
-	blurSprite->set(fb->getColorTexture());
-	blurSprite->draw();
+	GaussianBlur::blurSprite->set(fb->getColorTexture());
+	GaussianBlur::blurSprite->draw();
 
 	Framebuffer *blur = GaussianBlur::render(brightFB);
 
 	combineFB->bind();
 	combineShader->enable();
 	blur->getColorTexture()->bind(1);
-	blurSprite->set(fb->getColorTexture());
-	blurSprite->draw();
+	GaussianBlur::blurSprite->set(fb->getColorTexture());
+	GaussianBlur::blurSprite->draw();
 
 	combineFB->unbind();
 	return combineFB;

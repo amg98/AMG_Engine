@@ -92,6 +92,9 @@ Skybox::Skybox(const char *dir) {
 	free(names);
 }
 
+/**
+ * @brief Draws a Skybox in the current Renderer
+ */
 void Skybox::draw(){
 	Renderer::currentRenderer->setTransformation(position, rotation, scale);
 	Renderer::currentRenderer->updateMVP();
@@ -99,6 +102,17 @@ void Skybox::draw(){
 	MeshData::drawRaw();
 }
 
+/**
+ * @brief Bind the cube map texture associated to this Skybox
+ * @param slot Which slot to bind the cube map texture
+ */
+void Skybox::bindCubeMap(int slot){
+	materials[0]->getTexture(0)->bind(slot);
+}
+
+/**
+ * @brief Destructor for a Skybox
+ */
 Skybox::~Skybox() {
 	if(materials){
 		if(materials[0]) delete materials[0];

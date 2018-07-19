@@ -81,7 +81,7 @@ void Entity::destroyEntities(){
 	while(entities.size() > 0){
 		delete entities[entities.size() - 1];
 	}
-	entities.clear();
+	std::vector<Entity*>().swap(entities);
 }
 
 }

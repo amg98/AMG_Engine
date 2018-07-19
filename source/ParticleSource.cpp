@@ -35,7 +35,9 @@ ParticleSource::ParticleSource(const char *texPath, int hframes, int vframes) {
 	addInstancedAttribute(7, 1, 20);		// Texture blend factor
 	vboData = (float*) malloc (AMG_MAX_PARTICLES * AMG_PVBO_STRIDE);
 
-	particles = std::list<Particle*>();
+	particles = std::vector<Particle*>();
+	particles.reserve(AMG_MAX_PARTICLES);
+
 	atlas = NULL;
 	atlas = new Texture(texPath, hframes, vframes);
 	atlas->setDependency();
@@ -53,14 +55,14 @@ void ParticleSource::addInstancedAttribute(int attribute, int dataSize, int offs
  * @brief Update all the particles in this source
  */
 void ParticleSource::update(){
-	std::list<Particle*>::iterator i;
-	for(i = particles.begin(); i != particles.end(); i++){
-		Particle *p = *i;
+	for(unsigned int i=0;i<particles.size();i++){
+		Particle *p = particles[i];
 		if(p->update()){
-			particles.remove(p);
+			delete p;
+			particles.erase(particles.begin() + i);
 		}
 	}
-	particles.sort();
+	std::sort(particles.begin(), particles.end());
 }
 
 /**
@@ -87,11 +89,10 @@ void ParticleSource::draw(GLuint alphaFunc){
 	atlas->bind(0);
 
 	// Fill particle's buffer
-	std::list<Particle*>::iterator i;
 	int offset = 0;
 	Renderer *renderer = Renderer::currentRenderer;
-	for(i = particles.begin(); i != particles.end(); i++){
-		Particle *p = *i;
+	for(unsigned int i=0;i<particles.size();i++){
+		Particle *p = particles[i];
 		atlas->getCurrentFrame() = p->getLife() * atlas->getNFrames();
 		atlas->animate();
 		renderer->setTransformationBillboard(p->getPosition(), p->getRotation(), p->getScale());
@@ -121,11 +122,10 @@ void ParticleSource::draw(GLuint alphaFunc){
  * @brief Destructor for a Particle source
  */
 ParticleSource::~ParticleSource() {
-	std::list<Particle*>::iterator i;
-	for(i = particles.begin(); i != particles.end(); i++){
-		particles.erase(i);
-		delete (*i);
+	for(unsigned int i=0;i<particles.size();i++){
+		delete particles[i];
 	}
+	std::vector<Particle*>().swap(particles);
 	if(atlas) delete atlas;
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);

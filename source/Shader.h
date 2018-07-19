@@ -30,6 +30,7 @@ namespace AMG {
 #define AMG_USE_TEXT		(1 << 13)
 #define AMG_USE_TEXANIM		(1 << 14)
 #define AMG_USE_INSTANCES	(1 << 15)
+#define AMG_USE_CUBEMAP		(1 << 16)
 
 /**
  * @class Shader

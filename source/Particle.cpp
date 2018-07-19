@@ -47,10 +47,10 @@ bool Particle::update(){
  * @param p Particle to compare this
  * @return Whether this is less than p
  */
-bool Particle::operator<(Particle* p){
+bool Particle::operator<(Particle &p){
 	Camera *cam = Renderer::currentRenderer->getCamera();
 	vec3 v1 = this->position - cam->getPosition();
-	vec3 v2 = p->position - cam->getPosition();
+	vec3 v2 = p.position - cam->getPosition();
 	float d1 = glm::dot(v1, v1);
 	float d2 = glm::dot(v2, v2);
 	return d1 > d2;

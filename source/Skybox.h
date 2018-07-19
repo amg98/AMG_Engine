@@ -21,6 +21,7 @@ namespace AMG {
  */
 class Skybox: public Object {
 public:
+	void bindCubeMap(int slot);
 	Skybox(const char *dir);
 	void draw();
 	virtual ~Skybox();
