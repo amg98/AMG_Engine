@@ -16,7 +16,7 @@ void main(){
     AMG_ComputePosition();
 	
     // Pass data to the fragment shader
-	AMG_PassTexcoordsReflectionRefraction();
+	AMG_PassTexcoordsReflection();
     AMG_PassLighting(AMG_MV);
     AMG_PassLight(AMG_M, 0);
     AMG_PassFog(AMG_MV);

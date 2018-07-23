@@ -21,8 +21,9 @@ namespace AMG {
  */
 class Skybox: public Object {
 public:
-	void bindCubeMap(int slot);
+	Texture *getCubeMap(){ return materials[0]->getTexture(0); }
 	Skybox(const char *dir);
+	Skybox(Texture *cubeMap);
 	void draw();
 	virtual ~Skybox();
 };

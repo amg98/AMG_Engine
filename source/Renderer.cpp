@@ -11,9 +11,7 @@
 // Own includes
 #include "Renderer.h"
 #include "Debug.h"
-
-// Includes Windows
-#include <windows.h>
+#include "Framebuffer.h"
 
 namespace AMG {
 
@@ -96,6 +94,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwSwapInterval(1);
 		glfwSetup = true;
 	}
 
@@ -122,6 +121,7 @@ Renderer::Renderer(int width, int height, const char *title, bool resize, bool f
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_MULTISAMPLE);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		glewSetup = true;
 	}
 
@@ -168,6 +168,14 @@ void Renderer::calculateProjection(){
 }
 
 /**
+ * @brief Calculate the projection matrices for a panoramic view
+ */
+void Renderer::calculatePanoramicProjection(){
+	this->perspective = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
+	this->invPerspective = glm::inverse(this->perspective);
+}
+
+/**
  * @brief Update a renderer, flips buffers, reads input and limits frames per second
  * @note You should use multi-threading to have multiple windows, as the main loop is here
  * @todo Multi-threaded renderers
@@ -179,9 +187,6 @@ void Renderer::update(){
 	double b = glfwGetTime();
 	double lastframe = b;
 	int frames = 0;
-
-	// Enable V-Sync
-	glfwSwapInterval(1);
 
 	while(running){
 
@@ -396,6 +401,58 @@ void Renderer::getMousePosition(double *x, double *y){
  */
 bool Renderer::getKey(int code){
 	return (glfwGetKey(window, code) == GLFW_PRESS);
+}
+
+/**
+ * @brief Create a cube map texture from a scene
+ * @param render Callback which draws the scene
+ * @param shader Shader to draw the cube map (a simple texture is recommended)
+ * @param dimensions Dimensions (width and height) of the cube map
+ * @param position Where to locate the camera
+ * @return A cube map texture with the scene in it
+ */
+Texture *Renderer::createCubeMap(renderCallback render, Shader *shader, int dimensions, vec3 position){
+
+	shader->enable();
+
+	Camera *cam = new Camera();
+	cam->getPosition() = position;
+	cam->getRotation().z = M_PI;
+	currentRenderer->calculatePanoramicProjection();
+
+	Texture *texture = new Texture();
+	texture->createCubeMap(dimensions);
+
+	Framebuffer *fb = new Framebuffer(dimensions, dimensions);
+	fb->bind();
+
+	glClearColor(currentRenderer->fogColor.r, currentRenderer->fogColor.g, currentRenderer->fogColor.b, currentRenderer->fogColor.a);
+
+	for(int i=0;i<AMG_CUBE_SIDES;i++){
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->getID(), 0);
+		cam->lookAt(i);
+		currentRenderer->setCamera(cam);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		render();
+	}
+
+	currentRenderer->calculateProjection();
+	fb->unbind();
+	delete fb;
+	delete cam;
+	return texture;
+}
+
+/**
+ * @brief Update reflections from the current Camera
+ * @param cubeMap Cube Map to use for reflections
+ * @param slot Slot to bind this Cube Map
+ */
+void Renderer::updateReflections(Texture *cubeMap, int slot){
+	if(camera){
+		currentShader->setUniform("AMG_CamPosition", camera->getPosition());
+		cubeMap->bind(slot);
+	}
 }
 
 }

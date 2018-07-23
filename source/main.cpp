@@ -23,18 +23,31 @@ Renderer *window;
 Camera *cam;
 Model *link, *bullet;
 Terrain *terrain;
-Skybox *skybox;
+Skybox *skybox, *skybox2;
 Shader *s0, *s1, *s2, *s3, *s4, *s5, *s6;
 Text *hello;
 Sprite *sprite;
 ParticleSource *source;
 Sprite *screen;
+Texture *cubeMap;
+
+void renderSimple(){
+
+	s0->enable();
+	link->draw();
+
+	s1->enable();
+	terrain->draw();
+
+	s2->enable();
+	skybox->draw();
+}
 
 void render(){
 
-	MotionBlur::bind();
-
 	window->setCamera(cam);
+
+	MotionBlur::bind();
 
 	Object *clicked = window->getWorld()->getClickingObject(20.0f);
 	if(clicked == bullet->getObject(2)){
@@ -48,18 +61,15 @@ void render(){
 	link->draw();
 
 	s6->enable();
-	skybox->bindCubeMap(0);
+	window->updateReflections(skybox2->getCubeMap(), 0);
 	bullet->draw();
-
-	link->getObject(0)->getRotation() *= quat(vec3(0, 0.05f, 0));
 
 	s1->enable();
 	terrain->draw();
 
 	s2->enable();
-	skybox->draw();
+	skybox2->draw();
 
-	// FIX
 	if(window->getKey(GLFW_KEY_Q)){
 		source->getParticles().push_back(new Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
 	}
@@ -88,8 +98,8 @@ int main(int argc, char **argv){
 	window->getFogDensity() = 0.1f;
 	window->getFogGradient() = 5.0f;
 
-	cam = new Camera(FPS_CAMERA);
-	cam->getPosition().y = 3.0f;
+	cam = new Camera();
+	cam->getPosition() = vec3(0, 3, 5);
 
 	s0 = new Shader("default.vs", "default.fs", NULL, AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_SKINNING);
 	s1 = new Shader("terrain.vs", "terrain.fs", NULL, AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_TEXTURE(5));
@@ -97,7 +107,7 @@ int main(int argc, char **argv){
 	s3 = new Shader("shader2d.vs", "shader2d.fs", NULL, AMG_USE_2D | AMG_USE_TEXANIM);
 	s4 = new Shader("text2d.vs", "text2d.fs", NULL, AMG_USE_2D | AMG_USE_TEXT);
 	s5 = new Shader("particles.vs", "particles.fs", NULL, AMG_USE_TEXANIM | AMG_USE_INSTANCES);
-	s6 = new Shader("bullet.vs", "bullet.fs", NULL, AMG_USE_LIGHTING(1) | AMG_USE_FOG);
+	s6 = new Shader("bullet.vs", "bullet.fs", NULL, AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_REFLECTIONS);
 
 	Light *light = new Light(vec3(1, 1.0f, 3), vec3(1, 1, 0), vec3(0.0f, 0, 1));
 	s0->getLights().push_back(light);
@@ -117,8 +127,6 @@ int main(int argc, char **argv){
 	terrain->getMaterial(0)->addTexture("mud.dds");
 	terrain->getMaterial(0)->addTexture("path.dds");
 	terrain->getMaterial(0)->addTexture("blendMap.dds");
-
-	skybox = new Skybox("sky");
 
 	Font *font = new Font("candara.dds", "candara.fnt");
 
@@ -150,6 +158,12 @@ int main(int argc, char **argv){
 	screen = new Sprite();
 	screen->getPosition() = vec3(720, 450, 0);
 	screen->getScaleY() = -1.0f;
+
+	skybox = new Skybox("sky");
+	vec3 cmapPos = vec3(bullet->getObject(2)->getPosition());
+	cmapPos.y = 0.0f;
+	cubeMap = Renderer::createCubeMap(renderSimple, s6, 256, cmapPos);
+	skybox2 = new Skybox(cubeMap);
 
 	window->update();
 

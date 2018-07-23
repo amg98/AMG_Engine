@@ -44,6 +44,7 @@ public:
 	int getHeight(){ return height; }
 	int getNFrames(){ return nframes; }
 	float &getCurrentFrame(){ return currentFrame; }
+	GLuint getID(){ return id; }
 
 	Texture();
 	Texture(Texture *texture);
@@ -51,9 +52,11 @@ public:
 	Texture(const char **names);
 	Texture(const char *path, int frameWidth, int frameHeight);
 	Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment);
+	void createCubeMap(int dimensions);
 	void setLod(float bias);
 	void setAniso(float aniso);
 	void bind(int slot);
+	void unbind(int slot);
 	void set(Texture *texture);
 	void animate();
 	void storeFrameData(float *data, int offset);

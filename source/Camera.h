@@ -21,15 +21,6 @@ using namespace glm;
 namespace AMG {
 
 /**
- * @enum CameraMode
- * @brief Available camera mode
- */
-enum CameraMode {
-	NO_MOVE_CAMERA = 0,		/**< Static camera */
-	FPS_CAMERA,				/**< FPS-ish camera */
-};
-
-/**
  * @class Camera
  * @brief Class that holds a Camera
  */
@@ -40,18 +31,17 @@ private:
 	quat rotation;				/**< Camera rotation */
 	vec3 forward;				/**< Forward vector */
 	vec3 right;					/**< Right vector */
-	float rotX;					/**< Rotation in X axis */
-	float rotY;					/**< Rotation in Y axis */
-	int mode;					/**< Selected mode */
+	vec3 rot;					/**< Rotation in euler angles */
 	void computeTrihedron();
 public:
 	vec3 &getPosition(){ return position; }
+	vec3 &getRotation(){ return rot; }
 	mat4 &getMatrix(){ return camera; }
 
-	Camera(int mode);
+	Camera();
 	vec3 getRay();
 	void update(GLFWwindow *window, float delta);
-	void updateFPS(GLFWwindow *window, float delta);
+	void lookAt(int side);
 	virtual ~Camera();
 };
 

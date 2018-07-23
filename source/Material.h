@@ -39,11 +39,13 @@ public:
 	float &getSpecularPower(){ return specularPower; }
 	Texture *getTexture(int id){ return textures[id]; }
 
+	Material(Texture *texture);
 	Material(const char *path);
 	Material(const char **names);
 	Material(float *data, const char *path);
 	void addTexture(const char *texture);
 	void apply();
+	void disable();
 	virtual ~Material();
 };
 

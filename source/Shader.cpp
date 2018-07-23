@@ -9,9 +9,6 @@
 #include <sstream>
 #include <vector>
 
-// Includes OpenGL
-#include <GL/glew.h>
-
 // Own includes
 #include "Shader.h"
 #include "Debug.h"
@@ -203,6 +200,9 @@ void Shader::enableOptions(int options){
 	if((options &AMG_USE_TEXANIM) && !(options &AMG_USE_INSTANCES)){
 		this->defineUniform("AMG_TexPosition");
 		this->defineUniform("AMG_TexProgress");
+	}
+	if(options &AMG_USE_REFLECTIONS){
+		this->defineUniform("AMG_CamPosition");
 	}
 }
 

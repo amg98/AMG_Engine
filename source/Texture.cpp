@@ -39,6 +39,27 @@ Texture::Texture(){
 }
 
 /**
+ * @brief Create an empty cube map texture
+ * @param dimensions Width and height for each cube face, in pixels
+ */
+void Texture::createCubeMap(int dimensions){
+	this->target = GL_TEXTURE_CUBE_MAP;
+	this->width = dimensions;
+	this->height = dimensions;
+
+	glGenTextures(1, &this->id);
+	glBindTexture(target, this->id);
+
+	for(int i=0;i<AMG_CUBE_SIDES;i++){
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, dimensions, dimensions, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	}
+
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(target, 0);
+}
+
+/**
  * @brief Copies information from another texture
  * @param texture Texture to copy
  */
@@ -103,6 +124,7 @@ Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture(GL_FRAMEBUFFER, attachment, id, 0);
+	glBindTexture(target, 0);
 }
 
 /**
@@ -143,10 +165,9 @@ Texture::Texture(const char **names){
 		Texture::loadTexture(names[i], GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &w, &h);
 	}
 
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(target, 0);
 }
 
 /**
@@ -182,6 +203,7 @@ void Texture::loadTexture(const char *path){
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	Texture::loadTexture(path, target, &this->width, &this->height);
+	glBindTexture(target, 0);
 }
 
 /**
@@ -295,6 +317,15 @@ void Texture::bind(int slot){
 	shader->setUniform("AMG_TexPosition", texPosition);
 	shader->setUniform("AMG_TexScale", texScale);
 	shader->setUniform("AMG_TexProgress", progress);
+}
+
+/**
+ * @brief Unbind a texture
+ * @param slot Texture slot to upload the texture
+ */
+void Texture::unbind(int slot){
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(this->target, 0);
 }
 
 /**

@@ -7,23 +7,33 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 
+// Includes C/C++
+#include <math.h>
+
 // Own includes
 #include "Camera.h"
 #include "Renderer.h"
 
 namespace AMG {
 
+// Views for each side
+const static float camViews[] = {
+	 0, 			 M_PI/2.0f,
+	 0, 		    -M_PI/2.0f,
+	-M_PI/2.0f,  	 M_PI,
+	 M_PI/2.0f,  	 M_PI,
+	 0, 			 M_PI,
+	 0,				 0,
+};
+
 /**
  * @brief Constructor of a camera
- * @param mode Desired camera mode (under development)
  */
-Camera::Camera(int mode) {
+Camera::Camera() {
 	this->position = glm::vec3(0, 0, 5);
 	this->camera = glm::translate(mat4(1.0f), -this->position);
 	this->rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-	this->mode = mode;
-	this->rotX = 0.0f;
-	this->rotY = 0.0f;
+	this->rot = vec3(0, 0, 0);
 	this->computeTrihedron();
 }
 
@@ -31,22 +41,6 @@ Camera::Camera(int mode) {
  * @brief Destructor of a camera
  */
 Camera::~Camera() {
-}
-
-/**
- * @brief Update this camera according to a window's input
- * @param window Window to be read its input
- * @param delta Delta time
- * @note Called internally by a renderer
- */
-void Camera::update(GLFWwindow *window, float delta){
-	switch(this->mode){
-		case FPS_CAMERA:
-			this->updateFPS(window, delta);
-			break;
-		default:
-			break;
-	}
 }
 
 /**
@@ -58,24 +52,24 @@ void Camera::computeTrihedron(){
 }
 
 /**
- * @brief Update a FPS camera
+ * @brief Update this camera according to a window's input
  * @param window Window to be read its input
  * @param delta Delta time
  * @note Called internally by a renderer
  */
-void Camera::updateFPS(GLFWwindow *window, float delta){
+void Camera::update(GLFWwindow *window, float delta){
 
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		rotY -= 3.141592f/2.0f * delta;
+		rot.y -= 3.141592f/2.0f * delta;
 	} else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		rotY += 3.141592f/2.0f * delta;
+		rot.y += 3.141592f/2.0f * delta;
 	}
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		rotX += 3.141592f/2.0f * delta;
+		rot.x += 3.141592f/2.0f * delta;
 	} else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		rotX -= 3.141592f/2.0f * delta;
+		rot.x -= 3.141592f/2.0f * delta;
 	}
-	this->rotation = glm::normalize(glm::angleAxis(rotY, vec3(0, 1, 0)) * glm::angleAxis(rotX, vec3(1, 0, 0)));
+	this->rotation = glm::normalize(glm::angleAxis(rot.z, vec3(0, 0, 1)) * glm::angleAxis(rot.y, vec3(0, 1, 0)) * glm::angleAxis(rot.x, vec3(1, 0, 0)));
 	computeTrihedron();
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
 		this->position += right * delta;
@@ -117,6 +111,16 @@ vec3 Camera::getRay(){
 	// Return a 3D normalised ray vector
 	vec3 ray = vec3(pos);
 	return glm::normalize(ray);
+}
+
+/**
+ * @brief Tells the camera where to look
+ * @param side Which side to look
+ */
+void Camera::lookAt(int side){
+	side %= 6;		// Prevents an overflow
+	rot.x = camViews[(side << 1) + 0];
+	rot.y = camViews[(side << 1) + 1];
 }
 
 }

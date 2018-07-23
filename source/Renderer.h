@@ -74,11 +74,13 @@ public:
 	static GLuint quadVertices;			/**< OpenGL buffer ID for the quad's vertices */
 	static GLuint quadTexcoords;		/**< OpenGL buffer ID for the quad's texture coordinates */
 
+	static int exitProcess();
+	static Texture *createCubeMap(renderCallback render, Shader *shader, int dimensions, vec3 position);
+
 	Renderer(int width, int height, const char *title, bool resize, bool fullscreen, int samples=4);
 	void update();
 	void setCurrent();
 	virtual ~Renderer();
-	static int exitProcess();
 	void setRenderCallback(renderCallback cb);
 	void setTransformationZ(vec3 pos, quat rot, vec3 scale);
 	void setTransformation(vec3 pos, quat rot, vec3 scale);
@@ -88,12 +90,14 @@ public:
 	void storeMVP(float *data, int offset);
 	void set3dMode(bool mode);
 	void calculateProjection();
+	void calculatePanoramicProjection();
 	void setCamera(Camera *camera);
 	void updateFog();
 	void updateLighting();
 	void getMousePosition(double *x, double *y);
 	bool getKey(int code);
 	void createWorld();
+	void updateReflections(Texture *cubeMap, int slot);
 };
 
 }

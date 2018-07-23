@@ -61,6 +61,11 @@ Framebuffer::Framebuffer(int w, int h, int n, int samples) {
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, colorBuffer[i]);
 		}
 	}
+
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+		Debug::showError(FRAMEBUFFER_CREATION, NULL);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 /**

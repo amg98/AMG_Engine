@@ -93,6 +93,23 @@ Skybox::Skybox(const char *dir) {
 }
 
 /**
+ * @brief Constructor for a Skybox
+ * @param cubeMap Cube Map texture for this Skybox
+ */
+Skybox::Skybox(Texture *cubeMap){
+
+	// Bind the vertices buffer and enable raw drawing for this object
+	addBuffer(skyboxData, sizeof(skyboxData), 3, GL_FLOAT, true);
+	this->vertices = NULL;
+	this->nvertices = 0;
+
+	// Create the material
+	materials = (Material**) calloc (1, sizeof(Material*));
+	materials[0] = new Material(cubeMap);
+	materials[0]->setDependency();
+}
+
+/**
  * @brief Draws a Skybox in the current Renderer
  */
 void Skybox::draw(){
@@ -100,14 +117,7 @@ void Skybox::draw(){
 	Renderer::currentRenderer->updateMVP();
 	materials[0]->apply();
 	MeshData::drawRaw();
-}
-
-/**
- * @brief Bind the cube map texture associated to this Skybox
- * @param slot Which slot to bind the cube map texture
- */
-void Skybox::bindCubeMap(int slot){
-	materials[0]->getTexture(0)->bind(slot);
+	materials[0]->disable();
 }
 
 /**

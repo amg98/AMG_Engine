@@ -87,6 +87,7 @@ void Object::draw(){
 		if(groups[i*3 + 2] < nmaterials){		// Valid range of materials
 			materials[mat_index]->apply();
 			glDrawElements(GL_TRIANGLES, last - first, GL_UNSIGNED_SHORT, (void*)(first << 1));
+			materials[mat_index]->disable();
 		}
 	}
 

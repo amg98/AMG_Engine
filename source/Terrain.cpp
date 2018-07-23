@@ -103,6 +103,7 @@ void Terrain::draw(){
 	if(groups[2] < nmaterials){		// Valid range of materials
 		materials[groups[2]]->apply();
 		glDrawElements(GL_TRIANGLES, last - first, GL_UNSIGNED_SHORT, (void*)(first << 1));
+		materials[groups[2]]->disable();
 	}
 
 	this->disableBuffers();

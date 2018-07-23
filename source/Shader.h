@@ -12,6 +12,7 @@
 #include <vector>
 
 // OpenGL includes
+#include <GL/glew.h>
 #include <glm/glm.hpp>
 using namespace glm;
 
@@ -31,6 +32,7 @@ namespace AMG {
 #define AMG_USE_TEXANIM		(1 << 14)
 #define AMG_USE_INSTANCES	(1 << 15)
 #define AMG_USE_CUBEMAP		(1 << 16)
+#define AMG_USE_REFLECTIONS (1 << 17)
 
 /**
  * @class Shader
@@ -58,6 +60,7 @@ public:
 	void setUniform(const std::string &name, vec4 &v);
 	void setUniform(const std::string &name, mat4 &v);
 	void enable();
+	inline void disable(){ glUseProgram(0); }
 	virtual ~Shader();
 };
 

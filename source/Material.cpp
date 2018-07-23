@@ -15,6 +15,21 @@ namespace AMG {
 
 /**
  * @brief Constructor for a Material
+ * @param texture Texture to use
+ */
+Material::Material(Texture *texture){
+	this->diffuse = vec4(1, 1, 1, 1);
+	this->specular = vec4(1, 1, 1, 1);
+	this->ambient = 0.2f;
+	this->diffusePower = 1.0f;
+	this->specularPower = 1.0f;
+	this->textures = std::vector<Texture*>();
+	textures.push_back(texture);
+	texture->setDependency();
+}
+
+/**
+ * @brief Constructor for a Material
  * @param texture Texture path (if its NULL it doesn't load a texture)
  */
 Material::Material(const char *texture){
@@ -91,6 +106,12 @@ void Material::apply(){
 	shader->setUniform("AMG_MaterialAmbient", ambient);
 	shader->setUniform("AMG_DiffusePower", diffusePower);
 	shader->setUniform("AMG_SpecularPower", specularPower);
+}
+
+void Material::disable(){
+	for(unsigned int i=0;i<textures.size();i++){
+		textures[i]->unbind(i);
+	}
 }
 
 /**
