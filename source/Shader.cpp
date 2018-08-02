@@ -85,10 +85,9 @@ int Shader::loadShader(const char *path, int type){
  * @brief Constructor for a Shader object
  * @param vertex_file_path Location of the vertex shader file, any extension allowed
  * @param fragment_file_path Location of the fragment shader file, any extension allowed
- * @param geometry_file_path Location of the geometry shader file, any extension allowed (NULL if it is not used)
- * @param options Options to use in this shader, see the defined macros
+ * @param geometry_file_path Location of the geometry shader file, any extension allowed (optional)
  */
-Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, const char *geometry_file_path, int options) {
+Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, const char *geometry_file_path) {
 
 	// Create shader objects
 	GLuint VertexShaderID = loadShader(vertex_file_path, GL_VERTEX_SHADER);
@@ -125,84 +124,55 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, con
 	if(InfoLogLength > 0){
 		std::vector<char> ProgramErrorMessage(InfoLogLength+1);
 		glGetProgramInfoLog(programID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
+		fprintf(stderr, "[%s]\n", vertex_file_path);
 		Debug::showError(8, &ProgramErrorMessage[0]);
 	}
 
 	// Everything OK, create a uniform map
 	this->uniformsMap = std::tr1::unordered_map<std::string, int>();
 	lights = std::vector<Light*>();
-	this->enableOptions(options);
-}
 
-/**
- * @brief Enable shader options to use with the engine
- * @param options The options to use
- */
-void Shader::enableOptions(int options){
-	if(!(options &AMG_USE_INSTANCES)){
-		this->defineUniform("AMG_MVP");
-	}
-	if(options &AMG_USE_SKINNING){
-		this->defineUniform("AMG_BoneMatrix");
-	}
-	if(options &AMG_USE_FOG){
-		this->defineUniform("AMG_FogDensity");
-		this->defineUniform("AMG_FogGradient");
-		this->defineUniform("AMG_FogColor");
-	}
-	int nlights = (options >> 2) &31;
+	// Define vertex shader uniforms
 	char text[64];
-	if(nlights){
-		for(int i=0;i<nlights;i++){
-			sprintf(text, "AMG_Light[%d].position", i);
-			this->defineUniform(std::string(text));			// Vertex shader
-			sprintf(text, "AMG_Lights[%d].color", i);
-			this->defineUniform(std::string(text));			// Fragment shader
-			sprintf(text, "AMG_Lights[%d].attenuation", i);
-			this->defineUniform(std::string(text));
-		}
-		this->defineUniform("AMG_MV");
-		this->defineUniform("AMG_M");
-		this->defineUniform("AMG_MaterialDiffuse");
-		this->defineUniform("AMG_MaterialAmbient");
-		this->defineUniform("AMG_DiffusePower");
-		this->defineUniform("AMG_MaterialSpecular");
-		this->defineUniform("AMG_SpecularPower");
+	internalDefineUniform("AMG_MVP");
+	internalDefineUniform("AMG_BoneMatrix");
+	for(int i=0;i<AMG_MAX_LIGHTS;i++){
+		sprintf(text, "AMG_Light[%d].position", i);
+		internalDefineUniform(std::string(text));			// Vertex shader
+		sprintf(text, "AMG_Lights[%d].color", i);
+		internalDefineUniform(std::string(text));			// Fragment shader
+		sprintf(text, "AMG_Lights[%d].attenuation", i);
+		internalDefineUniform(std::string(text));
 	}
-	if(options &AMG_USE_2D){
-		this->defineUniform("AMG_SprColor");
-	}
-	int ntextures = (options >> 8) &0x15;
-	if(ntextures){
-		glUseProgram(programID);
-		for(int i=0;i<ntextures;i++){
-			sprintf(text, "AMG_TextureSampler[%d]", i);
-			std::string name = std::string(text);
-			this->defineUniform(name);
-			this->setUniform(name, i);
-		}
-		if(options &AMG_USE_CUBEMAP){
-			this->defineUniform("AMG_TextureCubeSampler");
-			this->setUniform("AMG_TextureCubeSampler", ntextures);
-		}
-	}
-	if(options &AMG_USE_TEXT){
-		this->defineUniform("AMG_CharWidth");
-		this->defineUniform("AMG_CharEdge");
-		this->defineUniform("AMG_CharBorderWidth");
-		this->defineUniform("AMG_CharBorderEdge");
-		this->defineUniform("AMG_CharShadowOffset");
-		this->defineUniform("AMG_CharOutlineColor");
-	}
-	if(options &AMG_USE_TEXANIM){
-		this->defineUniform("AMG_TexScale");
-	}
-	if((options &AMG_USE_TEXANIM) && !(options &AMG_USE_INSTANCES)){
-		this->defineUniform("AMG_TexPosition");
-		this->defineUniform("AMG_TexProgress");
-	}
-	if(options &AMG_USE_REFLECTIONS){
-		this->defineUniform("AMG_CamPosition");
+	internalDefineUniform("AMG_MV");
+	internalDefineUniform("AMG_M");
+	internalDefineUniform("AMG_FogDensity");
+	internalDefineUniform("AMG_FogGradient");
+	internalDefineUniform("AMG_CamPosition");
+	internalDefineUniform("AMG_TexScale");
+	internalDefineUniform("AMG_TexPosition");
+
+	// Define fragment shader uniforms
+	internalDefineUniform("AMG_MaterialDiffuse");
+	internalDefineUniform("AMG_MaterialAmbient");
+	internalDefineUniform("AMG_MaterialSpecular");
+	internalDefineUniform("AMG_DiffusePower");
+	internalDefineUniform("AMG_SpecularPower");
+	internalDefineUniform("AMG_SprColor");
+	internalDefineUniform("AMG_FogColor");
+	internalDefineUniform("AMG_TexProgress");
+	internalDefineUniform("AMG_CharWidth");
+	internalDefineUniform("AMG_CharEdge");
+	internalDefineUniform("AMG_CharBorderWidth");
+	internalDefineUniform("AMG_CharBorderEdge");
+	internalDefineUniform("AMG_CharShadowOffset");
+	internalDefineUniform("AMG_CharOutlineColor");
+	glUseProgram(programID);
+	for(int i=0;i<AMG_MAX_TEXTURES;i++){
+		sprintf(text, "AMG_TextureSampler[%d]", i);
+		std::string name = std::string(text);
+		internalDefineUniform(name);
+		setUniform(name, i);
 	}
 }
 
@@ -216,6 +186,18 @@ void Shader::defineUniform(std::string name){
 		Debug::showError(9, (void*)name.c_str());
 	}
 	uniformsMap[name] = id;
+}
+
+/**
+ * @brief Define a uniform variable from the shader
+ * @param name Name of the uniform
+ * @note This function doesn't pop an error message if not defined
+ */
+void Shader::internalDefineUniform(std::string name){
+	int id = glGetUniformLocation(programID, name.c_str());
+	if(id != -1){
+		uniformsMap[name] = id;
+	}
 }
 
 /**
@@ -289,9 +271,9 @@ void Shader::setUniform(const std::string &name, mat4 &v){
  * @brief Enable a shader program
  */
 void Shader::enable(){
-	if(Renderer::currentRenderer->getCurrentShader() != this){
+	if(Renderer::getCurrentShader() != this){
 		glUseProgram(programID);
-		Renderer::currentRenderer->setCurrentShader(this);
+		Renderer::setCurrentShader(this);
 	}
 }
 
@@ -300,8 +282,6 @@ void Shader::enable(){
  */
 Shader::~Shader() {
 	glDeleteProgram(programID);
-	uniformsMap.clear();
-	lights.clear();
 }
 
 }

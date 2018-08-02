@@ -33,7 +33,7 @@ typedef struct{
 
 /**
  * @class Font
- * @brief Font glyph loading and text rendering
+ * @brief Font glyph loading and text rendering engine
  */
 class Font: public Entity {
 private:

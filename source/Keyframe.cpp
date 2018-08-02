@@ -23,7 +23,7 @@ namespace AMG {
 /**
  * @brief Constructor for a Keyframe
  * @param instant The keyframe's frame in the animation
- * @param data Data holding positions and rotations for each bone
+ * @param data Data with positions and rotations for each bone
  * @param nbones Number of bones that this keyframe modifies
  */
 Keyframe::Keyframe(float instant, float *data, int nbones) {

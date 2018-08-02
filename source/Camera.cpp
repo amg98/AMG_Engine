@@ -28,9 +28,10 @@ const static float camViews[] = {
 
 /**
  * @brief Constructor of a camera
+ * @param position Camera's position
  */
-Camera::Camera() {
-	this->position = glm::vec3(0, 0, 5);
+Camera::Camera(vec3 position) {
+	this->position = position;
 	this->camera = glm::translate(mat4(1.0f), -this->position);
 	this->rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	this->rot = vec3(0, 0, 0);
@@ -59,6 +60,7 @@ void Camera::computeTrihedron(){
  */
 void Camera::update(GLFWwindow *window, float delta){
 
+	// Rotate the camera
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
 		rot.y -= 3.141592f/2.0f * delta;
 	} else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
@@ -69,8 +71,14 @@ void Camera::update(GLFWwindow *window, float delta){
 	} else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
 		rot.x -= 3.141592f/2.0f * delta;
 	}
+
+	// Compute the rotation quaternion
 	this->rotation = glm::normalize(glm::angleAxis(rot.z, vec3(0, 0, 1)) * glm::angleAxis(rot.y, vec3(0, 1, 0)) * glm::angleAxis(rot.x, vec3(1, 0, 0)));
+
+	// Compute the forward and right vectors
 	computeTrihedron();
+
+	// Move the camera
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
 		this->position += right * delta;
 	} else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
@@ -82,6 +90,7 @@ void Camera::update(GLFWwindow *window, float delta){
 		this->position += forward * delta;
 	}
 
+	// Compute the camera view matrix
 	this->camera = glm::toMat4(glm::conjugate(this->rotation)) * glm::translate(mat4(1.0f), -this->position);
 }
 
@@ -91,18 +100,16 @@ void Camera::update(GLFWwindow *window, float delta){
  */
 vec3 Camera::getRay(){
 
-	Renderer *renderer = Renderer::currentRenderer;
-
 	// Get needed matrices
-	mat4 invPerspective = renderer->getInversePerspective();
+	mat4 invPerspective = Renderer::getInversePerspective();
 	mat4 invView = glm::inverse(this->camera);
 
 	// Get mouse position, in OpenGL coordinates
 	double x, y;
-	renderer->getMousePosition(&x, &y);
+	Renderer::getMousePosition(&x, &y);
 
 	// Perform the inverse transformations
-	vec4 pos = vec4((2.0f * x)/renderer->getWidth() - 1, -(2.0f * y)/renderer->getHeight() + 1, -1, 1);
+	vec4 pos = vec4((2.0f * x) / Renderer::getWidth() - 1, -(2.0f * y) / Renderer::getHeight() + 1, -1, 1);
 	pos = invPerspective * pos;
 	pos.z = -1;
 	pos.w = 0;

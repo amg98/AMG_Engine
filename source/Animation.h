@@ -24,6 +24,10 @@ private:
 	float length;						/**< Length of the animation, in frames */
 	float currentTime;					/**< Current animation time, in frames */
 public:
+	unsigned int getNKeyframes(){ return nkeyframes; }
+	float getLength(){ return length; }
+	float getCurrentTime(){ return currentTime; }
+
 	Animation(Keyframe **keyframelist, int nkeyframes);
 	void increaseTime(float delta);
 	float getKeyframes(Keyframe **first, Keyframe **last);

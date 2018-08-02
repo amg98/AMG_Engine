@@ -1,8 +1,8 @@
-uniform mat4 AMG_BoneMatrix[AMG_MAX_BONES];			/**< Bone matrices */
-
 /**
  * @brief Compute the skinning matrix used for animation
  * @return The skinning matrix
+ * Uniforms: AMG_BoneMatrix
+ * Input: AMG_Weight
  */
 mat4 AMG_ComputeSkinning(){
 	return AMG_BoneMatrix[AMG_WeightBoneID[0]] * AMG_Weight[0] +

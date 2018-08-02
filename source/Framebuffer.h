@@ -14,7 +14,7 @@ namespace AMG {
 
 /**
  * @class Framebuffer
- * @brief Holds a framebuffer and ways to manipulate it
+ * @brief Holds a framebuffer object
  */
 class Framebuffer: public Entity {
 private:

@@ -16,20 +16,23 @@
 #include "ParticleSource.h"
 #include "World.h"
 #include "MotionBlur.h"
+#include "LensFlare.h"
 using namespace AMG;
 
 // Definition of objects
-Renderer *window;
-Camera *cam;
-Model *link, *bullet;
-Terrain *terrain;
-Skybox *skybox, *skybox2;
-Shader *s0, *s1, *s2, *s3, *s4, *s5, *s6;
-Text *hello;
-Sprite *sprite;
-ParticleSource *source;
-Sprite *screen;
-Texture *cubeMap;
+Camera *cam = NULL;
+Model *link = NULL, *bullet = NULL;
+Terrain *terrain = NULL;
+Skybox *skybox = NULL;
+Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *s6 = NULL;
+Text *hello = NULL;
+Sprite *sprite = NULL;
+ParticleSource *source = NULL;
+Sprite *screen = NULL;
+Texture *cubeMap = NULL;
+LensFlare *lens = NULL;
+Light *light = NULL;
+Font *font = NULL;
 
 void renderSimple(){
 
@@ -45,13 +48,13 @@ void renderSimple(){
 
 void render(){
 
-	window->setCamera(cam);
+	Renderer::setCamera(cam);
 
 	MotionBlur::bind();
 
-	Object *clicked = window->getWorld()->getClickingObject(20.0f);
+	Object *clicked = Renderer::getWorld()->getClickingObject(20.0f);
 	if(clicked == bullet->getObject(2)){
-		btRigidBody *b = window->getWorld()->getRigidBody(clicked);
+		btRigidBody *b = Renderer::getWorld()->getRigidBody(clicked);
 		b->setActivationState(1);
 		b->setLinearVelocity(btVector3(0, 3, 0));
 	}
@@ -61,55 +64,80 @@ void render(){
 	link->draw();
 
 	s6->enable();
-	window->updateReflections(skybox2->getCubeMap(), 0);
+	Renderer::updateReflections(cubeMap, 0);
 	bullet->draw();
 
 	s1->enable();
 	terrain->draw();
 
 	s2->enable();
-	skybox2->draw();
+	skybox->draw();
 
-	if(window->getKey(GLFW_KEY_Q)){
-		source->getParticles().push_back(new Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
+	if(Renderer::getKey(GLFW_KEY_Q)){
+		source->getParticles().push_back(Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
 	}
 
 	s5->enable();
 	source->update();
 	source->draw(GL_ONE);
 
-	MotionBlur::unbind();
-
-	window->set3dMode(false);
-	screen->set(MotionBlur::render()->getColorTexture());
+	Renderer::set3dMode(false);
 	s3->enable();
-	screen->draw();
 	sprite->draw();
+	lens->draw(cam, s0->getLights()[0]);
+
+	MotionBlur::unbind();
+	screen->set(MotionBlur::render()->getColorTexture());
+	screen->draw();
 	s4->enable();
 	hello->draw();
-	window->set3dMode(true);
+	Renderer::set3dMode(true);
+}
+
+void unload(){
+	MotionBlur::finish();
+	AMG_DELETE(cam);
+	AMG_DELETE(link);
+	AMG_DELETE(bullet);
+	AMG_DELETE(terrain);
+	AMG_DELETE(skybox);
+	AMG_DELETE(s0);
+	AMG_DELETE(s1);
+	AMG_DELETE(s2);
+	AMG_DELETE(s3);
+	AMG_DELETE(s4);
+	AMG_DELETE(s5);
+	AMG_DELETE(s6);
+	AMG_DELETE(hello);
+	AMG_DELETE(sprite);
+	AMG_DELETE(cubeMap);
+	AMG_DELETE(source);
+	AMG_DELETE(screen);
+	AMG_DELETE(lens);
+	AMG_DELETE(light);
+	AMG_DELETE(font);
 }
 
 int main(int argc, char **argv){
 
-	window = new Renderer(1440, 900, "Window1", false, false, 0);
-	window->createWorld();
-	window->setRenderCallback(render);
-	window->getFogDensity() = 0.1f;
-	window->getFogGradient() = 5.0f;
+	Renderer::initialize(1440, 900, "Window1", false, false, 0);
+	Renderer::createWorld();
+	Renderer::setRenderCallback(render);
+	Renderer::setUnloadCallback(unload);
+	Renderer::getFogDensity() = 0.1f;
+	Renderer::getFogGradient() = 5.0f;
 
-	cam = new Camera();
-	cam->getPosition() = vec3(0, 3, 5);
+	cam = new Camera(vec3(0, 3, 5));
 
-	s0 = new Shader("default.vs", "default.fs", NULL, AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_SKINNING);
-	s1 = new Shader("terrain.vs", "terrain.fs", NULL, AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_TEXTURE(5));
-	s2 = new Shader("skybox.vs", "skybox.fs", NULL, 0);
-	s3 = new Shader("shader2d.vs", "shader2d.fs", NULL, AMG_USE_2D | AMG_USE_TEXANIM);
-	s4 = new Shader("text2d.vs", "text2d.fs", NULL, AMG_USE_2D | AMG_USE_TEXT);
-	s5 = new Shader("particles.vs", "particles.fs", NULL, AMG_USE_TEXANIM | AMG_USE_INSTANCES);
-	s6 = new Shader("bullet.vs", "bullet.fs", NULL, AMG_USE_LIGHTING(1) | AMG_USE_FOG | AMG_USE_REFLECTIONS);
+	s0 = new Shader("default.vs", "default.fs");
+	s1 = new Shader("terrain.vs", "terrain.fs");
+	s2 = new Shader("skybox.vs", "skybox.fs");
+	s3 = new Shader("shader2d.vs", "shader2d.fs");
+	s4 = new Shader("text2d.vs", "text2d.fs");
+	s5 = new Shader("particles.vs", "particles.fs");
+	s6 = new Shader("bullet.vs", "bullet.fs");
 
-	Light *light = new Light(vec3(1, 1.0f, 3), vec3(1, 1, 0), vec3(0.0f, 0, 1));
+	light = new Light(vec3(0, 3, 3), vec3(1, 1, 0), vec3(0.0f, 0, 1));
 	s0->getLights().push_back(light);
 	s1->getLights().push_back(light);
 	s6->getLights().push_back(light);
@@ -128,7 +156,7 @@ int main(int argc, char **argv){
 	terrain->getMaterial(0)->addTexture("path.dds");
 	terrain->getMaterial(0)->addTexture("blendMap.dds");
 
-	Font *font = new Font("candara.dds", "candara.fnt");
+	font = new Font("candara.dds", "candara.fnt");
 
 	float tbx = 300;
 	float tby = 300;
@@ -147,11 +175,11 @@ int main(int argc, char **argv){
 	sprite->getScaleX() = tbx / 256;
 	sprite->getScaleY() = tby / 256;
 
-	source = new ParticleSource("cosmic.dds", 32, 32);
+	source = new ParticleSource("cosmic.dds", 32, 32, 1000);
 
-	window->getWorld()->addObjectBox(bullet->getObject(0), 0.0f);
-	window->getWorld()->addObjectBox(bullet->getObject(1), 5.0f);
-	window->getWorld()->addObjectConvexHull(bullet->getObject(2), 7.0f);
+	Renderer::getWorld()->addObjectBox(bullet->getObject(0), 0.0f);
+	Renderer::getWorld()->addObjectBox(bullet->getObject(1), 5.0f);
+	Renderer::getWorld()->addObjectConvexHull(bullet->getObject(2), 7.0f);
 
 	MotionBlur::initialize(1440, 900);
 
@@ -163,9 +191,10 @@ int main(int argc, char **argv){
 	vec3 cmapPos = vec3(bullet->getObject(2)->getPosition());
 	cmapPos.y = 0.0f;
 	cubeMap = Renderer::createCubeMap(renderSimple, s6, 256, cmapPos);
-	skybox2 = new Skybox(cubeMap);
 
-	window->update();
+	lens = new LensFlare("lens", 0.4f, 1);
+
+	Renderer::update();
 
 	return Renderer::exitProcess();
 }

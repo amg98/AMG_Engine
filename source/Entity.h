@@ -1,6 +1,6 @@
 /**
  * @file Entity.h
- * @brief File to declare Entity features, used in trash collector
+ * @brief File to declare Entities
  */
 
 #ifndef ENTITY_H_
@@ -27,15 +27,10 @@ enum EntityTypes {
  * @brief An engine entity
  */
 class Entity {
-private:
-	static std::vector<Entity*> entities;		/**< Vector of registered entities */
-protected:
-	int index;									/**< Index in the vector */
 public:
+	static int nEntities;						/**< Number of entities */
 	Entity();
-	void setDependency();
 	static char *getFullPath(const char *path, int type);
-	static std::vector<Entity*> &getEntities(){ return entities; }
 	virtual ~Entity();
 	static void destroyEntities();
 };

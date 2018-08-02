@@ -28,13 +28,14 @@ Text::Text(float *vertices, float *texcoords, int size, Texture *texture) {
 	this->charOutlineColor = vec3(0.0f, 0.0f, 0.0f);
 	addBuffer(vertices, size, 2, GL_FLOAT, true);
 	addBuffer(texcoords, size, 2, GL_FLOAT);
+	this->vertices = NULL;
 }
 
 /**
  * @brief Draws a prepared Text
  */
 void Text::draw(){
-	Shader *shader = Renderer::currentRenderer->getCurrentShader();
+	Shader *shader = Renderer::getCurrentShader();
 	texture->bind(0);
 	shader->setUniform("AMG_CharWidth", charWidth);
 	shader->setUniform("AMG_CharEdge", charEdge);
@@ -43,8 +44,8 @@ void Text::draw(){
 	shader->setUniform("AMG_CharShadowOffset", charShadowOffset);
 	shader->setUniform("AMG_CharOutlineColor", charOutlineColor);
 	shader->setUniform("AMG_SprColor", color);
-	Renderer::currentRenderer->setTransformation(position);
-	Renderer::currentRenderer->updateMVP();
+	Renderer::setTransformation(position);
+	Renderer::updateMVP();
 	MeshData::drawRaw();
 }
 

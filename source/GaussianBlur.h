@@ -23,13 +23,14 @@ private:
 	static Shader *vblurShader;			/**< Vertical blur shader */
 	static Framebuffer *hblurFB;		/**< Horizontal blur framebuffer */
 	static Framebuffer *vblurFB;		/**< Vertical blur framebuffer */
+	static Sprite *blurSprite;			/**< General purpose sprite */
 	static bool init;					/**< Whether the class is initialized */
 protected:
 	GaussianBlur(){}
 public:
-	static Sprite *blurSprite;			/**< General purpose sprite */
 	static void initialize(int width, int height);
 	static Framebuffer *render(Framebuffer *fb);
+	static void finish();
 };
 
 }

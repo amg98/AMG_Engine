@@ -17,7 +17,7 @@ namespace AMG {
 
 /**
  * @class Model
- * @brief Holds a 3D model and a loader for *.amd files (internal engine model file format)
+ * @brief Holds a 3D model and a loader for *.amd files
  */
 class Model: public Entity {
 private:

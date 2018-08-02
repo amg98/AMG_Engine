@@ -18,7 +18,6 @@
 #include "Particle.h"
 #include "Texture.h"
 
-#define AMG_MAX_PARTICLES 10000					/**< Maximum number of particles per ParticleSource */
 #define AMG_PVBO_STRIDE 21 * sizeof(float)		/**< Stride for the particle source VBO */
 
 namespace AMG {
@@ -33,12 +32,12 @@ private:
 	GLuint vbo;							/**< VBO for instanced rendering */
 	GLuint vao;							/**< VAO for this source */
 	float *vboData;						/**< VBO data to be updated */
-	std::vector<Particle*> particles;		/**< Vector holding all the particles for this source */
+	std::vector<Particle> particles;	/**< Vector holding all the particles for this source */
 	void addInstancedAttribute(int attribute, int dataSize, int offset);
 public:
-	std::vector<Particle*> &getParticles(){ return particles; }
+	std::vector<Particle> &getParticles(){ return particles; }
 
-	ParticleSource(const char *texPath, int hframes, int vframes);
+	ParticleSource(const char *texPath, int hframes, int vframes, int maxparticles);
 	void update();
 	void draw(GLuint alphaFunc);
 	virtual ~ParticleSource();

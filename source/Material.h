@@ -25,7 +25,7 @@ namespace AMG {
  */
 class Material: public Entity {
 private:
-	std::vector<Texture*> textures;	/**< Material textures */
+	std::vector<Texture*> textures;	/**< Material textures vector */
 	vec4 diffuse;					/**< Material diffuse color */
 	vec4 specular;					/**< Material specular color */
 	float ambient;					/**< Material ambient color */

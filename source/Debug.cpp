@@ -76,8 +76,9 @@ void Debug::showError(int code, void *param){
 	}
 
 	fflush(stderr);
+	Entity::nEntities --;		// One entity hasn't been created
 	Renderer::exitProcess();
-	exit(EXIT_FAILURE);
+	exit(1);
 }
 
 }

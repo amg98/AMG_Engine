@@ -1,15 +1,8 @@
-uniform float AMG_CharWidth;
-uniform float AMG_CharEdge;
-
-uniform float AMG_CharBorderWidth;
-uniform float AMG_CharBorderEdge;
-
-uniform vec2 AMG_CharShadowOffset;
-
-uniform vec3 AMG_CharOutlineColor;
-
 /**
  * @brief Compute the color for a text, applying its effects
+ * Uniforms: AMG_TextureSampler, AMG_CharWidth, AMG_CharEdge, AMG_CharBorderWidth, AMG_CharBorderEdge, AMG_CharShadowOffset, AMG_CharOutlineColor, AMG_SprColor
+ * Input: AMG_OutUV
+ * Output: AMG_Color
  */
 void AMG_ComputeTextColor(){
 	float distance = 1 - texture(AMG_TextureSampler[0], AMG_OutUV).a;

@@ -1,17 +1,3 @@
-// Uniforms
-uniform sampler2D AMG_TextureSampler[AMG_TEXTURES];		/**< Texture samplers */
-
-in vec2 AMG_OutUV;
-
-/**
-  * @brief Computes a texture mapping
-  * @param tex Texture slot to use
-  * @return The mapped color
-  */
-vec4 AMG_TextureMap(int tex){
-	return texture(AMG_TextureSampler[tex], AMG_OutUV);
-}
-
 /**
  * @brief Perform a blending of textures using a blend map
  * @param t0 Red component of the blend map
@@ -20,6 +6,8 @@ vec4 AMG_TextureMap(int tex){
  * @param t3 The remaining color of the blend map
  * @param blendMap The blend map mask texture
  * @return The blended textures in this fragment
+ * Uniforms: AMG_TextureSampler
+ * Input: AMG_OutUV
  */
 vec4 AMG_BlendMap(int t0, int t1, int t2, int t3, int blendMap){
 	vec4 blendMapColor = texture(AMG_TextureSampler[blendMap], AMG_OutUV);

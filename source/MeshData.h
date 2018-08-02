@@ -37,7 +37,7 @@ protected:
 	GLuint id;							/**< ID of the OpenGL VAO */
 	GLuint indexid;						/**< ID of the indices buffer */
 	std::vector<buffer_info> info;		/**< Vector holding information of all the defined buffers */
-	int count;							/**< Number of indices / vertices in the mesh */
+	int count;							/**< Number of indices / vertices in the mesh (raw mode) */
 	float *vertices;					/**< Buffer holding a mesh's vertices */
 	int nvertices;						/**< Number of vertices in the mesh */
 public:

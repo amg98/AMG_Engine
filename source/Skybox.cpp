@@ -85,7 +85,6 @@ Skybox::Skybox(const char *dir) {
 		sprintf(names[i], "%s/%s.dds", dir, skyboxFiles[i]);
 	}
 	materials[0] = new Material((const char**)names);
-	materials[0]->setDependency();
 	for(int i=0;i<AMG_CUBE_SIDES;i++){
 		free(names[i]);
 	}
@@ -106,17 +105,18 @@ Skybox::Skybox(Texture *cubeMap){
 	// Create the material
 	materials = (Material**) calloc (1, sizeof(Material*));
 	materials[0] = new Material(cubeMap);
-	materials[0]->setDependency();
 }
 
 /**
  * @brief Draws a Skybox in the current Renderer
  */
 void Skybox::draw(){
-	Renderer::currentRenderer->setTransformation(position, rotation, scale);
-	Renderer::currentRenderer->updateMVP();
+	Renderer::setTransformation(position, rotation, scale);
+	Renderer::updateMVP();
 	materials[0]->apply();
+	glDepthMask(GL_FALSE);
 	MeshData::drawRaw();
+	glDepthMask(GL_TRUE);
 	materials[0]->disable();
 }
 

@@ -33,7 +33,7 @@ enum ErrorCodes {
 
 /**
  * @class Debug
- * @brief Utility and debugging functions
+ * @brief Utility and debug functions
  */
 class Debug {
 public:

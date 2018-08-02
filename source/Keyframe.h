@@ -18,7 +18,7 @@ namespace AMG {
 /**
  * @class Keyframe
  * @brief Class holding Keyframe information, used in skeletal animation
- * @note Not an Entity, always depends on an Animation object (may be a lot to handle by the trash collector)
+ * @note It's not an Entity, always depends on an Animation object (may be a lot to handle by the trash collector)
  */
 class Keyframe {
 private:

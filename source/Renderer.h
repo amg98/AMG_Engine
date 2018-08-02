@@ -18,8 +18,10 @@ using namespace glm;
 // Own includes
 #include "Shader.h"
 #include "Camera.h"
-#include "Entity.h"
 #include "World.h"
+
+/**< Delete an Entity */
+#define AMG_DELETE(x) if((x)) delete (x)
 
 namespace AMG {
 
@@ -27,77 +29,80 @@ namespace AMG {
  * @typedef renderCallback
  * @brief Callback used to render stuff
  */
-typedef void (*renderCallback)(void);
+typedef void (*AMG_FunctionCallback)(void);
 
 /**
  * @class Renderer
- * @brief Class that holds a window capable of rendering 3D stuff
+ * @brief Static class that holds a window capable of rendering 3D stuff
  */
-class Renderer : public Entity {
+class Renderer {
 private:
-	GLFWwindow* window;				/**< Internal window object */
-	static bool glfwSetup;			/**< Whether GLFW is setup */
-	static bool glewSetup;			/**< Whether GLEW is setup */
-	renderCallback renderCb;		/**< Rendering callback */
-	mat4 *projection;				/**< Current projection matrix */
-	mat4 perspective, ortho;		/**< Precalculated perspective and ortho matrices */
-	mat4 invPerspective;			/**< Inverse perspective matrix, for ray tracing */
-	mat4 model;						/**< Model matrix */
-	mat4 mvp;						/**< Concatenation of Model, Projection and Camera matrices */
-	mat4 mv;						/**< Model view matrix */
-	int width;						/**< Window width, in pixels (don't write) */
-	int height;						/**< Window height, in pixels (don't write) */
-	int FPS;						/**< The actual frames per second */
-	float fogDensity;				/**< Fog density */
-	float fogGradient;				/**< Fog gradient */
-	vec4 fogColor;					/**< Fog color, same as clear color */
-	Camera *camera;					/**< Current set camera */
-	Shader *currentShader;			/**< Current used shader */
-	mat4 zupConversion;				/**< Matrix to use with Z up coordinate systems */
-	World *world;					/**< Physics world, optional */
+	static GLFWwindow* window;					/**< Internal window object */
+	static bool init;							/**< The engine has been initialized? */
+	static AMG_FunctionCallback renderCb;		/**< Rendering callback */
+	static AMG_FunctionCallback unloadCb;		/**< Unload callback */
+	static mat4 *projection;					/**< Current projection matrix */
+	static mat4 perspective, ortho;				/**< Precalculated perspective and ortho matrices */
+	static mat4 invPerspective;					/**< Inverse perspective matrix, for ray tracing */
+	static mat4 model;							/**< Model matrix */
+	static mat4 mvp;							/**< Concatenation of Model, Projection and Camera matrices */
+	static mat4 mv;								/**< Model view matrix */
+	static int width;							/**< Window width, in pixels */
+	static int height;							/**< Window height, in pixels */
+	static int FPS;								/**< The actual frames per second */
+	static float fogDensity;					/**< Fog density */
+	static float fogGradient;					/**< Fog gradient */
+	static vec4 fogColor;						/**< Fog color, same as clear color */
+	static Camera *camera;						/**< Current set camera */
+	static Shader *currentShader;				/**< Current used shader */
+	static mat4 zupConversion;					/**< Matrix to use with Z up coordinate systems */
+	static World *world;						/**< Physics world, optional */
+	static GLuint quadID;						/**< OpenGL buffer ID for a quad */
+	static GLuint quadVertices;					/**< OpenGL buffer ID for the quad's vertices */
+	static GLuint quadTexcoords;				/**< OpenGL buffer ID for the quad's texture coordinates */
+	Renderer(){}
 public:
-	int &getWidth(){ return width; }
-	int &getHeight(){ return height; }
-	int getFPS(){ return FPS; }
-	float &getFogDensity(){ return fogDensity; }
-	float &getFogGradient(){ return fogGradient; }
-	vec4 &getFogColor(){ return fogColor; }
-	double getDelta(){ return 1.0f / FPS; }
-	mat4 &getInversePerspective(){ return invPerspective; }
-	Camera *getCamera(){ return camera; }
-	Shader *getCurrentShader(){ return currentShader; }
-	World *getWorld(){ return world; }
-	void setCurrentShader(Shader *shader){ currentShader = shader; }
-
-	static Renderer *currentRenderer;	/**< Current renderer drawing */
-	static GLuint quadID;				/**< OpenGL buffer ID for a quad */
-	static GLuint quadVertices;			/**< OpenGL buffer ID for the quad's vertices */
-	static GLuint quadTexcoords;		/**< OpenGL buffer ID for the quad's texture coordinates */
+	static bool initialized(){ return init; }
+	static int getWidth(){ return width; }
+	static int getHeight(){ return height; }
+	static int getFPS(){ return FPS; }
+	static float &getFogDensity(){ return fogDensity; }
+	static float &getFogGradient(){ return fogGradient; }
+	static vec4 &getFogColor(){ return fogColor; }
+	static double getDelta(){ return 1.0f / FPS; }
+	static mat4 &getPerspective(){ return perspective; }
+	static mat4 &getOrtho(){ return ortho; }
+	static mat4 &getInversePerspective(){ return invPerspective; }
+	static Camera *getCamera(){ return camera; }
+	static Shader *getCurrentShader(){ return currentShader; }
+	static World *getWorld(){ return world; }
+	static void setCurrentShader(Shader *shader){ currentShader = shader; }
+	static void setRenderCallback(AMG_FunctionCallback cb){ renderCb = cb; }
+	static void setUnloadCallback(AMG_FunctionCallback cb){ unloadCb = cb; }
 
 	static int exitProcess();
-	static Texture *createCubeMap(renderCallback render, Shader *shader, int dimensions, vec3 position);
+	static Texture *createCubeMap(AMG_FunctionCallback render, Shader *shader, int dimensions, vec3 position);
 
-	Renderer(int width, int height, const char *title, bool resize, bool fullscreen, int samples=4);
-	void update();
-	void setCurrent();
-	virtual ~Renderer();
-	void setRenderCallback(renderCallback cb);
-	void setTransformationZ(vec3 pos, quat rot, vec3 scale);
-	void setTransformation(vec3 pos, quat rot, vec3 scale);
-	void setTransformation(vec3 pos);
-	void setTransformationBillboard(vec3 pos, float rot, float scale);
-	void updateMVP();
-	void storeMVP(float *data, int offset);
-	void set3dMode(bool mode);
-	void calculateProjection();
-	void calculatePanoramicProjection();
-	void setCamera(Camera *camera);
-	void updateFog();
-	void updateLighting();
-	void getMousePosition(double *x, double *y);
-	bool getKey(int code);
-	void createWorld();
-	void updateReflections(Texture *cubeMap, int slot);
+	static void initialize(int w, int h, const char *title, bool resize, bool fullscreen, int samples=4);
+	static void update();
+	static void setTransformationZ(vec3 pos, quat rot, vec3 scale);
+	static void setTransformation(vec3 pos, quat rot, vec3 scale);
+	static void setTransformation(vec3 pos);
+	static void setTransformationBillboard(vec3 pos, float rot, float scale);
+	static void updateMVP();
+	static void storeMVP(float *data, int offset);
+	static void set3dMode(bool mode);
+	static void calculateProjection();
+	static void calculatePanoramicProjection();
+	static void setCamera(Camera *cam);
+	static void updateFog();
+	static void updateLighting();
+	static void getMousePosition(double *x, double *y);
+	static bool getKey(int code);
+	static void createWorld();
+	static void updateReflections(Texture *cubeMap, int slot);
+	static void resize(int w, int h);
+	static void bindQuad(bool vao);
 };
 
 }

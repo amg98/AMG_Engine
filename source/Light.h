@@ -20,7 +20,7 @@ class Light {
 private:
 	vec3 position;		/**< Position of the light */
 	vec3 color;			/**< Color of the light */
-	vec3 attenuation;	/**< Attenuation of the light, following a parabola */
+	vec3 attenuation;	/**< Attenuation of the light */
 public:
 	vec3 &getPosition(){ return position; }
 	vec3 &getColor(){ return color; }

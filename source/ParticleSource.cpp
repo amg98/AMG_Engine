@@ -18,29 +18,29 @@ namespace AMG {
  * @param texPath Texture atlas path
  * @param hframes Number of horizontal frames
  * @param vframes Number of vertical frames
+ * @paramm maxparticles Maximum number of particles
  */
-ParticleSource::ParticleSource(const char *texPath, int hframes, int vframes) {
+ParticleSource::ParticleSource(const char *texPath, int hframes, int vframes, int maxparticles) {
 
 	// Setup instanced rendering stuff
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, AMG_MAX_PARTICLES * AMG_PVBO_STRIDE, NULL, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, maxparticles * AMG_PVBO_STRIDE, NULL, GL_STREAM_DRAW);
 	addInstancedAttribute(2, 4, 0);			// MVP columns
 	addInstancedAttribute(3, 4, 4);
 	addInstancedAttribute(4, 4, 8);
 	addInstancedAttribute(5, 4, 12);
 	addInstancedAttribute(6, 4, 16);		// Texture frame position
 	addInstancedAttribute(7, 1, 20);		// Texture blend factor
-	vboData = (float*) malloc (AMG_MAX_PARTICLES * AMG_PVBO_STRIDE);
+	vboData = (float*) malloc (maxparticles * AMG_PVBO_STRIDE);
 
-	particles = std::vector<Particle*>();
-	particles.reserve(AMG_MAX_PARTICLES);
+	particles = std::vector<Particle>();
+	particles.reserve(maxparticles);
 
 	atlas = NULL;
 	atlas = new Texture(texPath, hframes, vframes);
-	atlas->setDependency();
 }
 
 /**
@@ -56,9 +56,8 @@ void ParticleSource::addInstancedAttribute(int attribute, int dataSize, int offs
  */
 void ParticleSource::update(){
 	for(unsigned int i=0;i<particles.size();i++){
-		Particle *p = particles[i];
-		if(p->update()){
-			delete p;
+		Particle &p = particles[i];
+		if(p.update()){
 			particles.erase(particles.begin() + i);
 		}
 	}
@@ -80,24 +79,20 @@ void ParticleSource::draw(GLuint alphaFunc){
 	for(int i=0;i<8;i++){
 		glEnableVertexAttribArray(i);
 	}
-	glBindBuffer(GL_ARRAY_BUFFER, Renderer::quadVertices);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glBindBuffer(GL_ARRAY_BUFFER, Renderer::quadTexcoords);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	Renderer::bindQuad(false);
 
 	// Bind texture
 	atlas->bind(0);
 
 	// Fill particle's buffer
 	int offset = 0;
-	Renderer *renderer = Renderer::currentRenderer;
 	for(unsigned int i=0;i<particles.size();i++){
-		Particle *p = particles[i];
-		atlas->getCurrentFrame() = p->getLife() * atlas->getNFrames();
+		Particle &p = particles[i];
+		atlas->getCurrentFrame() = p.getLife() * atlas->getNFrames();
 		atlas->animate();
-		renderer->setTransformationBillboard(p->getPosition(), p->getRotation(), p->getScale());
-		renderer->updateMVP();
-		renderer->storeMVP(vboData, offset * 21);
+		Renderer::setTransformationBillboard(p.getPosition(), p.getRotation(), p.getScale());
+		Renderer::updateMVP();
+		Renderer::storeMVP(vboData, offset * 21);
 		atlas->storeFrameData(vboData, offset * 21 + 16);
 		offset ++;
 	}
@@ -122,14 +117,10 @@ void ParticleSource::draw(GLuint alphaFunc){
  * @brief Destructor for a Particle source
  */
 ParticleSource::~ParticleSource() {
-	for(unsigned int i=0;i<particles.size();i++){
-		delete particles[i];
-	}
-	std::vector<Particle*>().swap(particles);
-	if(atlas) delete atlas;
+	AMG_DELETE(atlas);
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
-	free(vboData);
+	if(vboData) free(vboData);
 }
 
 }

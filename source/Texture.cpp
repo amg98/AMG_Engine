@@ -36,6 +36,7 @@ Texture::Texture(){
 	this->verticalFrames = 1;
 	this->nframes = 1;
 	this->id = 0;
+	this->isCopy = false;
 }
 
 /**
@@ -75,6 +76,7 @@ void Texture::set(Texture *texture){
 	this->verticalFrames = texture->verticalFrames;
 	this->nframes = texture->getNFrames();
 	this->id = texture->id;
+	this->isCopy = true;
 }
 
 /**
@@ -82,17 +84,7 @@ void Texture::set(Texture *texture){
  * @param texture Texture to copy
  */
 Texture::Texture(Texture *texture){
-	this->target = texture->target;
-	this->progress = texture->progress;
-	this->width = texture->getWidth();
-	this->height = texture->getHeight();
-	this->currentFrame = texture->getCurrentFrame();
-	this->texScale = texture->texScale;
-	this->texPosition = texture->texPosition;
-	this->horizontalFrames = texture->horizontalFrames;
-	this->verticalFrames = texture->verticalFrames;
-	this->nframes = texture->getNFrames();
-	this->id = texture->id;
+	set(texture);
 }
 
 /**
@@ -116,6 +108,7 @@ Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
 	this->nframes = 1;
 	this->width = w;
 	this->height = h;
+	this->isCopy = false;
 	glGenTextures(1, &id);
 	glBindTexture(target, id);
 	glTexImage2D(target, 0, mode, w, h, 0, mode2, GL_UNSIGNED_BYTE, NULL);
@@ -313,7 +306,7 @@ void Texture::bind(int slot){
 	glBindTexture(this->target, this->id);
 
 	// Update uniforms in the shader
-	Shader *shader = Renderer::currentRenderer->getCurrentShader();
+	Shader *shader = Renderer::getCurrentShader();
 	shader->setUniform("AMG_TexPosition", texPosition);
 	shader->setUniform("AMG_TexScale", texScale);
 	shader->setUniform("AMG_TexProgress", progress);
@@ -353,7 +346,7 @@ void Texture::animate(){
 		this->texPosition.z = (nfr % horizontalFrames) / (float)horizontalFrames;
 		this->texPosition.w = (nfr / verticalFrames) / (float)verticalFrames;
 		float p;
-			progress = modf(currentFrame, &p);
+		progress = modf(currentFrame, &p);
 	}
 }
 
@@ -374,7 +367,7 @@ void Texture::storeFrameData(float *data, int offset){
  * @brief Destructor for a Texture
  */
 Texture::~Texture() {
-	if(this->id) glDeleteTextures(1, &this->id);
+	if(this->id && !isCopy) glDeleteTextures(1, &this->id);
 }
 
 }

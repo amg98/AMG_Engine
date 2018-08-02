@@ -24,6 +24,7 @@ Framebuffer::Framebuffer(int w, int h, int n, int samples) {
 	this->height = h;
 	this->colorTexture = NULL;
 	this->depthTexture = NULL;
+	this->colorBuffer = NULL;
 
 	// Create a framebuffer object
 	glGenFramebuffers(1, &fbo);
@@ -50,7 +51,6 @@ Framebuffer::Framebuffer(int w, int h, int n, int samples) {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 	// Create the color buffers
-	colorBuffer = NULL;
 	if(n > 0 && samples > 0){
 		colorBuffer = (GLuint*) malloc (n * sizeof(GLuint));
 		nColorBuffers = n;
@@ -62,9 +62,12 @@ Framebuffer::Framebuffer(int w, int h, int n, int samples) {
 		}
 	}
 
+	// Check that the framebuffer is valid
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
 		Debug::showError(FRAMEBUFFER_CREATION, NULL);
 	}
+
+	// Unbind the framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -74,7 +77,6 @@ Framebuffer::Framebuffer(int w, int h, int n, int samples) {
 void Framebuffer::createDepthTexture(){
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT);
-	depthTexture->setDependency();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -85,7 +87,6 @@ void Framebuffer::createDepthTexture(){
 void Framebuffer::createColorTexture(int attachment){
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	colorTexture = new Texture(width, height, GL_RGB, GL_RGB, GL_COLOR_ATTACHMENT0 + attachment);
-	colorTexture->setDependency();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -105,7 +106,7 @@ void Framebuffer::bind(){
  */
 void Framebuffer::unbind(){
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, Renderer::currentRenderer->getWidth(), Renderer::currentRenderer->getHeight());
+	glViewport(0, 0, Renderer::getWidth(), Renderer::getHeight());
 }
 
 /**
@@ -128,7 +129,7 @@ void Framebuffer::blit(){
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	glDrawBuffer(GL_BACK);
-	glBlitFramebuffer(0, 0, width, height, 0, 0, Renderer::currentRenderer->getWidth(), Renderer::currentRenderer->getHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, Renderer::getWidth(), Renderer::getHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -140,8 +141,8 @@ Framebuffer::~Framebuffer() {
 	glDeleteRenderbuffers(1, &depthBuffer);
 	if(colorTexture) delete colorTexture;
 	if(depthTexture) delete depthTexture;
-	if(colorBuffer){
-		glDeleteRenderbuffers(1, colorBuffer);
+	if(colorBuffer && nColorBuffers > 0){
+		glDeleteRenderbuffers(nColorBuffers, colorBuffer);
 		free(colorBuffer);
 	}
 }

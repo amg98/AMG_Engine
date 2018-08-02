@@ -77,7 +77,6 @@ Terrain::Terrain(float x, float y, const char *texture){
 	// Create the material
 	Material **mat = (Material**) malloc (sizeof(Material*));
 	mat[0] = new Material(texture);
-	mat[0]->setDependency();
 	unsigned short *groups = (unsigned short*) malloc (3 * sizeof(unsigned short));
 	groups[0] = 0;
 	groups[1] = 2*(VERTEX_COUNT-1)*(VERTEX_COUNT-1)-1;
@@ -90,11 +89,10 @@ Terrain::Terrain(float x, float y, const char *texture){
  * @param renderer Window to draw this terrain
  */
 void Terrain::draw(){
-	Renderer *renderer = Renderer::currentRenderer;
-	renderer->updateFog();
-	renderer->updateLighting();
-	renderer->setTransformation(position, rotation, scale);
-	renderer->updateMVP();
+	Renderer::updateFog();
+	Renderer::updateLighting();
+	Renderer::setTransformation(position, rotation, scale);
+	Renderer::updateMVP();
 
 	this->enableBuffers();
 

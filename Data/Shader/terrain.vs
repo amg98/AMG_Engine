@@ -1,13 +1,16 @@
 #version 330 core
 
-const int AMG_LIGHTS = 1;
-
-#include <AMG_InputAnimatedModel.glsl>
+layout(location = 0) in vec3 AMG_Position;
+layout(location = 1) in vec2 AMG_UV;
+layout(location = 2) in vec3 AMG_Normal;
 
 #include <AMG_VertexCommon.glsl>
-#include <AMG_VertexTexture.glsl>
-#include <AMG_VertexLighting.glsl>
-#include <AMG_VertexFog.glsl>
+
+#include <AMG_ComputePosition.glsl>
+#include <AMG_PassTexcoords.glsl>
+#include <AMG_PassLighting.glsl>
+#include <AMG_PassLight.glsl>
+#include <AMG_PassFog.glsl>
 
 void main(){
     
@@ -16,7 +19,7 @@ void main(){
     
     // Pass data to the fragment shader
     AMG_PassTexcoords();
-	AMG_PassLighting(AMG_MV);
+	AMG_PassLighting(AMG_M);
     AMG_PassLight(AMG_M, 0);
     AMG_PassFog(AMG_MV);
 }

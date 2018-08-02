@@ -1,11 +1,12 @@
 #version 330 core
 
-const int AMG_TEXTURES = 1;
+layout (location = 0) out vec4 AMG_Color;
 
-#include <AMG_FragmentCommon2D.glsl>
-#include <AMG_FragmentAnimatedTexture.glsl>
+#include <AMG_FragmentCommon.glsl>
+
+#include <AMG_AnimatedTextureMap.glsl>
 
 void main(){
 
-    AMG_Color = AMG_SprColor * AMG_TextureMap(0);
+    AMG_Color = AMG_SprColor * AMG_AnimatedTextureMap(0);
 }

@@ -24,7 +24,6 @@ Font::Font(const char *tex, const char *fnt){
 	// Load the texture
 	glyphBuffer = NULL;
 	font = new Texture(tex);
-	font->setDependency();
 
 	// Create the glyph map
 	glyphs = std::tr1::unordered_map<char, AMG_Glyph*>();
@@ -223,8 +222,6 @@ Text *Font::createText(char *text, float size, float width, float height, int *r
 	free(vertices);
 	free(texcoords);
 	free(tbuf);
-	words.clear();
-	wordsSize.clear();
 
 	// Return the created text
 	return t;
@@ -235,7 +232,6 @@ Text *Font::createText(char *text, float size, float width, float height, int *r
  */
 Font::~Font() {
 	if(glyphBuffer) free(glyphBuffer);
-	glyphs.clear();
 	if(font) delete font;
 }
 

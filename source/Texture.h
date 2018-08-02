@@ -31,7 +31,8 @@ private:
 	int verticalFrames;		/**< Number of vertical frames in the sprite */
 	GLuint target;			/**< Texture mode */
 	float progress;			/**< Blending between frames */
-	float currentFrame;				/**< Current frame to show, it will be truncated */
+	float currentFrame;		/**< Current frame to show, it will be truncated */
+	bool isCopy;			/**< Is this texture a reference to another texture */
 	void loadTexture(const char *path);
 	static void loadTexture(const char *path, GLuint target, int *w, int *h);
 protected:

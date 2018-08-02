@@ -38,7 +38,7 @@ Light::Light(vec3 position, vec3 color) : Light(position, color, vec3(0, 0, 1)){
  * @param id Light's ID in the shader
  */
 void Light::enable(int id){
-	Shader *shader = Renderer::currentRenderer->getCurrentShader();
+	Shader *shader = Renderer::getCurrentShader();
 	sprintf(shaderText, "AMG_Light[%d].position", id);
 	shader->setUniform(std::string(shaderText), position);
 	sprintf(shaderText, "AMG_Lights[%d].color", id);

@@ -70,9 +70,7 @@ void MeshData::setIndexBuffer(void *data, int size){
  */
 void MeshData::draw(){
 	this->enableBuffers();
-
-	glDrawElements(GL_TRIANGLES, this->count, GL_UNSIGNED_SHORT, (void*)0);
-
+	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, (void*)0);
 	this->disableBuffers();
 }
 
@@ -82,9 +80,7 @@ void MeshData::draw(){
  */
 void MeshData::drawRaw(){
 	this->enableBuffers();
-
 	glDrawArrays(GL_TRIANGLES, 0, count);
-
 	this->disableBuffers();
 }
 
@@ -127,7 +123,6 @@ MeshData::~MeshData() {
 	if(this->indexid) glDeleteBuffers(1, &this->indexid);
 	if(this->vertices) free(vertices);
 	glDeleteVertexArrays(1, &this->id);
-	info.clear();
 }
 
 }

@@ -11,9 +11,8 @@
 
 namespace AMG {
 
-std::vector<Entity*> Entity::entities;
-
 static char _fullpath[256];
+int Entity::nEntities = 0;
 
 /**
  * @brief Get the full path of an Entity
@@ -44,44 +43,14 @@ char *Entity::getFullPath(const char *path, int type){
  * @brief Constructor of an Entity
  */
 Entity::Entity() {
-	this->index = entities.size();
-	//fprintf(stderr, "i=%d, Size: %d, ", index, entities.size());
-	entities.push_back(this);
-	/*fprintf(stderr, "Newsize: %d\n", entities.size());
-	fflush(stderr);*/
+	nEntities ++;
 }
 
 /**
  * @brief Destructor of an entity
  */
 Entity::~Entity() {
-	setDependency();
-}
-
-/**
- * @brief Set an Entity's dependant of other (delete it from the vector)
- */
-void Entity::setDependency(){
-	if(index != -1){
-		for(unsigned int i=index+1;i<entities.size();i++){
-			entities[i]->index -= 1;
-		}
-		entities.erase(entities.begin()+index);
-		/*fprintf(stderr, "erased %d, new size %d\n", index, entities.size());
-		fflush(stderr);*/
-		index = -1;
-	}
-}
-
-/**
- * @brief Static method to destroy all entities
- * @note Called internally by Renderer::exitProcess()
- */
-void Entity::destroyEntities(){
-	while(entities.size() > 0){
-		delete entities[entities.size() - 1];
-	}
-	std::vector<Entity*>().swap(entities);
+	nEntities --;
 }
 
 }

@@ -54,11 +54,10 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 		Debug::showError(TOO_MANY_BONES, NULL);
 	}
 	// Search root bone (must be only one)
-	Shader *shader = Renderer::currentRenderer->getCurrentShader();
+	GLuint boneMatrix = Renderer::getCurrentShader()->getUniform("AMG_BoneMatrix");
 	for(unsigned int i=0;i<nbones;i++){
 		if(bones[i].parent == 0xFFFF){
-			rootBone = new Bone(i, shader->getUniform("AMG_BoneMatrix"));
-			rootBone->setDependency();
+			rootBone = new Bone(i, boneMatrix);
 			rootBone->createChildren(bones, nbones);
 		}
 	}
@@ -71,8 +70,8 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 void Object::draw(){
 
 	// Transform the object
-	Renderer::currentRenderer->setTransformationZ(position, rotation, scale);
-	Renderer::currentRenderer->updateMVP();
+	Renderer::setTransformationZ(position, rotation, scale);
+	Renderer::updateMVP();
 
 	// Transform each bone
 	if(rootBone)

@@ -14,7 +14,7 @@ namespace AMG {
 
 /**
  * @class Particle
- * @brief Class that holds a Particle
+ * @brief Class that holds a Particle (quad)
  */
 class Particle {
 private:

@@ -24,9 +24,11 @@ private:
 	static Framebuffer *brightFB;		/**< Bright framebuffer */
 	static Shader *combineShader;		/**< Combine shader */
 	static Framebuffer *combineFB;		/**< Combine framebuffer */
+	static Sprite *bloomSprite;			/**< General purpose Sprite */
 public:
 	static void initialize(int width, int height);
 	static Framebuffer *render(Framebuffer *fb);
+	static void finish();
 };
 
 }

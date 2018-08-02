@@ -42,7 +42,6 @@ public:
 	vec2 &getCharShadowOffset(){ return charShadowOffset; }
 	vec3 &getCharOutlineColor(){ return charOutlineColor; }
 
-
 	Text(float *vertices, float *texcoords, int size, Texture *texture);
 	void draw();
 	virtual ~Text();

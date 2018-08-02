@@ -39,9 +39,14 @@ Animation::Animation(Keyframe **keyframelist, int nkeyframes) {
  * @param delta Number of frames to increase in this call
  */
 void Animation::increaseTime(float delta){
+
+	// Increase time
 	currentTime += delta;
+
+	// Loop the animation
 	if(currentTime > length){
-		currentTime = modf(currentTime, &length);
+		float l;
+		currentTime = modf(currentTime, &l);
 	}
 }
 
@@ -52,8 +57,12 @@ void Animation::increaseTime(float delta){
  * @return A float in [0, 1] telling the proximity to the last keyframe (1 is last, 0 is first)
  */
 float Animation::getKeyframes(Keyframe **first, Keyframe **last){
+
+	// Initial state
 	*first = keyframes[0];
 	*last = keyframes[0];
+
+	// Find 2 consecutive keyframes
 	for(unsigned int i=1;i<nkeyframes;i++){
 		*last = keyframes[i];
 		if((*last)->getInstant() > currentTime){
@@ -62,6 +71,7 @@ float Animation::getKeyframes(Keyframe **first, Keyframe **last){
 		*first = *last;
 	}
 
+	// Return the progress between 2 keyframes
 	return (currentTime - (*first)->getInstant())/((*last)->getInstant() - (*first)->getInstant());
 }
 
@@ -74,11 +84,15 @@ float Animation::getKeyframes(Keyframe **first, Keyframe **last){
  */
 void Animation::animateBone(Bone *bone, Keyframe *first, Keyframe *last, float progress){
 
+	// Calculate the position and rotation for the bone
 	int id = bone->getID();
 	vec3 pos = first->getPosition(id) + (last->getPosition(id) - first->getPosition(id)) * progress;
 	quat rot = glm::slerp(first->getRotation(id), last->getRotation(id), progress);
 
+	// Calculate the bone matrix
 	bone->getCurrentBindMatrix() = glm::translate(mat4(1.0f), pos) * glm::toMat4(rot);
+
+	// Calculate the children's bones
 	std::vector<Bone*> &children = bone->getChildren();
 	for(unsigned int i=0;i<children.size();i++){
 		this->animateBone(children[i], first, last, progress);
@@ -90,7 +104,7 @@ void Animation::animateBone(Bone *bone, Keyframe *first, Keyframe *last, float p
  */
 Animation::~Animation() {
 	for(unsigned int i=0;i<nkeyframes;i++){
-		if(keyframes[i]) delete keyframes[i];
+		delete keyframes[i];
 	}
 	if(keyframes) free(this->keyframes);
 }

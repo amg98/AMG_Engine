@@ -25,7 +25,6 @@ Material::Material(Texture *texture){
 	this->specularPower = 1.0f;
 	this->textures = std::vector<Texture*>();
 	textures.push_back(texture);
-	texture->setDependency();
 }
 
 /**
@@ -54,7 +53,6 @@ Material::Material(const char **names){
 	this->specularPower = 1.0f;
 	this->textures = std::vector<Texture*>();
 	Texture *tex = new Texture(names);
-	tex->setDependency();
 	this->textures.push_back(tex);
 }
 
@@ -80,7 +78,6 @@ void Material::addTexture(const char *texture){
 	Texture *tex = NULL;
 	if(texture){
 		tex = new Texture(texture);
-		tex->setDependency();
 		tex->setLod(-0.4f);			// -0.4 level of detail
 		tex->setAniso(4.0f);		// 4x anisotropic filtering
 		this->textures.push_back(tex);
@@ -100,7 +97,7 @@ void Material::apply(){
 	}else{
 		glEnable(GL_CULL_FACE);
 	}
-	Shader *shader = Renderer::currentRenderer->getCurrentShader();
+	Shader *shader = Renderer::getCurrentShader();
 	shader->setUniform("AMG_MaterialDiffuse", diffuse);
 	shader->setUniform("AMG_MaterialSpecular", specular);
 	shader->setUniform("AMG_MaterialAmbient", ambient);
@@ -119,9 +116,8 @@ void Material::disable(){
  */
 Material::~Material() {
 	for(unsigned int i=0;i<textures.size();i++){
-		if(textures[i]) delete textures[i];
+		delete textures[i];
 	}
-	textures.clear();
 }
 
 }

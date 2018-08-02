@@ -1,13 +1,12 @@
 #version 330 core
 
-const int AMG_LIGHTS = 1;
-const int AMG_TEXTURES = 1;
+layout (location = 0) out vec4 AMG_Color;
 
 #include <AMG_FragmentCommon.glsl>
 
-#include <AMG_FragmentTexture.glsl>
-#include <AMG_FragmentLighting.glsl>
-#include <AMG_FragmentFog.glsl>
+#include <AMG_ComputeLightCel.glsl>
+#include <AMG_TextureMap.glsl>
+#include <AMG_ComputeFog.glsl>
 
 void main(){
 

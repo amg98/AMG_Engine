@@ -37,8 +37,10 @@ public:
 	vec3 &getPosition(){ return position; }
 	vec3 &getRotation(){ return rot; }
 	mat4 &getMatrix(){ return camera; }
+	vec3 &getForward(){ return forward; }
+	vec3 &getRight(){ return right; }
 
-	Camera();
+	Camera(vec3 position);
 	vec3 getRay();
 	void update(GLFWwindow *window, float delta);
 	void lookAt(int side);

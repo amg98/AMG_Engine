@@ -34,7 +34,7 @@ Particle::Particle(vec3 position, vec3 velocity, float mass, float lifeLength, f
  * @return Whether the particle is dead or not
  */
 bool Particle::update(){
-	float delta = Renderer::currentRenderer->getDelta();
+	float delta = Renderer::getDelta();
 	velocity.y += -1.0f * mass * delta;
 	position += velocity * delta;
 	elapsedTime += delta;
@@ -48,7 +48,7 @@ bool Particle::update(){
  * @return Whether this is less than p
  */
 bool Particle::operator<(Particle &p){
-	Camera *cam = Renderer::currentRenderer->getCamera();
+	Camera *cam = Renderer::getCamera();
 	vec3 v1 = this->position - cam->getPosition();
 	vec3 v2 = p.position - cam->getPosition();
 	float d1 = glm::dot(v1, v1);

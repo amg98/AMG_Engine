@@ -141,7 +141,7 @@ void World::removeObject(Object *obj){
  */
 Object *World::getClickingObject(float rayLength){
 
-	Camera *cam = Renderer::currentRenderer->getCamera();
+	Camera *cam = Renderer::getCamera();
 	vec3 &camPos = cam->getPosition();
 	vec3 rayEnd = camPos + cam->getRay() * rayLength;
 	btVector3 start = btVector3(camPos.x, camPos.y, camPos.z);
@@ -196,8 +196,6 @@ World::~World() {
 	for(unsigned int i=0;i<shapes.size();i++){
 		delete shapes[i];
 	}
-	shapes.clear();
-	objects.clear();
 
 	delete dynamicsWorld;
 	delete solver;

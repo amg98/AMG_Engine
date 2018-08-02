@@ -22,7 +22,7 @@ namespace AMG {
 
 /**
  * @class Object
- * @brief Describes a 3D object, extends MeshData
+ * @brief Describes a 3D object
  */
 class Object: public MeshData {
 private:
