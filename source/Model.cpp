@@ -18,8 +18,9 @@ namespace AMG {
  * @brief Constructor for a 3D Model
  * @param path Path for the *.amd file
  * @param shader Shader to be used
+ * @param tangent Use tangent space data?
  */
-Model::Model(const char *path, Shader *shader) {
+Model::Model(const char *path, Shader *shader, bool tangent) {
 
 	// Initialize variables
 	this->nobjects = 0;
@@ -46,19 +47,28 @@ Model::Model(const char *path, Shader *shader) {
 	materials = (Material**) calloc (nmaterials, sizeof(Material*));
 
 	// Read all materials
+	char texpath[256];
 	for(unsigned int i=0;i<nmaterials;i++){
+
+		// Create the material
 		float buff[11];
 		fread(buff, sizeof(float), 11, f);
-		unsigned char len;
-		fread(&len, sizeof(unsigned char), 1, f);
-		char *path = NULL;
-		if(len > 0){		// Only if we have a texture
-			path = (char*) calloc (len+1, sizeof(char));
-			fread(path, len, sizeof(char), f);
-			path[len] = 0;
+		materials[i] = new Material(buff);
+
+		// Read the number of textures
+		unsigned char ntex;
+		fread(&ntex, sizeof(unsigned char), 1, f);
+
+		// Load each texture
+		for(unsigned int j=0;j<ntex;j++){
+			int len;
+			fread(&len, sizeof(unsigned char), 1, f);
+			if(len > 0){
+				fread(texpath, len, sizeof(char), f);
+				texpath[len] = 0;
+				materials[i]->addTexture(texpath);
+			}
 		}
-		materials[i] = new Material(buff, path);
-		if(path) free(path);
 	}
 
 	// Set up object information
@@ -80,9 +90,13 @@ Model::Model(const char *path, Shader *shader) {
 		float *vertices = (float*) malloc (vertices_size);
 		float *texcoords = (float*) malloc (texcoords_size);
 		float *normals = (float*) malloc (vertices_size);
+		float *tangents = (float*) malloc (vertices_size);
+		float *bitangents = (float*) malloc (vertices_size);
 		fread(vertices, sizeof(float), nvertices*3, f);
 		fread(texcoords, sizeof(float), nvertices*2, f);
 		fread(normals, sizeof(float), nvertices*3, f);
+		fread(tangents, sizeof(float), nvertices*3, f);
+		fread(bitangents, sizeof(float), nvertices*3, f);
 		fread(&nindices, sizeof(unsigned short), 1, f);
 		unsigned short *indices = (unsigned short*) malloc (nindices*sizeof(unsigned short));
 		fread(indices, sizeof(unsigned short), nindices, f);
@@ -97,11 +111,15 @@ Model::Model(const char *path, Shader *shader) {
 		objects[i] = new Object();
 		objects[i]->getBBox() = vec3(posdata[0], posdata[2], posdata[1]);
 		objects[i]->getPosition() = vec3(posdata[3], posdata[5], -posdata[4]);
-		objects[i]->getRotation() = quat(posdata[6], posdata[8], -posdata[7], posdata[9]);
+		objects[i]->getRotation() = quat(posdata[9], posdata[6], posdata[7], posdata[8]);
 		objects[i]->getScale() = vec3(posdata[10], posdata[12], posdata[11]);
 		objects[i]->addBuffer(vertices, vertices_size, 3, GL_FLOAT);
 		objects[i]->addBuffer(texcoords, texcoords_size, 2, GL_FLOAT);
 		objects[i]->addBuffer(normals, vertices_size, 3, GL_FLOAT);
+		if(tangent){		// Fill tangent space buffers, if necessary
+			objects[i]->addBuffer(tangents, vertices_size, 3, GL_FLOAT);
+			objects[i]->addBuffer(bitangents, vertices_size, 3, GL_FLOAT);
+		}
 		objects[i]->setIndexBuffer(indices, nindices*sizeof(unsigned short));
 		objects[i]->setMaterialGroups(groups, ngroups, materials, nmaterials);
 
@@ -141,6 +159,8 @@ Model::Model(const char *path, Shader *shader) {
 		free(texcoords);
 		free(normals);
 		free(indices);
+		free(tangents);
+		free(bitangents);
 		// Vertices and groups are deleted in its Object
 	}
 
@@ -177,13 +197,11 @@ Model::Model(const char *path, Shader *shader) {
  * @brief Draw a 3D model previously loaded
  */
 void Model::draw(){
-	glFrontFace(GL_CW);
 	Renderer::updateLighting();
 	Renderer::updateFog();
 	for(unsigned int i=0;i<nobjects;i++){
 		objects[i]->draw();
 	}
-	glFrontFace(GL_CCW);
 }
 
 /**

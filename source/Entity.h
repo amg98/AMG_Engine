@@ -20,6 +20,7 @@ enum EntityTypes {
 	AMG_MODEL = 1,
 	AMG_TEXTURE = 2,
 	AMG_SHADER = 3,
+	AMG_AUDIO = 4,
 };
 
 /**

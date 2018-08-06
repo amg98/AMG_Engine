@@ -29,6 +29,8 @@ enum ErrorCodes {
 	UNSUPPORTED_CHARACTER,			/**< When a character is not supported by a font */
 	FRAMEBUFFER_CREATION,			/**< When it fails creating a framebuffer object */
 	NO_VERTEX_DATA,					/**< When accessing unexistent vertex data (in a MeshData) */
+	NO_AUDIO_DEVICE,				/**< When an audio device is not supported */
+	NO_AUDIO_CONTEXT,				/**< When an audio context can't be created */
 };
 
 /**

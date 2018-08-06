@@ -23,6 +23,7 @@ def triangulate_object(obj):
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.to_mesh(me)
     bm.free()
+    me.calc_tangents()
 
 # Search a vertex in a buffer
 def buscaVertex(v0, t0, n0, vtx, txc, nrm):
@@ -85,17 +86,27 @@ def export(context, filepath, use_some_setting):
         f.write(struct.pack("@fffff", mat.diffuse_color[0], mat.diffuse_color[1], mat.diffuse_color[2], mat.diffuse_intensity, mat.alpha))
         f.write(struct.pack("@fffff", mat.specular_color[0], mat.specular_color[1], mat.specular_color[2], mat.specular_intensity, mat.specular_alpha))
         f.write(struct.pack("@f", mat.ambient))
-        if(len(mat.texture_slots) > 0 and mat.texture_slots[0] != None):
-            try:
-                print("Texture: " + str(mat.texture_slots[0].texture.image.filepath) + "\n")
-                texturepath = os.path.splitext(os.path.basename(mat.texture_slots[0].texture.image.filepath))[0]+'.dds'
-                f.write(struct.pack("@B", len(texturepath)))
-                f.write(bytes(texturepath, "utf-8"))
-            except AttributeError:
-                f.write(struct.pack("@B", 0))
-        else:
-            f.write(struct.pack("@B", 0))
-    
+        
+        ntextures = 0
+        if(len(mat.texture_slots) > 0):
+            for tex in mat.texture_slots:
+                if(tex != None):
+                    try:
+                        print("Texture: " + str(tex.texture.image.filepath) + "\n")
+                        ntextures += 1
+                    except AttributeError:
+                        print("Warning: empty texture")
+        f.write(struct.pack("@B", ntextures))
+        
+        if(ntextures > 0):
+            for tex in mat.texture_slots:
+                if(tex != None):
+                    try:
+                        texturepath = os.path.splitext(os.path.basename(tex.texture.image.filepath))[0]+'.dds'
+                        f.write(struct.pack("@B", len(texturepath)))
+                        f.write(bytes(texturepath, "utf-8"))
+                    except AttributeError:
+                        print("Warning: empty texture")
     objects = []
     
     # Write object data
@@ -112,6 +123,8 @@ def export(context, filepath, use_some_setting):
             groups = []
             weights = []
             weight_bones = []
+            tangents = []
+            bitangents = []
             bones = None
             currentMaterial = -1
             
@@ -124,6 +137,8 @@ def export(context, filepath, use_some_setting):
             for face in obj.data.polygons:
                 for vert, loop in zip(face.vertices, face.loop_indices):
                     normal = obj.data.vertices[vert].normal
+                    tangent = obj.data.loops[loop].tangent
+                    bitangent = obj.data.loops[loop].bitangent
                     vertex = obj.data.vertices[vert].co
                     texcoord = (obj.data.uv_layers.active.data[loop].uv if obj.data.uv_layers.active is not None else (0.0, 0.0))
                     
@@ -152,6 +167,8 @@ def export(context, filepath, use_some_setting):
                             weight_bones.append(weight_bonelist)
                         
                         normals.append(normal)
+                        tangents.append(tangent)
+                        bitangents.append(bitangent)
                     else:               # It was in the list
                         indices.append(index)
                         
@@ -163,7 +180,7 @@ def export(context, filepath, use_some_setting):
                     groups.append([len(indices)/3-1, -1, matid])
                     currentMaterial = face.material_index
             groups[len(groups)-1][1] = len(indices)/3
-            objects.append([vertices, texcoords, normals, indices, groups, weights, weight_bones, bones, obj])
+            objects.append([vertices, texcoords, normals, indices, groups, weights, weight_bones, bones, obj, tangents, bitangents])
     print("NObjects: " + str(len(objects)) + "\n")
     f.write(struct.pack("@B", len(objects)))
     for o in objects:
@@ -180,6 +197,12 @@ def export(context, filepath, use_some_setting):
         print("\n")
         print("NNormals: " + str(len(o[2]))+"\n")
         for n in o[2]:
+            #print("{" + str(n[0]) + ", " + str(n[1]) + ", " + str(n[2]) + "}\n")
+            f.write(struct.pack("@fff", n[0], n[1], n[2]))
+        for n in o[9]:
+            #print("{" + str(n[0]) + ", " + str(n[1]) + ", " + str(n[2]) + "}\n")
+            f.write(struct.pack("@fff", n[0], n[1], n[2]))
+        for n in o[10]:
             #print("{" + str(n[0]) + ", " + str(n[1]) + ", " + str(n[2]) + "}\n")
             f.write(struct.pack("@fff", n[0], n[1], n[2]))
         print("\n")

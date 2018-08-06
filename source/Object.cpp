@@ -19,7 +19,7 @@ namespace AMG {
  */
 Object::Object() {
 	this->position = vec3(0.0f, 0.0f, 0.0f);
-	this->rotation = quat();
+	this->rotation = quat(1, 0, 0, 0);
 	this->scale = vec3(1.0f, 1.0f, 1.0f);
 	this->groups = NULL;
 	this->ngroups = 0;

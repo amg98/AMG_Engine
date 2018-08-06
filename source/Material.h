@@ -42,7 +42,7 @@ public:
 	Material(Texture *texture);
 	Material(const char *path);
 	Material(const char **names);
-	Material(float *data, const char *path);
+	Material(float *data);
 	void addTexture(const char *texture);
 	void apply();
 	void disable();

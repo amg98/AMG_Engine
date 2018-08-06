@@ -17,14 +17,18 @@
 #include "World.h"
 #include "MotionBlur.h"
 #include "LensFlare.h"
+#include "AudioPlayer.h"
+#include "SFX.h"
+#include "Music.h"
+#include "AudioSource.h"
 using namespace AMG;
 
 // Definition of objects
 Camera *cam = NULL;
-Model *link = NULL, *bullet = NULL;
+Model *link = NULL, *bullet = NULL, *barrel = NULL;
 Terrain *terrain = NULL;
 Skybox *skybox = NULL;
-Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *s6 = NULL;
+Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *s6 = NULL, *s7 = NULL;
 Text *hello = NULL;
 Sprite *sprite = NULL;
 ParticleSource *source = NULL;
@@ -63,6 +67,10 @@ void render(){
 	link->animate(0, 0);
 	link->draw();
 
+	s7->enable();
+	barrel->draw();
+	barrel->getObject(0)->getRotation() *= quat(vec3(0, 0.01f, 0));
+
 	s6->enable();
 	Renderer::updateReflections(cubeMap, 0);
 	bullet->draw();
@@ -97,6 +105,7 @@ void render(){
 void unload(){
 	MotionBlur::finish();
 	AMG_DELETE(cam);
+	AMG_DELETE(barrel);
 	AMG_DELETE(link);
 	AMG_DELETE(bullet);
 	AMG_DELETE(terrain);
@@ -108,6 +117,7 @@ void unload(){
 	AMG_DELETE(s4);
 	AMG_DELETE(s5);
 	AMG_DELETE(s6);
+	AMG_DELETE(s7);
 	AMG_DELETE(hello);
 	AMG_DELETE(sprite);
 	AMG_DELETE(cubeMap);
@@ -136,11 +146,13 @@ int main(int argc, char **argv){
 	s4 = new Shader("text2d.vs", "text2d.fs");
 	s5 = new Shader("particles.vs", "particles.fs");
 	s6 = new Shader("bullet.vs", "bullet.fs");
+	s7 = new Shader("barrel.vs", "barrel.fs");
 
 	light = new Light(vec3(0, 3, 3), vec3(1, 1, 0), vec3(0.0f, 0, 1));
 	s0->getLights().push_back(light);
 	s1->getLights().push_back(light);
 	s6->getLights().push_back(light);
+	s7->getLights().push_back(light);
 
 	link = new Model("model2.amd", s0);
 	link->getObject(0)->getScale() = vec3(0.1f, 0.1f, 0.1f);
@@ -149,6 +161,10 @@ int main(int argc, char **argv){
 	bullet = new Model("bullet.amd", s0);
 	bullet->getObject(1)->getScale() = vec3(0.2f, 0.2f, 0.2f);
 	bullet->getObject(2)->getScale() = vec3(0.5f, 0.5f, 0.5f);
+
+	barrel = new Model("barrel.amd", s0, true);
+	barrel->getObject(0)->getScale() = vec3(0.1f, 0.1f, 0.1f);
+	barrel->getObject(0)->getPosition() = vec3(0.0f, 3.0f, -3.0f);
 
 	terrain = new Terrain(-0.5f, 0, "grassy2.dds");
 	terrain->getMaterial(0)->addTexture("grassFlowers.dds");

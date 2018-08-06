@@ -70,6 +70,12 @@ void Debug::showError(int code, void *param){
 		case 16:
 			fprintf(stderr, "Vertex data not existent in MeshData\n");
 			break;
+		case 17:
+			fprintf(stderr, "The audio device is not supported\n");
+			break;
+		case 18:
+			fprintf(stderr, "Couldn't create an audio context\n");
+			break;
 		default:
 			fprintf(stderr, "Unknown error\n");
 			break;

@@ -59,16 +59,14 @@ Material::Material(const char **names){
 /**
  * @brief Constructor for a Material
  * @param data Float data which was loaded from a model
- * @param texture Texture path (if its NULL it doesn't load a texture)
  */
-Material::Material(float *data, const char *texture) {
+Material::Material(float *data) {
 	this->diffuse = vec4(data[0], data[1], data[2], data[4]);
 	this->specular = vec4(data[5], data[6], data[7], data[9]);
 	this->ambient = data[10];
 	this->diffusePower = data[3];
 	this->specularPower = data[8];
 	this->textures = std::vector<Texture*>();
-	addTexture(texture);
 }
 
 /**

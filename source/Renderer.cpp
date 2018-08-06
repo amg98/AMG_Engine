@@ -149,7 +149,7 @@ void Renderer::initialize(int w, int h, const char *title, bool resize, bool ful
 	mvp = glm::mat4(1.0f);
 	mv = glm::mat4(1.0f);
 	calculateProjection();
-	zupConversion = glm::scale(vec3(1, 1, -1)) * glm::rotate(3.141592f/2, vec3(1, 0, 0));
+	zupConversion = glm::scale(vec3(1, -1, -1)) * glm::rotate(3.141592f/2, vec3(1, 0, 0));
 	set3dMode(true);
 
 	// Create the sample quad for 2D drawing and particles
