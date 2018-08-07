@@ -4,3 +4,9 @@
 /Doc/
 /Tools/
 /OpenAL 1.1 SDK/
+/OpenAL32.dll
+/glew32.dll
+/glfw3.dll
+/libogg-0.dll
+/libvorbis-0.dll
+/libvorbisfile-3.dll

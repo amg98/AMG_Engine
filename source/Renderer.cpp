@@ -306,6 +306,15 @@ void Renderer::setTransformation(vec3 pos, quat rot, vec3 scale){
 }
 
 /**
+ * @brief Calculate model matrix from translation and scale vectors
+ * @param pos Position vector
+ * @param scale Vector of scale (1.0f, 1.0f, 1.0f) is default size
+ */
+void Renderer::setTransformation(vec3 pos, vec3 scale){
+	model = glm::translate(mat4(1.0f), pos) * glm::scale(scale);
+}
+
+/**
  * @brief Calculate model matrix from translation vector
  * @param pos Position vector
  */
@@ -341,6 +350,7 @@ void Renderer::setTransformationBillboard(vec3 pos, float rot, float scale){
 void Renderer::updateMVP(){
 	mv = view * model;
 	mvp = *projection * mv;
+	if(camera) currentShader->setUniform("AMG_CamPosition", camera->getPosition());
 	currentShader->setUniform("AMG_MVP", mvp);
 	currentShader->setUniform("AMG_MV", mv);
 	currentShader->setUniform("AMG_M", model);

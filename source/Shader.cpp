@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "Debug.h"
 #include "Renderer.h"
+#include "WaterTile.h"
 
 namespace AMG {
 
@@ -154,6 +155,7 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, con
 	internalDefineUniform("AMG_ShadowMatrix");
 	internalDefineUniform("AMG_ShadowDistance");
 	internalDefineUniform("AMG_ShadowMapSize");
+	internalDefineUniform("AMG_ClippingPlanes");
 
 	// Define fragment shader uniforms
 	internalDefineUniform("AMG_MaterialDiffuse");
@@ -278,6 +280,42 @@ void Shader::enable(){
 		glUseProgram(programID);
 		Renderer::setCurrentShader(this);
 	}
+}
+
+/**
+ * @brief Setup a clipping plane for this shader
+ * @param id Clipping plane ID (0-7)
+ * @param plane Plane equation for the clipping plane
+ */
+void Shader::setClipPlane(int id, vec4 &plane){
+	glEnable(GL_CLIP_DISTANCE0 + id);
+	glUniform4f(getUniform("AMG_ClippingPlanes") + id, plane.x, plane.y, plane.z, plane.w);
+}
+
+/**
+ * @brief Setup a clipping plane for this shader (water rendering)
+ * @param plane Plane equation for the clipping plane
+ */
+void Shader::setWaterClipPlane(vec4 &plane){
+	glEnable(GL_CLIP_DISTANCE0 + AMG_WATER_CLIPPING_PLANE);
+	glUniform4f(getUniform("AMG_ClippingPlanes") + AMG_WATER_CLIPPING_PLANE, plane.x, plane.y, plane.z, plane.w);
+}
+
+/**
+ * @brief Disables a clipping plane
+ * @param id Clipping plane ID (0-7)
+ */
+void Shader::disableClipPlane(int id){
+	glUniform4f(getUniform("AMG_ClippingPlanes") + id, 0, 1, 0, 100000);	// Some gpu's ignore the glDisable call
+	glDisable(GL_CLIP_DISTANCE0 + id);
+}
+
+/**
+ * @brief Disables the water engine's clipping plane
+ */
+void Shader::disableWaterClipPlane(){
+	glUniform4f(getUniform("AMG_ClippingPlanes") + AMG_WATER_CLIPPING_PLANE, 0, 1, 0, 100000);
+	glDisable(GL_CLIP_DISTANCE0 + AMG_WATER_CLIPPING_PLANE);
 }
 
 /**

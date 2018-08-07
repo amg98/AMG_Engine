@@ -45,6 +45,7 @@ public:
 
 	Camera(vec3 position);
 	vec3 getRay();
+	void update();
 	void update(GLFWwindow *window, float delta);
 	void lookAt(int side);
 	virtual ~Camera();

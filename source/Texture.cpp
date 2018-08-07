@@ -112,8 +112,8 @@ Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
 	glGenTextures(1, &id);
 	glBindTexture(target, id);
 	glTexImage2D(target, 0, mode, w, h, 0, mode2, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, id, 0);

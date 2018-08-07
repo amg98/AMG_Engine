@@ -11,9 +11,12 @@ layout(location = 2) in vec3 AMG_Normal;
 #include <AMG_PassLighting.glsl>
 #include <AMG_PassLight.glsl>
 #include <AMG_PassShadows.glsl>
+#include <AMG_WaterClipPlane.glsl>
 
 void main(){
     
+	AMG_WaterClipPlane(vec4(AMG_Position, 1));
+	
     // Compute final vertex position
     AMG_ComputePosition();
 	

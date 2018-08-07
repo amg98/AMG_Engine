@@ -73,11 +73,8 @@ void Camera::update(GLFWwindow *window, float delta){
 		rot.x -= 3.141592f/2.0f * delta;
 	}
 
-	// Compute the rotation quaternion
-	this->rotation = glm::normalize(glm::angleAxis(rot.z, vec3(0, 0, 1)) * glm::angleAxis(rot.y, vec3(0, 1, 0)) * glm::angleAxis(rot.x, vec3(1, 0, 0)));
-
-	// Compute the forward and right vectors
-	computeTrihedron();
+	// Compute the camera view matrix
+	update();
 
 	// Move the camera
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
@@ -90,8 +87,14 @@ void Camera::update(GLFWwindow *window, float delta){
 	} else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
 		this->position -= forward * delta * speed;
 	}
+}
 
-	// Compute the camera view matrix
+/**
+ * @brief Update the camera matrix
+ */
+void Camera::update(){
+	this->rotation = glm::normalize(glm::angleAxis(rot.z, vec3(0, 0, 1)) * glm::angleAxis(rot.y, vec3(0, 1, 0)) * glm::angleAxis(rot.x, vec3(1, 0, 0)));
+	computeTrihedron();
 	this->camera = glm::toMat4(glm::conjugate(this->rotation)) * glm::translate(mat4(1.0f), -this->position);
 	Renderer::setView(this->camera);
 }

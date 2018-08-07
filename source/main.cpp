@@ -22,6 +22,7 @@
 #include "Music.h"
 #include "AudioSource.h"
 #include "ShadowRenderer.h"
+#include "WaterTile.h"
 using namespace AMG;
 
 // Definition of objects
@@ -38,6 +39,7 @@ Texture *cubeMap = NULL;
 LensFlare *lens = NULL;
 Light *light = NULL;
 Font *font = NULL;
+WaterTile *water = NULL;
 
 void renderSimple(){
 
@@ -57,13 +59,51 @@ void renderShadows(){
 	barrel->drawSimple();
 }
 
+void renderWater(vec4 plane){
+	s0->enable();
+	s0->setWaterClipPlane(plane);
+	link->draw();
+	s0->disableWaterClipPlane();
+
+	s7->enable();
+	s7->setWaterClipPlane(plane);
+	barrel->draw();
+	s7->disableWaterClipPlane();
+
+	s6->enable();
+	s6->setWaterClipPlane(plane);
+	Renderer::updateReflections(cubeMap, 0);
+	bullet->draw();
+	s6->disableWaterClipPlane();
+
+	s1->enable();
+	s1->setWaterClipPlane(plane);
+	ShadowRenderer::updateShadows(5);
+	terrain->draw();
+	s1->disableWaterClipPlane();
+
+	s2->enable();
+	s2->setWaterClipPlane(plane);
+	skybox->draw();
+	s2->disableWaterClipPlane();
+
+	s5->enable();
+	s5->setWaterClipPlane(plane);
+	source->draw(GL_ONE);
+	s5->disableWaterClipPlane();
+}
+
 void render(){
 
 	Renderer::updateCamera(cam);
 
 	ShadowRenderer::updateShadowMap(renderShadows, light);
 
+	water->prepare(renderWater);
+
 	MotionBlur::bind();
+
+	water->draw();
 
 	Object *clicked = Renderer::getWorld()->getClickingObject(20.0f);
 	if(clicked == bullet->getObject(2)){
@@ -115,6 +155,8 @@ void render(){
 void unload(){
 	MotionBlur::finish();
 	ShadowRenderer::finish();
+	WaterTile::finish();
+	AMG_DELETE(water);
 	AMG_DELETE(cam);
 	AMG_DELETE(barrel);
 	AMG_DELETE(link);
@@ -149,6 +191,9 @@ int main(int argc, char **argv){
 	Renderer::getFogGradient() = 5.0f;
 
 	ShadowRenderer::initialize(2048, 10.0f, 100.0f);
+
+	WaterTile::initialize(light);
+	water = new WaterTile("waterNormalMap.dds", "waterDUDV.dds", vec3(0, 2.5f, -10), 5.0f);
 
 	cam = new Camera(vec3(0, 3, 5));
 

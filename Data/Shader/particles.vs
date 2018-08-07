@@ -10,9 +10,11 @@ layout(location = 7) in float AMG_InstancedTexProgress;
 
 #include <AMG_ComputeParticlesPosition.glsl>
 #include <AMG_PassTexcoordsParticles.glsl>
+#include <AMG_WaterClipPlane.glsl>
 
 void main(){
 	
+	AMG_WaterClipPlane(vec4(AMG_Position, 0, 1));
 	AMG_ComputeParticlesPosition();
 	AMG_PassTexcoordsParticles();
 }

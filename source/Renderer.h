@@ -96,6 +96,7 @@ public:
 	static void setTransformationZ(vec3 pos, quat rot, vec3 scale);
 	static void setTransformation(vec3 pos, quat rot, vec3 scale);
 	static void setTransformation(vec3 pos);
+	static void setTransformation(vec3 pos, vec3 scale);
 	static void setTransformationBillboard(vec3 pos, float rot, float scale);
 	static void updateMVP();
 	static void storeMVP(float *data, int offset);

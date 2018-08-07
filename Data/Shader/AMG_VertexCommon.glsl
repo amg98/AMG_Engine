@@ -17,6 +17,7 @@ uniform vec2 AMG_TexScale;
 uniform vec4 AMG_TexPosition;
 uniform mat4 AMG_ShadowMatrix;
 uniform float AMG_ShadowDistance;
+uniform vec4 AMG_ClippingPlanes[8];
 
 out vec2 AMG_OutUV;
 out vec3 AMG_OutToLight[AMG_LIGHTS];

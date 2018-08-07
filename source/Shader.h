@@ -51,6 +51,10 @@ public:
 	void setUniform(const std::string &name, vec3 &v);
 	void setUniform(const std::string &name, vec4 &v);
 	void setUniform(const std::string &name, mat4 &v);
+	void setClipPlane(int id, vec4 &plane);
+	void setWaterClipPlane(vec4 &plane);
+	void disableClipPlane(int id);
+	void disableWaterClipPlane();
 	void enable();
 	inline void disable(){ glUseProgram(0); }
 	virtual ~Shader();
