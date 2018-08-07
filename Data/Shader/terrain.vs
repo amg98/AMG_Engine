@@ -10,16 +10,16 @@ layout(location = 2) in vec3 AMG_Normal;
 #include <AMG_PassTexcoords.glsl>
 #include <AMG_PassLighting.glsl>
 #include <AMG_PassLight.glsl>
-#include <AMG_PassFog.glsl>
+#include <AMG_PassShadows.glsl>
 
 void main(){
     
     // Compute final vertex position
     AMG_ComputePosition();
-    
+	
     // Pass data to the fragment shader
     AMG_PassTexcoords();
 	AMG_PassLighting(AMG_M);
     AMG_PassLight(AMG_M, 0);
-    AMG_PassFog(AMG_MV);
+	AMG_PassShadows();
 }

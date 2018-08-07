@@ -24,11 +24,9 @@ namespace AMG {
 /**
  * @brief Constructor of one bone
  * @param id Bone ID to set
- * @param glid ID of the matrix uniform in the shader, return value of glGetUniformLocation()
  */
-Bone::Bone(int id, int glid) {
+Bone::Bone(int id) {
 	this->id = id;
-	this->openglid = glid + id;				// At the specified array index
 	this->children = std::vector<Bone*>();
 	this->localBindMatrix = mat4(1.0f);
 	this->modelMatrixInv = mat4(1.0f);
@@ -51,7 +49,7 @@ void Bone::createChildren(bone_t *bones, int nbones){
 	// If there are children
 	if(bones[id].nchildren > 0){
 		for(int i=0;i<bones[id].nchildren;i++){
-			Bone *bone = new Bone(bones[id].children[i], openglid - id);
+			Bone *bone = new Bone(bones[id].children[i]);
 			bone->createChildren(bones, nbones);		// Create children recursively
 			this->children.push_back(bone);
 		}
@@ -79,7 +77,8 @@ void Bone::calculateBoneMatrix(Bone *parent){
 
 	// Perform the final matrix and push it to the shader
 	this->transformMatrix *= this->modelMatrixInv;
-	glUniformMatrix4fv(this->openglid, 1, GL_FALSE, &this->transformMatrix[0][0]);
+	GLuint openglid = Renderer::getCurrentShader()->getUniform("AMG_BoneMatrix");
+	glUniformMatrix4fv(openglid + id, 1, GL_FALSE, &this->transformMatrix[0][0]);
 }
 
 /**

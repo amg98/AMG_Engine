@@ -17,10 +17,9 @@ namespace AMG {
 /**
  * @brief Constructor for a 3D Model
  * @param path Path for the *.amd file
- * @param shader Shader to be used
  * @param tangent Use tangent space data?
  */
-Model::Model(const char *path, Shader *shader, bool tangent) {
+Model::Model(const char *path, bool tangent) {
 
 	// Initialize variables
 	this->nobjects = 0;
@@ -30,7 +29,6 @@ Model::Model(const char *path, Shader *shader, bool tangent) {
 	this->materials = NULL;
 	this->animations = NULL;
 	this->fps = 0;
-	shader->enable();
 
 	// Open file
 	FILE *f = fopen(getFullPath(path, AMG_MODEL), "rb");
@@ -201,6 +199,15 @@ void Model::draw(){
 	Renderer::updateFog();
 	for(unsigned int i=0;i<nobjects;i++){
 		objects[i]->draw();
+	}
+}
+
+/**
+ * @brief Draw a 3D model previously loaded, in the simplest way possible
+ */
+void Model::drawSimple(){
+	for(unsigned int i=0;i<nobjects;i++){
+		objects[i]->drawSimple();
 	}
 }
 

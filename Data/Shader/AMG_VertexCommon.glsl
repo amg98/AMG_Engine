@@ -15,6 +15,8 @@ uniform float AMG_FogGradient;
 uniform vec3 AMG_CamPosition;
 uniform vec2 AMG_TexScale;
 uniform vec4 AMG_TexPosition;
+uniform mat4 AMG_ShadowMatrix;
+uniform float AMG_ShadowDistance;
 
 out vec2 AMG_OutUV;
 out vec3 AMG_OutToLight[AMG_LIGHTS];
@@ -27,3 +29,4 @@ out vec3 AMG_RefractedVector;
 out vec2 AMG_OutUV2[2];
 out float AMG_TexBlend;
 out vec3 AMG_OutUV3D;
+out vec4 AMG_OutShadowCoord;

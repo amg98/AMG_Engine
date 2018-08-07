@@ -43,23 +43,25 @@ private:
 	static AMG_FunctionCallback unloadCb;		/**< Unload callback */
 	static mat4 *projection;					/**< Current projection matrix */
 	static mat4 perspective, ortho;				/**< Precalculated perspective and ortho matrices */
+	static mat4 view;							/**< View matrix */
 	static mat4 invPerspective;					/**< Inverse perspective matrix, for ray tracing */
 	static mat4 model;							/**< Model matrix */
 	static mat4 mvp;							/**< Concatenation of Model, Projection and Camera matrices */
 	static mat4 mv;								/**< Model view matrix */
+	static Camera *camera;						/**< Current set camera */
 	static int width;							/**< Window width, in pixels */
 	static int height;							/**< Window height, in pixels */
 	static int FPS;								/**< The actual frames per second */
 	static float fogDensity;					/**< Fog density */
 	static float fogGradient;					/**< Fog gradient */
 	static vec4 fogColor;						/**< Fog color, same as clear color */
-	static Camera *camera;						/**< Current set camera */
 	static Shader *currentShader;				/**< Current used shader */
 	static mat4 zupConversion;					/**< Matrix to use with Z up coordinate systems */
 	static World *world;						/**< Physics world, optional */
 	static GLuint quadID;						/**< OpenGL buffer ID for a quad */
 	static GLuint quadVertices;					/**< OpenGL buffer ID for the quad's vertices */
 	static GLuint quadTexcoords;				/**< OpenGL buffer ID for the quad's texture coordinates */
+	static float fov;							/**< Field of view, in radians */
 	Renderer(){}
 public:
 	static bool initialized(){ return init; }
@@ -73,12 +75,18 @@ public:
 	static mat4 &getPerspective(){ return perspective; }
 	static mat4 &getOrtho(){ return ortho; }
 	static mat4 &getInversePerspective(){ return invPerspective; }
-	static Camera *getCamera(){ return camera; }
 	static Shader *getCurrentShader(){ return currentShader; }
 	static World *getWorld(){ return world; }
+	static float getFOV(){ return fov; }
+	static float getAspectRatio(){ return (float)width / (float)height; }
+	static void setProjection(mat4 *m){ projection = m; }
+	static void setPerspective(){ projection = &perspective; }
+	static void setOrtho(){ projection = &ortho; }
+	static void setView(mat4 &v){ view = v; }
 	static void setCurrentShader(Shader *shader){ currentShader = shader; }
 	static void setRenderCallback(AMG_FunctionCallback cb){ renderCb = cb; }
 	static void setUnloadCallback(AMG_FunctionCallback cb){ unloadCb = cb; }
+	static Camera *getCamera(){ return camera; }
 
 	static int exitProcess();
 	static Texture *createCubeMap(AMG_FunctionCallback render, Shader *shader, int dimensions, vec3 position);
@@ -94,7 +102,7 @@ public:
 	static void set3dMode(bool mode);
 	static void calculateProjection();
 	static void calculatePanoramicProjection();
-	static void setCamera(Camera *cam);
+	static void updateCamera(Camera *cam);
 	static void updateFog();
 	static void updateLighting();
 	static void getMousePosition(double *x, double *y);
@@ -103,6 +111,7 @@ public:
 	static void updateReflections(Texture *cubeMap, int slot);
 	static void resize(int w, int h);
 	static void bindQuad(bool vao);
+	static void setFOV(float fieldOfView);
 };
 
 }

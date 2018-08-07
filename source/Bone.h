@@ -39,7 +39,6 @@ typedef struct{
  */
 class Bone: public Entity {
 private:
-	int openglid;					/**< ID of the bone matrix in the shader */
 	int id;							/**< ID of this bone, it is object-specific */
 	mat4 modelMatrixInv;			/**< Bone Space to Model Space Matrix */
 	mat4 transformMatrix;			/**< Final bone matrix, which is passed to the shader */
@@ -52,7 +51,7 @@ public:
 	std::vector<Bone*> &getChildren(){ return children; }
 	int getID(){ return id;}
 
-	Bone(int id, int glid);
+	Bone(int id);
 	void createChildren(bone_t *bones, int nbones);
 	void calculateBoneMatrix(Bone *parent);
 	virtual ~Bone();

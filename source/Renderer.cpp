@@ -26,12 +26,14 @@ mat4 Renderer::invPerspective;
 mat4 Renderer::model;
 mat4 Renderer::mvp;
 mat4 Renderer::mv;
+mat4 Renderer::view;
 int Renderer::width;
 int Renderer::height;
 int Renderer::FPS;
 float Renderer::fogDensity;
 float Renderer::fogGradient;
 vec4 Renderer::fogColor;
+float Renderer::fov;
 Camera *Renderer::camera;
 Shader *Renderer::currentShader;
 mat4 Renderer::zupConversion;
@@ -85,7 +87,6 @@ void Renderer::initialize(int w, int h, const char *title, bool resize, bool ful
 	if(init) return;
 
 	// Initialise variables
-	camera = NULL;
 	width = w;
 	height = h;
 	renderCb = NULL;
@@ -96,6 +97,7 @@ void Renderer::initialize(int w, int h, const char *title, bool resize, bool ful
 	fogGradient = 1.0f;
 	currentShader = NULL;
 	world = NULL;
+	fov = glm::radians(45.0f);
 
 	// Initialise GLFW
 	if(!glfwInit())
@@ -145,9 +147,10 @@ void Renderer::initialize(int w, int h, const char *title, bool resize, bool ful
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	// Calculate matrices
-	model = glm::mat4(1.0f);
-	mvp = glm::mat4(1.0f);
-	mv = glm::mat4(1.0f);
+	model = mat4(1.0f);
+	mvp = mat4(1.0f);
+	mv = mat4(1.0f);
+	view = mat4(1.0f);
 	calculateProjection();
 	zupConversion = glm::scale(vec3(1, -1, -1)) * glm::rotate(3.141592f/2, vec3(1, 0, 0));
 	set3dMode(true);
@@ -173,12 +176,23 @@ void Renderer::createWorld(){
 	world = new World();
 }
 
+
+/**
+ * @brief Set the renderer's field of view
+ * @param fieldOfView Field of view, in radians
+ */
+void Renderer::setFOV(float fieldOfView){
+	fov = fieldOfView;
+	perspective = glm::perspective(fov, (float)width/(float)height, 0.1f, 1000.0f);
+	invPerspective = glm::inverse(perspective);
+}
+
 /**
  * @brief Calculate projection matrices
  * @note Called whenever a window is created or resized
  */
 void Renderer::calculateProjection(){
-	perspective = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.1f, 1000.0f);
+	perspective = glm::perspective(fov, (float)width/(float)height, 0.1f, 1000.0f);
 	invPerspective = glm::inverse(perspective);
 	ortho = glm::ortho(0.0f, (float)width, 0.0f, (float)height, -1.0f, 1.0f);
 }
@@ -307,20 +321,17 @@ void Renderer::setTransformation(vec3 pos){
  * @note We need a set camera to call this
  */
 void Renderer::setTransformationBillboard(vec3 pos, float rot, float scale){
-	if(camera){		// We need a camera set
-		mat4 &view = camera->getMatrix();
-		model = glm::translate(mat4(1.0f), pos);
-		model[0][0] = view[0][0];
-		model[0][1] = view[1][0];
-		model[0][2] = view[2][0];
-		model[1][0] = view[0][1];
-		model[1][1] = view[1][1];
-		model[1][2] = view[2][1];
-		model[2][0] = view[0][2];
-		model[2][1] = view[1][2];
-		model[2][2] = view[2][2];
-		model *= glm::rotate(rot, vec3(0, 0, 1)) * glm::scale(vec3(scale, scale, scale));
-	}
+	model = glm::translate(mat4(1.0f), pos);
+	model[0][0] = view[0][0];
+	model[0][1] = view[1][0];
+	model[0][2] = view[2][0];
+	model[1][0] = view[0][1];
+	model[1][1] = view[1][1];
+	model[1][2] = view[2][1];
+	model[2][0] = view[0][2];
+	model[2][1] = view[1][2];
+	model[2][2] = view[2][2];
+	model *= glm::rotate(rot, vec3(0, 0, 1)) * glm::scale(vec3(scale, scale, scale));
 }
 
 /**
@@ -328,11 +339,7 @@ void Renderer::setTransformationBillboard(vec3 pos, float rot, float scale){
  * @note Called internally when an Object needs to be rendered
  */
 void Renderer::updateMVP(){
-	if(camera){
-		mv = camera->getMatrix() * model;
-	}else{
-		mv = model;
-	}
+	mv = view * model;
 	mvp = *projection * mv;
 	currentShader->setUniform("AMG_MVP", mvp);
 	currentShader->setUniform("AMG_MV", mv);
@@ -362,17 +369,18 @@ void Renderer::set3dMode(bool mode){
 		projection = &ortho;
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
-		setCamera(NULL);
 		glDisable(GL_CULL_FACE);
+		view = mat4(1.0f);
 	}
 }
 
 /**
- * @brief Set a current Camera for this Renderer, and updates it
+ * @brief Update a camera in the Renderer
+ * @param cam Camera to be set
  */
-void Renderer::setCamera(Camera *cam){
+void Renderer::updateCamera(Camera *cam){
 	camera = cam;
-	if(camera) camera->update(window, getDelta());
+	cam->update(window, getDelta());
 }
 
 /**
@@ -446,7 +454,7 @@ Texture *Renderer::createCubeMap(AMG_FunctionCallback render, Shader *shader, in
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->getID(), 0);
 		// Setup the camera
 		cam->lookAt(i);
-		setCamera(cam);
+		updateCamera(cam);
 		// Render the scene
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		render();

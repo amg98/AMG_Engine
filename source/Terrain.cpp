@@ -86,7 +86,6 @@ Terrain::Terrain(float x, float y, const char *texture){
 
 /**
  * @brief Render a Terrain object
- * @param renderer Window to draw this terrain
  */
 void Terrain::draw(){
 	Renderer::updateFog();

@@ -35,6 +35,7 @@ Camera::Camera(vec3 position) {
 	this->camera = glm::translate(mat4(1.0f), -this->position);
 	this->rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	this->rot = vec3(0, 0, 0);
+	this->speed = 2.0f;
 	this->computeTrihedron();
 }
 
@@ -48,8 +49,8 @@ Camera::~Camera() {
  * @brief Compute the camera trihedron
  */
 void Camera::computeTrihedron(){
-	forward = glm::normalize(this->rotation * vec3(0, 0, 1)) * 2.0f;
-	right = glm::normalize(this->rotation * vec3(1, 0, 0)) * 2.0f;
+	forward = glm::normalize(this->rotation * vec3(0, 0, -1));
+	right = glm::normalize(this->rotation * vec3(1, 0, 0));
 }
 
 /**
@@ -80,18 +81,19 @@ void Camera::update(GLFWwindow *window, float delta){
 
 	// Move the camera
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-		this->position += right * delta;
+		this->position += right * delta * speed;
 	} else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-		this->position -= right * delta;
+		this->position -= right * delta * speed;
 	}
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-		this->position -= forward * delta;
+		this->position += forward * delta * speed;
 	} else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-		this->position += forward * delta;
+		this->position -= forward * delta * speed;
 	}
 
 	// Compute the camera view matrix
 	this->camera = glm::toMat4(glm::conjugate(this->rotation)) * glm::translate(mat4(1.0f), -this->position);
+	Renderer::setView(this->camera);
 }
 
 /**

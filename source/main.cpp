@@ -21,6 +21,7 @@
 #include "SFX.h"
 #include "Music.h"
 #include "AudioSource.h"
+#include "ShadowRenderer.h"
 using namespace AMG;
 
 // Definition of objects
@@ -50,9 +51,17 @@ void renderSimple(){
 	skybox->draw();
 }
 
+void renderShadows(){
+	link->drawSimple();
+	bullet->drawSimple();
+	barrel->drawSimple();
+}
+
 void render(){
 
-	Renderer::setCamera(cam);
+	Renderer::updateCamera(cam);
+
+	ShadowRenderer::updateShadowMap(renderShadows, light);
 
 	MotionBlur::bind();
 
@@ -76,6 +85,7 @@ void render(){
 	bullet->draw();
 
 	s1->enable();
+	ShadowRenderer::updateShadows(5);
 	terrain->draw();
 
 	s2->enable();
@@ -104,6 +114,7 @@ void render(){
 
 void unload(){
 	MotionBlur::finish();
+	ShadowRenderer::finish();
 	AMG_DELETE(cam);
 	AMG_DELETE(barrel);
 	AMG_DELETE(link);
@@ -137,6 +148,8 @@ int main(int argc, char **argv){
 	Renderer::getFogDensity() = 0.1f;
 	Renderer::getFogGradient() = 5.0f;
 
+	ShadowRenderer::initialize(2048, 10.0f, 100.0f);
+
 	cam = new Camera(vec3(0, 3, 5));
 
 	s0 = new Shader("default.vs", "default.fs");
@@ -148,25 +161,26 @@ int main(int argc, char **argv){
 	s6 = new Shader("bullet.vs", "bullet.fs");
 	s7 = new Shader("barrel.vs", "barrel.fs");
 
-	light = new Light(vec3(0, 3, 3), vec3(1, 1, 0), vec3(0.0f, 0, 1));
+	light = new Light(vec3(100000, 100000, 100000), vec3(1, 1, 0), vec3(0.0f, 0, 1));
 	s0->getLights().push_back(light);
 	s1->getLights().push_back(light);
 	s6->getLights().push_back(light);
 	s7->getLights().push_back(light);
 
-	link = new Model("model2.amd", s0);
+	link = new Model("model2.amd");
 	link->getObject(0)->getScale() = vec3(0.1f, 0.1f, 0.1f);
-	link->getObject(0)->getPosition() = vec3(0.0f, 3.0f, 3.0f);
+	link->getObject(0)->getPosition() = vec3(0.0f, 3.0f, -10.0f);
 
-	bullet = new Model("bullet.amd", s0);
+	bullet = new Model("bullet.amd");
+	bullet->getObject(0)->getPosition().y += 2.0f;
 	bullet->getObject(1)->getScale() = vec3(0.2f, 0.2f, 0.2f);
 	bullet->getObject(2)->getScale() = vec3(0.5f, 0.5f, 0.5f);
 
-	barrel = new Model("barrel.amd", s0, true);
+	barrel = new Model("barrel.amd", true);
 	barrel->getObject(0)->getScale() = vec3(0.1f, 0.1f, 0.1f);
 	barrel->getObject(0)->getPosition() = vec3(0.0f, 3.0f, -3.0f);
 
-	terrain = new Terrain(-0.5f, 0, "grassy2.dds");
+	terrain = new Terrain(-0.5f, -0.5f, "grassy2.dds");
 	terrain->getMaterial(0)->addTexture("grassFlowers.dds");
 	terrain->getMaterial(0)->addTexture("mud.dds");
 	terrain->getMaterial(0)->addTexture("path.dds");

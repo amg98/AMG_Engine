@@ -1,6 +1,8 @@
 const int AMG_LIGHTS = 4;
 const int AMG_TEXTURES = 6;
 const float AMG_CELSHADING_LEVELS = 5;
+const int AMG_PCF_SIZE = 2;
+const int AMG_PCF_TEXELS = (AMG_PCF_SIZE * 2 + 1) * (AMG_PCF_SIZE * 2 + 1);
 
 in vec2 AMG_OutUV;
 in vec3 AMG_OutUV3D;
@@ -13,6 +15,7 @@ in vec3 AMG_ReflectedVector;
 in vec3 AMG_RefractedVector;
 in float AMG_TexBlend;
 in vec2 AMG_OutUV2[2];
+in vec4 AMG_OutShadowCoord;
 
 // Lighting uniforms
 struct AMG_LightF {
@@ -36,3 +39,4 @@ uniform float AMG_CharBorderWidth;
 uniform float AMG_CharBorderEdge;
 uniform vec2 AMG_CharShadowOffset;
 uniform vec3 AMG_CharOutlineColor;
+uniform float AMG_ShadowMapSize;

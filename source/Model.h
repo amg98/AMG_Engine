@@ -34,8 +34,9 @@ public:
 	Object *getObject(int i){ return objects[i]; }
 	Animation *getAnimation(int i){ return animations[i]; }
 
-	Model(const char *path, Shader *shader, bool tangent=false);
+	Model(const char *path, bool tangent=false);
 	void draw();
+	void drawSimple();
 	void animate(unsigned int objIndex, unsigned int animIndex);
 	virtual ~Model();
 };

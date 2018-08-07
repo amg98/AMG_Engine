@@ -76,7 +76,7 @@ Framebuffer::Framebuffer(int w, int h, int n, int samples) {
  */
 void Framebuffer::createDepthTexture(){
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT);
+	depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_DEPTH_ATTACHMENT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

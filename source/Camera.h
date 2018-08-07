@@ -32,6 +32,7 @@ private:
 	vec3 forward;				/**< Forward vector */
 	vec3 right;					/**< Right vector */
 	vec3 rot;					/**< Rotation in euler angles */
+	float speed;				/**< Camera movement speed */
 	void computeTrihedron();
 public:
 	vec3 &getPosition(){ return position; }
@@ -39,6 +40,8 @@ public:
 	mat4 &getMatrix(){ return camera; }
 	vec3 &getForward(){ return forward; }
 	vec3 &getRight(){ return right; }
+	mat4 getRotationMatrix(){ return glm::toMat4(glm::conjugate(this->rotation)); }
+	void setSpeed(float s){ speed = s; }
 
 	Camera(vec3 position);
 	vec3 getRay();

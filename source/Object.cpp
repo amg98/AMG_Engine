@@ -54,10 +54,9 @@ void Object::createBoneHierarchy(bone_t *bones, unsigned int nbones){
 		Debug::showError(TOO_MANY_BONES, NULL);
 	}
 	// Search root bone (must be only one)
-	GLuint boneMatrix = Renderer::getCurrentShader()->getUniform("AMG_BoneMatrix");
 	for(unsigned int i=0;i<nbones;i++){
 		if(bones[i].parent == 0xFFFF){
-			rootBone = new Bone(i, boneMatrix);
+			rootBone = new Bone(i);
 			rootBone->createChildren(bones, nbones);
 		}
 	}
@@ -91,6 +90,30 @@ void Object::draw(){
 	}
 
 	this->disableBuffers();
+}
+
+/**
+ * @brief Draw an Object in the simplest way possible
+ */
+void Object::drawSimple(){
+
+	// Transform the object
+	Renderer::setTransformationZ(position, rotation, scale);
+	Renderer::updateMVP();
+
+	// Enable buffers
+	glBindVertexArray(this->id);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexid);
+	buffer_info &binfo = info.at(0);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, binfo.id);
+	glVertexAttribPointer(0, binfo.size, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	// Draw elements
+	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, NULL);
+
+	// Disable buffers
+	glDisableVertexAttribArray(0);
 }
 
 /**

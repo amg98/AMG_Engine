@@ -13,7 +13,6 @@ layout(location = 4) in vec3 AMG_Bitangent;
 #include <AMG_NormalMapMatrix.glsl>
 #include <AMG_PassLightingNormalMap.glsl>
 #include <AMG_PassLightNormalMap.glsl>
-#include <AMG_PassFog.glsl>
 
 void main(){
     
@@ -25,5 +24,4 @@ void main(){
 	mat3 normalMapMatrix = AMG_NormalMapMatrix(AMG_M);
     AMG_PassLightingNormalMap(normalMapMatrix, AMG_M);
     AMG_PassLightNormalMap(normalMapMatrix, AMG_M, 0);
-    AMG_PassFog(AMG_MV);
 }

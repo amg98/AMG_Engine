@@ -13,7 +13,6 @@ layout(location = 4) in ivec4 AMG_WeightBoneID;
 #include <AMG_PassTexcoords.glsl>
 #include <AMG_PassLighting.glsl>
 #include <AMG_PassLight.glsl>
-#include <AMG_PassFog.glsl>
 
 void main(){
 
@@ -29,5 +28,4 @@ void main(){
 	AMG_PassTexcoords();
     AMG_PassLighting(model);
     AMG_PassLight(model, 0);
-    AMG_PassFog(modelview);
 }

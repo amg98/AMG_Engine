@@ -151,6 +151,9 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, con
 	internalDefineUniform("AMG_CamPosition");
 	internalDefineUniform("AMG_TexScale");
 	internalDefineUniform("AMG_TexPosition");
+	internalDefineUniform("AMG_ShadowMatrix");
+	internalDefineUniform("AMG_ShadowDistance");
+	internalDefineUniform("AMG_ShadowMapSize");
 
 	// Define fragment shader uniforms
 	internalDefineUniform("AMG_MaterialDiffuse");

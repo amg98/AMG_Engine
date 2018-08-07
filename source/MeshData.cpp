@@ -92,7 +92,7 @@ void MeshData::enableBuffers(){
 	glBindVertexArray(this->id);
 	if(this->indexid) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indexid);
 	for(unsigned int i=0;i<info.size();i++){
-		buffer_info binfo = info.at(i);
+		buffer_info &binfo = info.at(i);
 		glEnableVertexAttribArray(i);
 		glBindBuffer(GL_ARRAY_BUFFER, binfo.id);
 		if(binfo.type == GL_FLOAT){
