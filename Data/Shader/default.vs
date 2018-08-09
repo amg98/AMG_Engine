@@ -14,6 +14,7 @@ layout(location = 4) in ivec4 AMG_WeightBoneID;
 #include <AMG_PassLighting.glsl>
 #include <AMG_PassLight.glsl>
 #include <AMG_WaterClipPlane.glsl>
+#include <AMG_PassFog.glsl>
 
 void main(){
 

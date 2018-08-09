@@ -28,6 +28,7 @@ class Object: public MeshData {
 private:
 	Bone *rootBone;					/**< Bone hierarchy, NULL if there are no bones */
 	vec3 bbox;						/**< Bounding box, without transformations */
+	bool visible;					/**< Is this object visible? */
 protected:
 	Material **materials;			/**< Buffer of materials, same for a Model */
 	unsigned int nmaterials;		/**< Number of materials, same for a Model */
@@ -44,6 +45,7 @@ public:
 	quat &getRotation(){ return rotation; }
 	vec3 &getScale(){ return scale; }
 	vec3 &getBBox(){ return bbox; }
+	bool isVisible(){ return visible; }
 
 	Object();
 	void setMaterialGroups(unsigned short *groups, unsigned int ngroups, Material **materials, unsigned int nmaterials);

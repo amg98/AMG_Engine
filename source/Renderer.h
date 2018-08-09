@@ -62,6 +62,7 @@ private:
 	static GLuint quadVertices;					/**< OpenGL buffer ID for the quad's vertices */
 	static GLuint quadTexcoords;				/**< OpenGL buffer ID for the quad's texture coordinates */
 	static float fov;							/**< Field of view, in radians */
+	static float renderDistance;				/**< Maximum render distance */
 	Renderer(){}
 public:
 	static bool initialized(){ return init; }
@@ -87,6 +88,7 @@ public:
 	static void setRenderCallback(AMG_FunctionCallback cb){ renderCb = cb; }
 	static void setUnloadCallback(AMG_FunctionCallback cb){ unloadCb = cb; }
 	static Camera *getCamera(){ return camera; }
+	static void setRenderDistance(float distance){ renderDistance = distance; }
 
 	static int exitProcess();
 	static Texture *createCubeMap(AMG_FunctionCallback render, Shader *shader, int dimensions, vec3 position);
@@ -109,10 +111,10 @@ public:
 	static void getMousePosition(double *x, double *y);
 	static bool getKey(int code);
 	static void createWorld();
-	static void updateReflections(Texture *cubeMap, int slot);
 	static void resize(int w, int h);
 	static void bindQuad(bool vao);
 	static void setFOV(float fieldOfView);
+	static bool isBBoxVisible(vec3 box);
 };
 
 }

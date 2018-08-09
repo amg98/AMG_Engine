@@ -72,7 +72,7 @@ void renderWater(vec4 plane){
 
 	s6->enable();
 	s6->setWaterClipPlane(plane);
-	Renderer::updateReflections(cubeMap, 0);
+	cubeMap->bind(0);
 	bullet->draw();
 	s6->disableWaterClipPlane();
 
@@ -121,7 +121,7 @@ void render(){
 	barrel->getObject(0)->getRotation() *= quat(vec3(0, 0.01f, 0));
 
 	s6->enable();
-	Renderer::updateReflections(cubeMap, 0);
+	cubeMap->bind(0);
 	bullet->draw();
 
 	s1->enable();

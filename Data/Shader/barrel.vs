@@ -14,6 +14,7 @@ layout(location = 4) in vec3 AMG_Bitangent;
 #include <AMG_PassLightingNormalMap.glsl>
 #include <AMG_PassLightNormalMap.glsl>
 #include <AMG_WaterClipPlane.glsl>
+#include <AMG_PassFog.glsl>
 
 void main(){
     

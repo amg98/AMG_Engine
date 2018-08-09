@@ -7,6 +7,7 @@ layout (location = 0) out vec4 AMG_Color;
 #include <AMG_BlendMap.glsl>
 #include <AMG_ComputeLight.glsl>
 #include <AMG_ComputeShadows.glsl>
+#include <AMG_ComputeFog.glsl>
 
 void main(){
 	

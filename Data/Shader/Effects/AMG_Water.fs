@@ -3,6 +3,7 @@
 layout (location = 0) out vec4 AMG_Color;
 
 #include <AMG_FragmentCommon.glsl>
+#include <AMG_ComputeFog.glsl>
 
 in vec4 clipSpaceCoords;
 
@@ -13,18 +14,9 @@ void main(){
 	vec2 ndc = (clipSpaceCoords.xy/clipSpaceCoords.w) / 2.0 + 0.5;
 	vec3 cameraVector = normalize(AMG_OutToCamera);
 	
-	float near = 0.1;
-	float far = 1000.0;
-	float depth = texture(AMG_TextureSampler[4], ndc.xy).r;
-	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
-	
-	depth = gl_FragCoord.z;
-	float waterDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
-	float waterDepth = floorDistance - waterDistance;
-	
 	vec2 distortedTexCoords = texture(AMG_TextureSampler[2], vec2(AMG_OutUV.x + moveFactor, AMG_OutUV.y)).rg * 0.1;
 	distortedTexCoords = AMG_OutUV + vec2(distortedTexCoords.x, distortedTexCoords.y + moveFactor);
-	vec2 distortion = (texture(AMG_TextureSampler[2], distortedTexCoords).rg * 2.0 - 1.0) * 0.03 * clamp(waterDepth/10.0, 0.0, 1.0);
+	vec2 distortion = (texture(AMG_TextureSampler[2], distortedTexCoords).rg * 2.0 - 1.0) * 0.03;
 	
 	vec2 reflectionTex = vec2(ndc.x, 1.0 - ndc.y) + distortion;
 	reflectionTex = clamp(reflectionTex, 0.001, 0.999);
@@ -49,5 +41,4 @@ void main(){
 	
 	AMG_Color = mix(reflectionColor, refractionColor, refractivity);
 	AMG_Color = mix(AMG_Color, vec4(0, 0.3, 0.5, 1.0), 0.2) + vec4(specularHighlights, 0.0);
-	AMG_Color.a = clamp(waterDepth/0.5, 0.0, 1.0);
 }

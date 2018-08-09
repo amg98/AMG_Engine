@@ -71,6 +71,8 @@ void Object::draw(){
 	// Transform the object
 	Renderer::setTransformationZ(position, rotation, scale);
 	Renderer::updateMVP();
+	visible = Renderer::isBBoxVisible(bbox);
+	if(!visible) return;
 
 	// Transform each bone
 	if(rootBone)
@@ -100,6 +102,8 @@ void Object::drawSimple(){
 	// Transform the object
 	Renderer::setTransformationZ(position, rotation, scale);
 	Renderer::updateMVP();
+	visible = Renderer::isBBoxVisible(bbox);
+	if(!visible) return;
 
 	// Enable buffers
 	glBindVertexArray(this->id);

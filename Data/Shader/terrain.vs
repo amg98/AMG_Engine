@@ -12,6 +12,7 @@ layout(location = 2) in vec3 AMG_Normal;
 #include <AMG_PassLight.glsl>
 #include <AMG_PassShadows.glsl>
 #include <AMG_WaterClipPlane.glsl>
+#include <AMG_PassFog.glsl>
 
 void main(){
     

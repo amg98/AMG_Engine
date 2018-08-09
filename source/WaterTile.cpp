@@ -54,7 +54,6 @@ WaterTile::WaterTile(const char *normalMapPath, const char *dudvpath, vec3 pos, 
 	reflection->createColorTexture(0);
 	refraction = new Framebuffer();
 	refraction->createColorTexture(0);
-	refraction->createDepthTexture();
 
 	// Load textures
 	dudv = new Texture(dudvpath);
@@ -102,25 +101,23 @@ void WaterTile::prepare(AMG_WaterFunctionCallback render){
  */
 void WaterTile::draw(){
 
+	// Set transformations
+	waterShader->enable();
+	Renderer::setTransformation(position, scale);
+	Renderer::updateMVP();
+	if(!Renderer::isBBoxVisible(vec3(1, 0.05f, 1))) return;
+
 	// Perform the wave movement
 	moveFactor += waveSpeed * Renderer::getDelta();
 	float d;
 	moveFactor = modf(moveFactor, &d);
-
-	// Enable the shader
-	waterShader->enable();
 	waterShader->setUniform("moveFactor", moveFactor);
-
-	// Set transformations
-	Renderer::setTransformation(position, scale);
-	Renderer::updateMVP();
 
 	// Bind the needed textures
 	reflection->getColorTexture()->bind(0);
 	refraction->getColorTexture()->bind(1);
 	dudv->bind(2);
 	normalMap->bind(3);
-	refraction->getDepthTexture()->bind(4);
 
 	// Draw the water quad
 	glBindVertexArray(id);

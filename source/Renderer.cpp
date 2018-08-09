@@ -3,6 +3,9 @@
  * @brief General rendering stuff
  */
 
+// Includes C/C++
+#include <math.h>
+
 // Includes OpenGL
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
@@ -41,6 +44,7 @@ World *Renderer::world;
 GLuint Renderer::quadID;
 GLuint Renderer::quadVertices;
 GLuint Renderer::quadTexcoords;
+float Renderer::renderDistance;
 
 /**< A vertex buffer for a quad (used for particles and 2D rendering) */
 static float spr_vertices[] = {
@@ -98,6 +102,7 @@ void Renderer::initialize(int w, int h, const char *title, bool resize, bool ful
 	currentShader = NULL;
 	world = NULL;
 	fov = glm::radians(45.0f);
+	renderDistance = 100.0f;
 
 	// Initialise GLFW
 	if(!glfwInit())
@@ -486,18 +491,6 @@ Texture *Renderer::createCubeMap(AMG_FunctionCallback render, Shader *shader, in
 }
 
 /**
- * @brief Update reflections from the current Camera
- * @param cubeMap Cube Map to use for reflections
- * @param slot Slot to bind this Cube Map
- */
-void Renderer::updateReflections(Texture *cubeMap, int slot){
-	if(camera){
-		currentShader->setUniform("AMG_CamPosition", camera->getPosition());
-		cubeMap->bind(slot);
-	}
-}
-
-/**
  * @brief Resize the window
  * @param w New width, in pixels
  * @param h new height, in pixels
@@ -521,6 +514,79 @@ void Renderer::bindQuad(bool vao){
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glBindBuffer(GL_ARRAY_BUFFER, quadTexcoords);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+}
+
+/**
+ * @brief Checks whether a bounding box is visible on screen
+ * @param box Maximum coordinate of the bounding box
+ */
+bool Renderer::isBBoxVisible(vec3 box){
+
+	// Get the bounding box
+	vec4 p[8];
+	p[0] = vec4( box.x,  box.y,  box.z, 1.0f);
+	p[1] = vec4(-box.x,  box.y,  box.z, 1.0f);
+	p[2] = vec4( box.x, -box.y,  box.z, 1.0f);
+	p[3] = vec4(-box.x, -box.y,  box.z, 1.0f);
+	p[4] = vec4( box.x,  box.y, -box.z, 1.0f);
+	p[5] = vec4(-box.x,  box.y, -box.z, 1.0f);
+	p[6] = vec4( box.x, -box.y, -box.z, 1.0f);
+	p[7] = vec4(-box.x, -box.y, -box.z, 1.0f);
+
+	// Convert to normalized device coordinates
+	int maxZ = 0;			// Index of the corner nearer to the camera
+	p[0] = mv * p[0];
+	for(int i=1;i<8;i++){
+		p[i] = mv * p[i];
+		if(p[i].z > p[maxZ].z){
+			maxZ = i;
+		}
+	}
+
+	// Check is not so far away from the camera
+	if(camera){
+		vec4 &modelCoords = p[maxZ];
+		float distance = glm::length(vec3(modelCoords.x, modelCoords.y, modelCoords.z) - camera->getPosition());
+		if(distance > renderDistance) return false;
+	}
+
+	// Check if any vertex is inside the screen
+	for(int i=0;i<8;i++){
+		p[i] = *projection * p[i];			// Convert to normalized device coordinates
+		p[i] /= p[i].w;						// Perform perspective division
+		if(p[i].x > -1.0f && p[i].x < 1.0f && p[i].y > -1.0f && p[i].y < 1.0f && p[i].z < 1.0f){
+			return true;
+		}
+	}
+
+	// Check if any edge intersects the screen
+	vec4 r[12];
+	r[0 ] = p[1] - p[0];
+	r[1 ] = p[5] - p[1];
+	r[2 ] = p[4] - p[5];
+	r[3 ] = p[0] - p[4];
+	r[4 ] = p[3] - p[2];
+	r[5 ] = p[6] - p[3];
+	r[6 ] = p[7] - p[6];
+	r[7 ] = p[2] - p[7];
+	r[8 ] = p[1] - p[3];
+	r[9 ] = p[0] - p[2];
+	r[10] = p[5] - p[6];
+	r[11] = p[4] - p[7];
+	float factor;
+	for(int i=0;i<12;i++){
+		factor = (-1 -p[i].x) / r[i].x;
+		if(factor > 0.0f && factor < 1.0f) return true;
+		factor = ( 1 -p[i].y) / r[i].y;
+		if(factor > 0.0f && factor < 1.0f) return true;
+		factor = ( 1 -p[i].x) / r[i].x;
+		if(factor > 0.0f && factor < 1.0f) return true;
+		factor = (-1 -p[i].y) / r[i].y;
+		if(factor > 0.0f && factor < 1.0f) return true;
+	}
+
+	// Not a visible object
+	return false;
 }
 
 }
