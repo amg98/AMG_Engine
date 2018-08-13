@@ -67,25 +67,14 @@ static float uv_vertices[] = {
 };
 
 /**
- * @brief Static method to resize a window
- * @param window Window to be resized
- * @param newWidth New width, in pixels
- * @param newHeight new height, in pixels
- */
-static void resizeCallback(GLFWwindow *window, int newWidth, int newHeight){
-	Renderer::resize(newWidth, newHeight);
-}
-
-/**
  * @brief Constructor for a Renderer object
  * @param w Window width, in pixels
  * @param h Window height, in pixels
  * @param title Title for this new window
- * @param resize Resizable window?
  * @param fullscreen Full screen window?
  * @param samples Number of samples per pixel
  */
-void Renderer::initialize(int w, int h, const char *title, bool resize, bool fullscreen, int samples) {
+void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int samples) {
 
 	// If it was initialised
 	if(init) return;
@@ -110,7 +99,7 @@ void Renderer::initialize(int w, int h, const char *title, bool resize, bool ful
 
 	// Set window hints
 	glfwWindowHint(GLFW_SAMPLES, samples);
-	glfwWindowHint(GLFW_RESIZABLE, resize);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);					// OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -118,7 +107,7 @@ void Renderer::initialize(int w, int h, const char *title, bool resize, bool ful
 	glfwSwapInterval(1);
 
 	// Create a window
-	GLFWmonitor *monitor = (fullscreen && !resize) ? glfwGetPrimaryMonitor() : NULL;
+	GLFWmonitor *monitor = fullscreen ? glfwGetPrimaryMonitor() : NULL;
 	window = glfwCreateWindow(width, height, title, monitor, NULL);
 	if(window == NULL){
 		glfwTerminate();
@@ -142,11 +131,6 @@ void Renderer::initialize(int w, int h, const char *title, bool resize, bool ful
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-	// Set the resize callback, if needed
-	if(resize){
-		glfwSetWindowSizeCallback(window, resizeCallback);
-	}
 
 	// Input configuration
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);

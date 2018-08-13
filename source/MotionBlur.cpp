@@ -17,10 +17,12 @@ int MotionBlur::motionIndex;
 
 /**
  * @brief Initialize objects for this class
- * @param width Display width, in pixels
- * @param height Display height, in pixels
  */
-void MotionBlur::initialize(int width, int height){
+void MotionBlur::initialize(){
+
+	// Get screen dimensions
+	int width = Renderer::getWidth();
+	int height = Renderer::getHeight();
 
 	// Load the shader
 	motionShader = new Shader("Effects/AMG_MotionBlur.vs", "Effects/AMG_MotionBlur.fs");

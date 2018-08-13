@@ -29,7 +29,7 @@ private:
 	static int motionIndex;									/**< Current framebuffer to be used */
 	static Sprite *motionSprite;							/**< General purpose Sprite */
 public:
-	static void initialize(int width, int height);
+	static void initialize();
 	static void bind();
 	static void unbind();
 	static Framebuffer *render();

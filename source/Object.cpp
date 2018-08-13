@@ -27,6 +27,7 @@ Object::Object() {
 	this->nmaterials = 0;
 	this->rootBone = NULL;
 	this->bbox = vec3(0.0f, 0.0f, 0.0f);
+	this->visible = true;
 }
 
 /**

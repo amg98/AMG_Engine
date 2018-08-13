@@ -41,7 +41,6 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.1095919108" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="glfw3dll"/>
-									<listOptionValue builtIn="false" value="tinyxml"/>
 									<listOptionValue builtIn="false" value="ogg.dll"/>
 									<listOptionValue builtIn="false" value="vorbis.dll"/>
 									<listOptionValue builtIn="false" value="vorbisfile.dll"/>

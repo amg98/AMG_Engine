@@ -6,7 +6,6 @@
 #include "Renderer.h"
 #include "Shader.h"
 #include "Texture.h"
-#include "MeshData.h"
 #include "Sprite.h"
 #include "Model.h"
 #include "Light.h"
@@ -15,14 +14,10 @@
 #include "Font.h"
 #include "ParticleSource.h"
 #include "World.h"
-#include "MotionBlur.h"
 #include "LensFlare.h"
-#include "AudioPlayer.h"
-#include "SFX.h"
-#include "Music.h"
-#include "AudioSource.h"
 #include "ShadowRenderer.h"
 #include "WaterTile.h"
+#include "DeferredRendering.h"
 using namespace AMG;
 
 // Definition of objects
@@ -34,7 +29,6 @@ Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *
 Text *hello = NULL;
 Sprite *sprite = NULL;
 ParticleSource *source = NULL;
-Sprite *screen = NULL;
 Texture *cubeMap = NULL;
 LensFlare *lens = NULL;
 Light *light = NULL;
@@ -43,8 +37,8 @@ WaterTile *water = NULL;
 
 void renderSimple(){
 
-	s0->enable();
-	link->draw();
+	/*s0->enable();
+	link->draw();*/
 
 	s1->enable();
 	terrain->draw();
@@ -60,10 +54,10 @@ void renderShadows(){
 }
 
 void renderWater(vec4 plane){
-	s0->enable();
+	/*s0->enable();
 	s0->setWaterClipPlane(plane);
 	link->draw();
-	s0->disableWaterClipPlane();
+	s0->disableWaterClipPlane();*/
 
 	s7->enable();
 	s7->setWaterClipPlane(plane);
@@ -97,11 +91,16 @@ void render(){
 
 	Renderer::updateCamera(cam);
 
-	ShadowRenderer::updateShadowMap(renderShadows, light);
+	DeferredRendering::start();
+	s0->enable();
+	link->animate(0, 0);
+	link->draw();
+	DeferredRendering::end();
+	DeferredRendering::render()->blit();
+
+	/*ShadowRenderer::updateShadowMap(renderShadows, light);
 
 	water->prepare(renderWater);
-
-	MotionBlur::bind();
 
 	water->draw();
 
@@ -111,10 +110,6 @@ void render(){
 		b->setActivationState(1);
 		b->setLinearVelocity(btVector3(0, 3, 0));
 	}
-
-	s0->enable();
-	link->animate(0, 0);
-	link->draw();
 
 	s7->enable();
 	barrel->draw();
@@ -143,19 +138,15 @@ void render(){
 	s3->enable();
 	sprite->draw();
 	lens->draw(cam, s0->getLights()[0]);
-
-	MotionBlur::unbind();
-	screen->set(MotionBlur::render()->getColorTexture());
-	screen->draw();
 	s4->enable();
 	hello->draw();
-	Renderer::set3dMode(true);
+	Renderer::set3dMode(true);*/
 }
 
 void unload(){
-	MotionBlur::finish();
 	ShadowRenderer::finish();
 	WaterTile::finish();
+	DeferredRendering::finish();
 	AMG_DELETE(water);
 	AMG_DELETE(cam);
 	AMG_DELETE(barrel);
@@ -175,7 +166,6 @@ void unload(){
 	AMG_DELETE(sprite);
 	AMG_DELETE(cubeMap);
 	AMG_DELETE(source);
-	AMG_DELETE(screen);
 	AMG_DELETE(lens);
 	AMG_DELETE(light);
 	AMG_DELETE(font);
@@ -183,7 +173,7 @@ void unload(){
 
 int main(int argc, char **argv){
 
-	Renderer::initialize(1440, 900, "Window1", false, false, 0);
+	Renderer::initialize(1440, 900, "Window1", false, 0);
 	Renderer::createWorld();
 	Renderer::setRenderCallback(render);
 	Renderer::setUnloadCallback(unload);
@@ -191,6 +181,8 @@ int main(int argc, char **argv){
 	Renderer::getFogGradient() = 5.0f;
 
 	ShadowRenderer::initialize(2048, 10.0f, 100.0f);
+
+	DeferredRendering::initialize();
 
 	WaterTile::initialize(light);
 	water = new WaterTile("waterNormalMap.dds", "waterDUDV.dds", vec3(0, 2.5f, -10), 5.0f);
@@ -255,12 +247,6 @@ int main(int argc, char **argv){
 	Renderer::getWorld()->addObjectBox(bullet->getObject(0), 0.0f);
 	Renderer::getWorld()->addObjectBox(bullet->getObject(1), 5.0f);
 	Renderer::getWorld()->addObjectConvexHull(bullet->getObject(2), 7.0f);
-
-	MotionBlur::initialize(1440, 900);
-
-	screen = new Sprite();
-	screen->getPosition() = vec3(720, 450, 0);
-	screen->getScaleY() = -1.0f;
 
 	skybox = new Skybox("sky");
 	vec3 cmapPos = vec3(bullet->getObject(2)->getPosition());

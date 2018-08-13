@@ -16,9 +16,12 @@ layout(location = 4) in ivec4 AMG_WeightBoneID;
 #include <AMG_WaterClipPlane.glsl>
 #include <AMG_PassFog.glsl>
 
+out vec3 AMG_OutGPosition;
+out vec3 AMG_OutGNormal;
+
 void main(){
 
-	AMG_WaterClipPlane(vec4(AMG_Position, 1));
+	//AMG_WaterClipPlane(vec4(AMG_Position, 1));
 	
 	// Compute skinning
 	mat4 skin = AMG_ComputeSkinning();
@@ -26,10 +29,13 @@ void main(){
 	mat4 model = AMG_M * skin;
     
     // Compute final vertex position
-    AMG_ComputePositionSkin(skin);
+    gl_Position = AMG_ComputePositionSkin(skin);
     
     // Pass data to the fragment shader
 	AMG_PassTexcoords();
-    AMG_PassLighting(model);
-    AMG_PassLight(model, 0);
+	//AMG_PassLighting(model);
+	//AMG_PassLight(model, 0);
+	
+	AMG_OutGPosition = (model * vec4(AMG_Position, 1)).xyz;
+	AMG_OutGNormal = (model * vec4(AMG_Normal, 0)).xyz;
 }

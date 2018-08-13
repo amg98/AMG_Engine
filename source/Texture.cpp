@@ -94,8 +94,9 @@ Texture::Texture(Texture *texture){
  * @param mode How to generate the texture: GL_RGB/GL_DEPTH_COMPONENT32
  * @param mode2 Second mode for glTexImage2D
  * @param attachment Where to attach the texture
+ * @param type Texture type (GL_UNSIGNED_BYTE as default)
  */
-Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
+Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment, GLuint type){
 	this->target = GL_TEXTURE_2D;
 	this->progress = 0.0f;
 	this->width = w;
@@ -111,11 +112,11 @@ Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment){
 	this->isCopy = false;
 	glGenTextures(1, &id);
 	glBindTexture(target, id);
-	glTexImage2D(target, 0, mode, w, h, 0, mode2, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(target, 0, mode, w, h, 0, mode2, type, NULL);
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, id, 0);
 	glBindTexture(target, 0);
 }

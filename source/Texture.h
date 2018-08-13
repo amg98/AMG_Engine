@@ -52,7 +52,7 @@ public:
 	Texture(const char *path);
 	Texture(const char **names);
 	Texture(const char *path, int frameWidth, int frameHeight);
-	Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment);
+	Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment, GLuint type=GL_UNSIGNED_BYTE);
 	void createCubeMap(int dimensions);
 	void setLod(float bias);
 	void setAniso(float aniso);

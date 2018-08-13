@@ -93,7 +93,7 @@ public:
 	static int exitProcess();
 	static Texture *createCubeMap(AMG_FunctionCallback render, Shader *shader, int dimensions, vec3 position);
 
-	static void initialize(int w, int h, const char *title, bool resize, bool fullscreen, int samples=4);
+	static void initialize(int w, int h, const char *title, bool fullscreen, int samples=4);
 	static void update();
 	static void setTransformationZ(vec3 pos, quat rot, vec3 scale);
 	static void setTransformation(vec3 pos, quat rot, vec3 scale);
