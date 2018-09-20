@@ -112,13 +112,34 @@ void Framebuffer::unbind(){
 /**
  * @brief Blits a Framebuffer to another Framebuffer (used for multisampling)
  * @param attachment Which color buffer to blit
- * @param tex Framebuffer to be blitted to
+ * @param fb Framebuffer to be blitted to
  */
 void Framebuffer::blit(int attachment, Framebuffer *fb){
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->getFbo());
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
 	glBlitFramebuffer(0, 0, width, height, 0, 0, fb->getWidth(), fb->getHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+/**
+ * @brief Blits a Framebuffer to the screen (only the depth buffer)
+ */
+void Framebuffer::blitDepthBuffer(){
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, Renderer::getWidth(), Renderer::getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+/**
+ * @brief Blits a Framebuffer to another Framebuffer (only the depth buffer)
+ * @param fb Framebuffer to be blitted to
+ */
+void Framebuffer::blitDepthBuffer(Framebuffer *fb){
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->getFbo());
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, fb->getWidth(), fb->getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

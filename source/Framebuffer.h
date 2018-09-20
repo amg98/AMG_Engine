@@ -42,6 +42,8 @@ public:
 	void unbind();
 	void blit(int attachment, Framebuffer *fb);
 	void blit();
+	void blitDepthBuffer(Framebuffer *fb);
+	void blitDepthBuffer();
 	virtual ~Framebuffer();
 };
 

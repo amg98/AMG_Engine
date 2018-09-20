@@ -40,3 +40,5 @@ uniform float AMG_CharBorderEdge;
 uniform vec2 AMG_CharShadowOffset;
 uniform vec3 AMG_CharOutlineColor;
 uniform float AMG_ShadowMapSize;
+uniform float AMG_HDRExposure;
+uniform float AMG_GammaValue;

@@ -6,6 +6,7 @@
 // Own includes
 #include "Renderer.h"
 #include "WaterTile.h"
+#include "DeferredRendering.h"
 
 namespace AMG {
 

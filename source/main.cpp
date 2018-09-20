@@ -25,7 +25,7 @@ Camera *cam = NULL;
 Model *link = NULL, *bullet = NULL, *barrel = NULL;
 Terrain *terrain = NULL;
 Skybox *skybox = NULL;
-Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *s6 = NULL, *s7 = NULL;
+Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *s6 = NULL, *s7 = NULL, *s8 = NULL, *s9 = NULL, *s10 = NULL, *s11 = NULL;
 Text *hello = NULL;
 Sprite *sprite = NULL;
 ParticleSource *source = NULL;
@@ -37,8 +37,8 @@ WaterTile *water = NULL;
 
 void renderSimple(){
 
-	/*s0->enable();
-	link->draw();*/
+	s8->enable();
+	link->draw();
 
 	s1->enable();
 	terrain->draw();
@@ -54,27 +54,27 @@ void renderShadows(){
 }
 
 void renderWater(vec4 plane){
-	/*s0->enable();
-	s0->setWaterClipPlane(plane);
+	s8->enable();
+	s8->setWaterClipPlane(plane);
 	link->draw();
-	s0->disableWaterClipPlane();*/
+	s8->disableWaterClipPlane();
 
-	s7->enable();
-	s7->setWaterClipPlane(plane);
+	s9->enable();
+	s9->setWaterClipPlane(plane);
 	barrel->draw();
-	s7->disableWaterClipPlane();
+	s9->disableWaterClipPlane();
 
-	s6->enable();
-	s6->setWaterClipPlane(plane);
+	s10->enable();
+	s10->setWaterClipPlane(plane);
 	cubeMap->bind(0);
 	bullet->draw();
-	s6->disableWaterClipPlane();
+	s10->disableWaterClipPlane();
 
-	s1->enable();
-	s1->setWaterClipPlane(plane);
+	s11->enable();
+	s11->setWaterClipPlane(plane);
 	ShadowRenderer::updateShadows(5);
 	terrain->draw();
-	s1->disableWaterClipPlane();
+	s11->disableWaterClipPlane();
 
 	s2->enable();
 	s2->setWaterClipPlane(plane);
@@ -91,25 +91,13 @@ void render(){
 
 	Renderer::updateCamera(cam);
 
+	ShadowRenderer::updateShadowMap(renderShadows, light);
+
 	DeferredRendering::start();
+
 	s0->enable();
 	link->animate(0, 0);
 	link->draw();
-	DeferredRendering::end();
-	DeferredRendering::render()->blit();
-
-	/*ShadowRenderer::updateShadowMap(renderShadows, light);
-
-	water->prepare(renderWater);
-
-	water->draw();
-
-	Object *clicked = Renderer::getWorld()->getClickingObject(20.0f);
-	if(clicked == bullet->getObject(2)){
-		btRigidBody *b = Renderer::getWorld()->getRigidBody(clicked);
-		b->setActivationState(1);
-		b->setLinearVelocity(btVector3(0, 3, 0));
-	}
 
 	s7->enable();
 	barrel->draw();
@@ -123,8 +111,22 @@ void render(){
 	ShadowRenderer::updateShadows(5);
 	terrain->draw();
 
+	DeferredRendering::end();
+	DeferredRendering::render();
+
 	s2->enable();
 	skybox->draw();
+
+	water->prepare(renderWater);
+
+	water->draw();
+
+	Object *clicked = Renderer::getWorld()->getClickingObject(20.0f);
+	if(clicked == bullet->getObject(2)){
+		btRigidBody *b = Renderer::getWorld()->getRigidBody(clicked);
+		b->setActivationState(1);
+		b->setLinearVelocity(btVector3(0, 3, 0));
+	}
 
 	if(Renderer::getKey(GLFW_KEY_Q)){
 		source->getParticles().push_back(Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
@@ -140,7 +142,7 @@ void render(){
 	lens->draw(cam, s0->getLights()[0]);
 	s4->enable();
 	hello->draw();
-	Renderer::set3dMode(true);*/
+	Renderer::set3dMode(true);
 }
 
 void unload(){
@@ -162,6 +164,10 @@ void unload(){
 	AMG_DELETE(s5);
 	AMG_DELETE(s6);
 	AMG_DELETE(s7);
+	AMG_DELETE(s8);
+	AMG_DELETE(s9);
+	AMG_DELETE(s10);
+	AMG_DELETE(s11);
 	AMG_DELETE(hello);
 	AMG_DELETE(sprite);
 	AMG_DELETE(cubeMap);
@@ -197,12 +203,22 @@ int main(int argc, char **argv){
 	s5 = new Shader("particles.vs", "particles.fs");
 	s6 = new Shader("bullet.vs", "bullet.fs");
 	s7 = new Shader("barrel.vs", "barrel.fs");
+	s8 = new Shader("_default.vs", "_default.fs");
+	s9 = new Shader("_barrel.vs", "_barrel.fs");
+	s10 = new Shader("_bullet.vs", "_bullet.fs");
+	s11 = new Shader("_terrain.vs", "_terrain.fs");
 
 	light = new Light(vec3(100000, 100000, 100000), vec3(1, 1, 0), vec3(0.0f, 0, 1));
 	s0->getLights().push_back(light);
 	s1->getLights().push_back(light);
 	s6->getLights().push_back(light);
 	s7->getLights().push_back(light);
+	s8->getLights().push_back(light);
+	s9->getLights().push_back(light);
+	s10->getLights().push_back(light);
+	s11->getLights().push_back(light);
+	DeferredRendering::lights.push_back(light);
+	DeferredRendering::lights.push_back(new Light(vec3(0, 10, 0), vec3(0, 1, 0), vec3(0.1f, 0, 1)));
 
 	link = new Model("model2.amd");
 	link->getObject(0)->getScale() = vec3(0.1f, 0.1f, 0.1f);

@@ -22,6 +22,7 @@ using namespace glm;
 
 // Defines
 #define AMG_MAX_LIGHTS 4		/**< Maximum number of lights at once */
+#define AMG_MAX_DLIGHTS 8		/**< Maximum number of lights in deferred rendering */
 #define AMG_MAX_TEXTURES 6		/**< Maximum number of textures at once */
 
 namespace AMG {
@@ -51,6 +52,8 @@ public:
 	void setUniform(const std::string &name, vec3 &v);
 	void setUniform(const std::string &name, vec4 &v);
 	void setUniform(const std::string &name, mat4 &v);
+	void setUniform(const std::string &name, mat3 &v);
+	void setUniform3fv(const std::string &name, int n, GLfloat *data);
 	void setClipPlane(int id, vec4 &plane);
 	void setWaterClipPlane(vec4 &plane);
 	void disableClipPlane(int id);

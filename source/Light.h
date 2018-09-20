@@ -27,7 +27,8 @@ public:
 	vec3 &getAttenuation(){ return attenuation; }
 
 	Light(vec3 position, vec3 color, vec3 attenuation);
-	Light(vec3 position, vec3 color);
+	Light(vec3 position, vec3 color) : Light(position, color, vec3(0, 0, 1)) {}
+	void enableDeferred(int id);
 	void enable(int id);
 	virtual ~Light();
 };

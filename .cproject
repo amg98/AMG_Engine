@@ -45,7 +45,6 @@
 									<listOptionValue builtIn="false" value="vorbis.dll"/>
 									<listOptionValue builtIn="false" value="vorbisfile.dll"/>
 									<listOptionValue builtIn="false" value="OpenAL32"/>
-									<listOptionValue builtIn="false" value="BulletSoftBody"/>
 									<listOptionValue builtIn="false" value="BulletDynamics"/>
 									<listOptionValue builtIn="false" value="BulletCollision"/>
 									<listOptionValue builtIn="false" value="LinearMath"/>

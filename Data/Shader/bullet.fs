@@ -1,17 +1,20 @@
 #version 330 core
 
-layout (location = 0) out vec4 AMG_Color;
+layout (location = 0) out vec3 AMG_GPosition;
+layout (location = 1) out vec3 AMG_GNormal;
+layout (location = 2) out vec4 AMG_GAlbedo;
 
 #include <AMG_FragmentCommon.glsl>
 
-#include <AMG_ComputeLight.glsl>
 #include <AMG_TextureCubeMapReflection.glsl>
-#include <AMG_ComputeFog.glsl>
+
+in vec3 AMG_OutGPosition;
+in vec3 AMG_OutGNormal;
 
 void main(){
-
-	vec4 color = AMG_ComputeLight(0, vec4(1, 1, 1, 1));
 	
-	vec4 reflectedColor = AMG_TextureCubeMapReflection();
-	AMG_Color = mix(color, reflectedColor, 0.6);
+	AMG_GPosition = AMG_OutGPosition;
+	AMG_GNormal.xyz = normalize(AMG_OutGNormal);
+	AMG_GAlbedo.rgb = AMG_TextureCubeMapReflection().rgb;
+	AMG_GAlbedo.a = 1.0;		// Specular map
 }

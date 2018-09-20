@@ -16,8 +16,11 @@ layout(location = 4) in vec3 AMG_Bitangent;
 #include <AMG_WaterClipPlane.glsl>
 #include <AMG_PassFog.glsl>
 
+out vec3 AMG_OutGPosition;
+out mat3 AMG_OutGNormalMatrix;
+
 void main(){
-    
+
 	AMG_WaterClipPlane(vec4(AMG_Position, 1));
 	
     // Compute final vertex position
@@ -25,7 +28,7 @@ void main(){
     
     // Pass data to the fragment shader
 	AMG_PassTexcoords();
-	mat3 normalMapMatrix = AMG_NormalMapMatrix(AMG_M);
-    AMG_PassLightingNormalMap(normalMapMatrix, AMG_M);
-    AMG_PassLightNormalMap(normalMapMatrix, AMG_M, 0);
+	
+	AMG_OutGPosition = (AMG_MV * vec4(AMG_Position, 1)).xyz;
+	AMG_OutGNormalMatrix = transpose(AMG_NormalMapMatrix(AMG_MV));
 }

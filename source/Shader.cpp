@@ -145,6 +145,13 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, con
 		sprintf(text, "AMG_Lights[%d].attenuation", i);
 		internalDefineUniform(std::string(text));
 	}
+	for(int i=0;i<AMG_MAX_DLIGHTS;i++){
+		sprintf(text, "AMG_LightDR[%d].position", i);
+		internalDefineUniform(std::string(text));
+		sprintf(text, "AMG_LightDR[%d].color", i);
+		internalDefineUniform(std::string(text));
+	}
+	internalDefineUniform("AMG_NLights");
 	internalDefineUniform("AMG_MV");
 	internalDefineUniform("AMG_M");
 	internalDefineUniform("AMG_FogDensity");
@@ -172,6 +179,11 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, con
 	internalDefineUniform("AMG_CharBorderEdge");
 	internalDefineUniform("AMG_CharShadowOffset");
 	internalDefineUniform("AMG_CharOutlineColor");
+	internalDefineUniform("AMG_SSAOSamples");
+	internalDefineUniform("AMG_SSAOProjection");
+	internalDefineUniform("AMG_DView");
+	internalDefineUniform("AMG_HDRExposure");
+	internalDefineUniform("AMG_GammaValue");
 	glUseProgram(programID);
 	for(int i=0;i<AMG_MAX_TEXTURES;i++){
 		sprintf(text, "AMG_TextureSampler[%d]", i);
@@ -273,11 +285,32 @@ void Shader::setUniform(const std::string &name, mat4 &v){
 }
 
 /**
+ * @brief Set a uniform value, 3x3 matrix version
+ * @param name Name of the uniform variable to be set
+ * @param v Value to set
+ */
+void Shader::setUniform(const std::string &name, mat3 &v){
+	glUniformMatrix3fv(getUniform(name), 1, GL_FALSE, &v[0][0]);
+}
+
+/**
+ * @brief Set a uniform value, vec3 array version
+ * @param name Name of the uniform variable to be set
+ * @param n Number of vectors
+ * @param data Value to set
+ */
+void Shader::setUniform3fv(const std::string &name, int n, GLfloat *data){
+	glUniform3fv(getUniform(name), n, data);
+}
+
+/**
  * @brief Enable a shader program
  */
 void Shader::enable(){
 	if(Renderer::getCurrentShader() != this){
 		glUseProgram(programID);
+		setUniform("AMG_HDRExposure", Renderer::getHDRExposure());
+		setUniform("AMG_GammaValue", Renderer::getGammaCorrection());
 		Renderer::setCurrentShader(this);
 	}
 }

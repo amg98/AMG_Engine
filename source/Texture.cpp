@@ -40,6 +40,22 @@ Texture::Texture(){
 }
 
 /**
+ * @brief Constructor for a loaded float texture
+ * @param w Texture width, in pixels
+ * @param h Texture height, in pixels
+ * @param data Float data
+ */
+void Texture::loadFloatData(int w, int h, float *data){
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D, id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+/**
  * @brief Create an empty cube map texture
  * @param dimensions Width and height for each cube face, in pixels
  */
@@ -115,8 +131,8 @@ Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment, GLu
 	glTexImage2D(target, 0, mode, w, h, 0, mode2, type, NULL);
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, id, 0);
 	glBindTexture(target, 0);
 }

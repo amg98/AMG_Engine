@@ -63,6 +63,8 @@ private:
 	static GLuint quadTexcoords;				/**< OpenGL buffer ID for the quad's texture coordinates */
 	static float fov;							/**< Field of view, in radians */
 	static float renderDistance;				/**< Maximum render distance */
+	static float hdrExposure;					/**< Exposure for the HDR -> LDR color transformation */
+	static float gammaCorrection;				/**< Gamma correction factor (2.2 by default) */
 	Renderer(){}
 public:
 	static bool initialized(){ return init; }
@@ -89,6 +91,9 @@ public:
 	static void setUnloadCallback(AMG_FunctionCallback cb){ unloadCb = cb; }
 	static Camera *getCamera(){ return camera; }
 	static void setRenderDistance(float distance){ renderDistance = distance; }
+	static mat4 &getView(){ return view; }
+	static float &getHDRExposure(){ return hdrExposure; }
+	static float &getGammaCorrection(){ return gammaCorrection; }
 
 	static int exitProcess();
 	static Texture *createCubeMap(AMG_FunctionCallback render, Shader *shader, int dimensions, vec3 position);

@@ -14,9 +14,8 @@ in vec3 AMG_OutGNormal;
 
 void main(){
 
-	//AMG_Color = AMG_ComputeLightCel(0, AMG_TextureMap(0));
 	AMG_GPosition = AMG_OutGPosition;
-	AMG_GNormal = normalize(AMG_OutGNormal);
+	AMG_GNormal.xyz = normalize(AMG_OutGNormal);
 	AMG_GAlbedo.rgb = texture(AMG_TextureSampler[0], AMG_OutUV).rgb;
 	AMG_GAlbedo.a = 1.0;		// Specular map
 }

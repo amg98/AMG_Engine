@@ -3,6 +3,9 @@
  * @brief Description of lighting sources
  */
 
+// Includes C/C++
+#include <math.h>
+
 // Own includes
 #include "Light.h"
 #include "Renderer.h"
@@ -24,14 +27,16 @@ Light::Light(vec3 position, vec3 color, vec3 attenuation) {
 }
 
 /**
- * @brief Constructor for a Light
- * @param position Light's position
- * @param color Light's color
+ * @brief Update light information onto the shader (deferred rendering)
+ * @param id Light's ID in the shader
  */
-Light::Light(vec3 position, vec3 color) : Light(position, color, vec3(0, 0, 1)){
-
+void Light::enableDeferred(int id){
+	Shader *shader = Renderer::getCurrentShader();
+	sprintf(shaderText, "AMG_LightDR[%d].position", id);
+	shader->setUniform(std::string(shaderText), position);
+	sprintf(shaderText, "AMG_LightDR[%d].color", id);
+	shader->setUniform(std::string(shaderText), color);
 }
-
 
 /**
  * @brief Update light information onto the shader

@@ -45,6 +45,8 @@ GLuint Renderer::quadID;
 GLuint Renderer::quadVertices;
 GLuint Renderer::quadTexcoords;
 float Renderer::renderDistance;
+float Renderer::hdrExposure;
+float Renderer::gammaCorrection;
 
 /**< A vertex buffer for a quad (used for particles and 2D rendering) */
 static float spr_vertices[] = {
@@ -92,6 +94,8 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	world = NULL;
 	fov = glm::radians(45.0f);
 	renderDistance = 100.0f;
+	hdrExposure = 1.0f;
+	gammaCorrection = 2.2f;
 
 	// Initialise GLFW
 	if(!glfwInit())
@@ -127,6 +131,7 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 	glDisable(GL_CULL_FACE);
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_MULTISAMPLE);
@@ -363,7 +368,6 @@ void Renderer::set3dMode(bool mode){
 		projection = &perspective;
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LEQUAL);
 	}else{
 		projection = &ortho;
 		glDisable(GL_DEPTH_TEST);
