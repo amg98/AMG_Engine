@@ -25,5 +25,7 @@ vec4 AMG_ComputeLight(int id, vec4 diffuseTex){
 	vec4 specular = vec4(specularBrightness * AMG_Lights[id].color / attenuation, 1) * AMG_MaterialSpecular * AMG_SpecularPower;
 
     // Output color = color of the texture at the specified UV
-    return (diffuse * diffuseTex + specular);
+    vec4 r = (diffuse * diffuseTex + specular);
+	r.a = clamp(r.a, 0.0, 1.0);
+	return r;
 }

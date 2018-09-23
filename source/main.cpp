@@ -25,7 +25,7 @@ Camera *cam = NULL;
 Model *link = NULL, *bullet = NULL, *barrel = NULL;
 Terrain *terrain = NULL;
 Skybox *skybox = NULL;
-Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *s6 = NULL, *s7 = NULL, *s8 = NULL, *s9 = NULL, *s10 = NULL, *s11 = NULL;
+Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *s6 = NULL, *s7 = NULL, *s00 = NULL, *s60 = NULL, *s10 = NULL, *s70 = NULL;
 Text *hello = NULL;
 Sprite *sprite = NULL;
 ParticleSource *source = NULL;
@@ -37,7 +37,7 @@ WaterTile *water = NULL;
 
 void renderSimple(){
 
-	s8->enable();
+	s00->enable();
 	link->draw();
 
 	s1->enable();
@@ -54,27 +54,27 @@ void renderShadows(){
 }
 
 void renderWater(vec4 plane){
-	s8->enable();
-	s8->setWaterClipPlane(plane);
+	s00->enable();
+	s00->setWaterClipPlane(plane);
 	link->draw();
-	s8->disableWaterClipPlane();
+	s00->disableWaterClipPlane();
 
-	s9->enable();
-	s9->setWaterClipPlane(plane);
+	s70->enable();
+	s70->setWaterClipPlane(plane);
 	barrel->draw();
-	s9->disableWaterClipPlane();
+	s70->disableWaterClipPlane();
+
+	s60->enable();
+	s60->setWaterClipPlane(plane);
+	cubeMap->bind(0);
+	bullet->draw();
+	s60->disableWaterClipPlane();
 
 	s10->enable();
 	s10->setWaterClipPlane(plane);
-	cubeMap->bind(0);
-	bullet->draw();
-	s10->disableWaterClipPlane();
-
-	s11->enable();
-	s11->setWaterClipPlane(plane);
 	ShadowRenderer::updateShadows(5);
 	terrain->draw();
-	s11->disableWaterClipPlane();
+	s10->disableWaterClipPlane();
 
 	s2->enable();
 	s2->setWaterClipPlane(plane);
@@ -163,10 +163,10 @@ void unload(){
 	AMG_DELETE(s5);
 	AMG_DELETE(s6);
 	AMG_DELETE(s7);
-	AMG_DELETE(s8);
-	AMG_DELETE(s9);
+	AMG_DELETE(s00);
+	AMG_DELETE(s60);
 	AMG_DELETE(s10);
-	AMG_DELETE(s11);
+	AMG_DELETE(s70);
 	AMG_DELETE(hello);
 	AMG_DELETE(sprite);
 	AMG_DELETE(cubeMap);
@@ -193,7 +193,7 @@ int main(int argc, char **argv){
 	WaterTile::initialize(light);
 	water = new WaterTile("waterNormalMap.dds", "waterDUDV.dds", vec3(0, 2.5f, -10), 5.0f);
 
-	cam = new Camera(vec3(0, 3, 5));
+	cam = new Camera(vec3(-4, 3, 5));
 
 	s0 = new Shader("default.vs", "default.fs");
 	s1 = new Shader("terrain.vs", "terrain.fs");
@@ -203,20 +203,20 @@ int main(int argc, char **argv){
 	s5 = new Shader("particles.vs", "particles.fs");
 	s6 = new Shader("bullet.vs", "bullet.fs");
 	s7 = new Shader("barrel.vs", "barrel.fs");
-	s8 = new Shader("_default.vs", "_default.fs");
-	s9 = new Shader("_barrel.vs", "_barrel.fs");
-	s10 = new Shader("_bullet.vs", "_bullet.fs");
-	s11 = new Shader("_terrain.vs", "_terrain.fs");
+	s00 = new Shader("_default.vs", "_default.fs");
+	s70 = new Shader("_barrel.vs", "_barrel.fs");
+	s60 = new Shader("_bullet.vs", "_bullet.fs");
+	s10 = new Shader("_terrain.vs", "_terrain.fs");
 
 	light = new Light(vec3(100000, 100000, 100000), vec3(1, 1, 0), vec3(0.0f, 0, 1));
 	s0->getLights().push_back(light);
 	s1->getLights().push_back(light);
 	s6->getLights().push_back(light);
 	s7->getLights().push_back(light);
-	s8->getLights().push_back(light);
-	s9->getLights().push_back(light);
+	s00->getLights().push_back(light);
+	s60->getLights().push_back(light);
 	s10->getLights().push_back(light);
-	s11->getLights().push_back(light);
+	s70->getLights().push_back(light);
 	DeferredRendering::lights.push_back(light);
 	DeferredRendering::lights.push_back(new Light(vec3(0, 10, 0), vec3(0, 1, 0), vec3(0.1f, 0, 1)));
 

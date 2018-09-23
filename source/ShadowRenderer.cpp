@@ -43,10 +43,9 @@ void ShadowRenderer::initialize(int dimensions, float offset, float distance){
 
 	// Create the framebuffer
 	shadowMap = new Framebuffer(dimensions, dimensions);
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->getFbo());
+	shadowMap->bind();
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	shadowMap->createDepthTexture();
 
 	// Initialize variables

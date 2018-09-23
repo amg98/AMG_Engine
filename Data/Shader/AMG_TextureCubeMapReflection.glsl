@@ -5,5 +5,5 @@
   * Input: AMG_ReflectedVector
   */
 vec4 AMG_TextureCubeMapReflection(){
-	return texture(AMG_TextureCubeSampler, AMG_ReflectedVector);
+	return texture(AMG_TextureCubeSampler, reflect(AMG_RView, AMG_RNormal));
 }

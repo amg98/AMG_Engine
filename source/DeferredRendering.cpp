@@ -16,10 +16,6 @@ namespace AMG {
 Framebuffer *DeferredRendering::gBuffer = NULL;
 Framebuffer *DeferredRendering::outFB = NULL;
 Framebuffer *DeferredRendering::ssaoFB = NULL;
-Texture *DeferredRendering::positionTexture = NULL;
-Texture *DeferredRendering::normalTexture = NULL;
-Texture *DeferredRendering::albedoTexture = NULL;
-Texture *DeferredRendering::ssaoTexture = NULL;
 Shader *DeferredRendering::renderShader = NULL;
 Shader *DeferredRendering::ssaoShader = NULL;
 Shader *DeferredRendering::blurShader = NULL;
@@ -27,31 +23,26 @@ Sprite *DeferredRendering::renderSprite = NULL;
 std::vector<Light*> DeferredRendering::lights;
 float *DeferredRendering::ssaoKernel = NULL;
 Texture *DeferredRendering::ssaoNoiseTexture = NULL;
-Texture *DeferredRendering::ssaoBlurTexture = NULL;
 
 /**
  * @brief Initialize the deferred rendering engine
- * @note Water can't be rendered in this mode
+ * @note Water can't be rendered in this mode, and the deferred scene will not be antialiased
  */
 void DeferredRendering::initialize(){
 
 	// Create the G-buffer
 	int width = Renderer::getWidth();
 	int height = Renderer::getHeight();
-	gBuffer = new Framebuffer(width, height, 3, 4);
-	outFB = new Framebuffer(width, height, 1, 4);
-	ssaoFB = new Framebuffer(width, height, 1, 4);
+	gBuffer = new Framebuffer(width, height, 3);
+	outFB = new Framebuffer(width, height);
+	ssaoFB = new Framebuffer(width, height);
 
 	// Create the G-buffer textures
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer->getFbo());
-	positionTexture = new Texture(width, height, GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT0, GL_FLOAT);
-	normalTexture = new Texture(width, height, GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT1, GL_FLOAT);
-	albedoTexture = new Texture(width, height, GL_RGBA, GL_RGBA, GL_COLOR_ATTACHMENT2, GL_UNSIGNED_BYTE);
-	glBindFramebuffer(GL_FRAMEBUFFER, ssaoFB->getFbo());
-	ssaoTexture = new Texture(width, height, GL_R16F, GL_RGB, GL_COLOR_ATTACHMENT0, GL_FLOAT);
-	glBindFramebuffer(GL_FRAMEBUFFER, outFB->getFbo());
-	ssaoBlurTexture = new Texture(width, height, GL_R16F, GL_RGB, GL_COLOR_ATTACHMENT0, GL_FLOAT);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	gBuffer->createColorTexture(0, GL_RGB16F, GL_RGB, GL_FLOAT);
+	gBuffer->createColorTexture(1, GL_RGB16F, GL_RGB, GL_FLOAT);
+	gBuffer->createColorTexture(2, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+	ssaoFB->createColorTexture(0, GL_R16F, GL_RGB, GL_FLOAT);
+	outFB->createColorTexture(0, GL_R16F, GL_RGB, GL_FLOAT);
 
 	// Load shaders
 	renderShader = new Shader("Deferred/AMG_Render.vs", "Deferred/AMG_Render.fs");
@@ -73,8 +64,8 @@ void DeferredRendering::initialize(){
 	for (unsigned int i = 0; i < 64; i++){
 		int offset = i * 3;
 	    vec3 sample(
-	        randomFloats(generator) * 2.0 - 1.0,
-	        randomFloats(generator) * 2.0 - 1.0,
+	        randomFloats(generator) * 2.0f - 1.0f,
+	        randomFloats(generator) * 2.0f - 1.0f,
 	        randomFloats(generator)
 	    );
 	    sample  = glm::normalize(sample);
@@ -104,22 +95,21 @@ void DeferredRendering::initialize(){
 void DeferredRendering::start(){
 	glDisable(GL_BLEND);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	gBuffer->bind();
+	gBuffer->start();
 }
 
 /**
  * @brief Stop the deferred rendering pass
  */
 void DeferredRendering::end(){
-	gBuffer->unbind();
+	gBuffer->end();
 	glEnable(GL_BLEND);
 }
 
 /**
  * @brief Do the rendering process and return a framebuffer with it
- * @param blitDepth Blit the depth buffer? (default yes)
  */
-void DeferredRendering::render(bool blitDepth){
+void DeferredRendering::render(){
 
 	// Get the current view
 	mat4 view = Renderer::getView();
@@ -131,18 +121,19 @@ void DeferredRendering::render(bool blitDepth){
 	ssaoShader->enable();
 	ssaoShader->setUniform("AMG_SSAOProjection", Renderer::getPerspective());
 	ssaoShader->setUniform3fv("AMG_SSAOSamples", 64, ssaoKernel);
-	ssaoFB->bind();
-	renderSprite->set(positionTexture);
-	normalTexture->bind(1);
+	ssaoFB->start();
+	renderSprite->set(gBuffer->getColorTexture(0));
+	gBuffer->getColorTexture(1)->bind(1);
 	ssaoNoiseTexture->bind(2);
 	renderSprite->draw();
+	ssaoFB->end();
 
 	// Blur the SSAO texture
-	outFB->bind();
+	outFB->start();
 	blurShader->enable();
-	renderSprite->set(ssaoTexture);
+	renderSprite->set(ssaoFB->getColorTexture(0));
 	renderSprite->draw();
-	outFB->unbind();
+	outFB->end();
 
 	// Enable the deferred rendering shader
 	renderShader->enable();
@@ -155,15 +146,14 @@ void DeferredRendering::render(bool blitDepth){
 	}
 
 	// Render the scene
-	renderSprite->set(positionTexture);
-	normalTexture->bind(1);
-	albedoTexture->bind(2);
-	ssaoBlurTexture->bind(3);
+	renderSprite->set(gBuffer->getColorTexture(0));
+	gBuffer->getColorTexture(1)->bind(1);
+	gBuffer->getColorTexture(2)->bind(2);
+	outFB->getColorTexture(0)->bind(3);
 	renderSprite->draw();
 
-	// Copy the depth buffer, if needed
-	if(blitDepth)
-		gBuffer->blitDepthBuffer();
+	// Copy the depth buffer
+	gBuffer->blit(NULL, 0, GL_DEPTH_BUFFER_BIT);
 
 	// Restore the rendering settings
 	Renderer::set3dMode(true);
@@ -176,9 +166,6 @@ void DeferredRendering::render(bool blitDepth){
  */
 void DeferredRendering::finish(){
 	if(gBuffer) delete gBuffer;
-	if(positionTexture) delete positionTexture;
-	if(normalTexture) delete normalTexture;
-	if(albedoTexture) delete albedoTexture;
 	if(renderShader) delete renderShader;
 	if(renderSprite) delete renderSprite;
 	if(outFB) delete outFB;
@@ -186,9 +173,7 @@ void DeferredRendering::finish(){
 	if(ssaoShader) delete ssaoShader;
 	if(ssaoFB) delete ssaoFB;
 	if(ssaoKernel) free(ssaoKernel);
-	if(ssaoTexture) delete ssaoTexture;
 	if(blurShader) delete blurShader;
-	if(ssaoBlurTexture) delete ssaoBlurTexture;
 }
 
 }

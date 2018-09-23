@@ -8,8 +8,8 @@ layout (location=0) out vec4 AMG_Color;
 
 void main(){
 
-    vec4 color = AMG_TextureMap(0);
-	color.rgb = (vec3(1.0) - exp(-color.rgb * AMG_HDRExposure));
-	color.rgb = pow(color.rgb, vec3(1.0/AMG_GammaValue));
-	AMG_Color = color;
+    vec3 color = AMG_TextureMap(0).rgb;
+	color = (vec3(1.0) - exp(-color * AMG_HDRExposure));
+	color = pow(color, vec3(1.0/AMG_GammaValue));
+	AMG_Color = vec4(color, 1.0);
 }

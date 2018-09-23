@@ -52,8 +52,6 @@ float Renderer::gammaCorrection;
 int Renderer::srgbTextures;
 Framebuffer *Renderer::defaultFB;
 Sprite *Renderer::fbSprite;
-Texture *Renderer::fbTexture;
-int Renderer::nSamples;
 
 /**< A vertex buffer for a quad (used for particles and 2D rendering) */
 static float spr_vertices[] = {
@@ -108,8 +106,6 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	hdrGammaShader = NULL;
 	defaultFB = NULL;
 	fbSprite = NULL;
-	fbTexture = NULL;
-	nSamples = samples;
 
 	// Initialise GLFW
 	if(!glfwInit())
@@ -177,10 +173,9 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	hdrGammaShader = new Shader("Effects/AMG_HDRGamma.vs", "Effects/AMG_HDRGamma.fs");
 
 	// Create the 3D framebuffer
-	defaultFB = new Framebuffer();
-	glBindFramebuffer(GL_FRAMEBUFFER, defaultFB->getFbo());
-	fbTexture = new Texture(width, height, GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT0);
-	fbSprite = new Sprite(fbTexture);
+	defaultFB = new Framebuffer(width, height, 1, samples);
+	defaultFB->createColorTexture(0, GL_RGB16F, GL_RGB, GL_FLOAT);
+	fbSprite = new Sprite(defaultFB->getColorTexture(0));
 	fbSprite->getScaleY() = -1.0f;
 	fbSprite->getPosition() = vec3(width / 2.0f, height / 2.0f, 0.0f);
 
@@ -259,8 +254,9 @@ void Renderer::update(){
 
 		// Render the 3D scene onto the framebuffer
 		glClearColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
-		defaultFB->bind();
+		defaultFB->start();
 		if(renderCb) renderCb();
+		defaultFB->end();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// Render the scene
@@ -298,7 +294,6 @@ int Renderer::exitProcess(){
 		if(hdrGammaShader) delete hdrGammaShader;
 		if(fbSprite) delete fbSprite;
 		if(defaultFB) delete defaultFB;
-		if(fbTexture) delete fbTexture;
 
 		// Delete the quad object
 		glDeleteBuffers(1, &quadVertices);
@@ -489,7 +484,7 @@ Texture *Renderer::createCubeMap(AMG_FunctionCallback render, Shader *shader, in
 
 	// Create a framebuffer
 	Framebuffer *fb = new Framebuffer(dimensions, dimensions);
-	fb->bind();
+	fb->start();
 
 	// Set the clear color
 	glClearColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);

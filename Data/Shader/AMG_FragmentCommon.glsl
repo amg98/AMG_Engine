@@ -11,11 +11,11 @@ in float AMG_OutLightDistance[AMG_LIGHTS];
 in vec3 AMG_OutNormal;
 in vec3 AMG_OutToCamera;
 in float AMG_OutFogValue;
-in vec3 AMG_ReflectedVector;
-in vec3 AMG_RefractedVector;
 in float AMG_TexBlend;
 in vec2 AMG_OutUV2[2];
 in vec4 AMG_OutShadowCoord;
+in vec3 AMG_RView;
+in vec3 AMG_RNormal;
 
 // Lighting uniforms
 struct AMG_LightF {

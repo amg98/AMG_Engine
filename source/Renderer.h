@@ -72,8 +72,6 @@ private:
 	static int srgbTextures;					/**< Number of sRGB textures on the next model (1 by default) */
 	static Framebuffer *defaultFB;				/**< Default 3D framebuffer */
 	static Sprite *fbSprite;					/**< Framebuffer sprite */
-	static Texture *fbTexture;					/**< Framebuffer texture */
-	static int nSamples;						/**< Number of samples per pixel */
 	Renderer(){}
 public:
 	static bool initialized(){ return init; }
@@ -107,7 +105,6 @@ public:
 	static void setsRGBTextures(int t){ srgbTextures = t; }
 	static bool getsRGBTextures(){ return srgbTextures; }
 	static Framebuffer *get3dFramebuffer(){ return defaultFB; }
-	static int getNSamples(){ return nSamples; }
 
 	static int exitProcess();
 	static Texture *createCubeMap(AMG_FunctionCallback render, Shader *shader, int dimensions, vec3 position);

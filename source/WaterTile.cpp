@@ -82,8 +82,9 @@ void WaterTile::prepare(AMG_WaterFunctionCallback render){
 	cam->update();
 
 	// Render the reflection texture
-	reflection->bind();
+	reflection->start();
 	render(vec4(0, 1, 0, -position.y));
+	reflection->end();
 
 	// Restore the camera
 	cam->getPosition().y += distance;
@@ -92,9 +93,9 @@ void WaterTile::prepare(AMG_WaterFunctionCallback render){
 	cam->update();
 
 	// Render the refraction texture
-	refraction->bind();
+	refraction->start();
 	render(vec4(0, -1, 0, position.y));
-	refraction->unbind();
+	refraction->end();
 }
 
 /**
@@ -115,8 +116,8 @@ void WaterTile::draw(){
 	waterShader->setUniform("moveFactor", moveFactor);
 
 	// Bind the needed textures
-	reflection->getColorTexture()->bind(0);
-	refraction->getColorTexture()->bind(1);
+	reflection->getColorTexture(0)->bind(0);
+	refraction->getColorTexture(0)->bind(1);
 	dudv->bind(2);
 	normalMap->bind(3);
 
