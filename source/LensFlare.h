@@ -8,6 +8,8 @@
 
 // Own includes
 #include "Sprite.h"
+#include "Camera.h"
+#include "Light.h"
 
 // Defines
 #define AMG_LENS_FLARE_TEXTURES 10		/**< Number of textures in this effect */

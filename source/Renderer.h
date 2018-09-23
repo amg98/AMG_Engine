@@ -19,6 +19,8 @@ using namespace glm;
 #include "Shader.h"
 #include "Camera.h"
 #include "World.h"
+#include "Framebuffer.h"
+#include "Sprite.h"
 
 /**< Delete an Entity */
 #define AMG_DELETE(x) if((x)) delete (x)
@@ -40,6 +42,7 @@ private:
 	static GLFWwindow* window;					/**< Internal window object */
 	static bool init;							/**< The engine has been initialized? */
 	static AMG_FunctionCallback renderCb;		/**< Rendering callback */
+	static AMG_FunctionCallback render2dCb;		/**< 2D rendering callback */
 	static AMG_FunctionCallback unloadCb;		/**< Unload callback */
 	static mat4 *projection;					/**< Current projection matrix */
 	static mat4 perspective, ortho;				/**< Precalculated perspective and ortho matrices */
@@ -56,6 +59,7 @@ private:
 	static float fogGradient;					/**< Fog gradient */
 	static vec4 fogColor;						/**< Fog color, same as clear color */
 	static Shader *currentShader;				/**< Current used shader */
+	static Shader *hdrGammaShader;				/**< HDR and gamma correction shader */
 	static mat4 zupConversion;					/**< Matrix to use with Z up coordinate systems */
 	static World *world;						/**< Physics world, optional */
 	static GLuint quadID;						/**< OpenGL buffer ID for a quad */
@@ -65,6 +69,11 @@ private:
 	static float renderDistance;				/**< Maximum render distance */
 	static float hdrExposure;					/**< Exposure for the HDR -> LDR color transformation */
 	static float gammaCorrection;				/**< Gamma correction factor (2.2 by default) */
+	static int srgbTextures;					/**< Number of sRGB textures on the next model (1 by default) */
+	static Framebuffer *defaultFB;				/**< Default 3D framebuffer */
+	static Sprite *fbSprite;					/**< Framebuffer sprite */
+	static Texture *fbTexture;					/**< Framebuffer texture */
+	static int nSamples;						/**< Number of samples per pixel */
 	Renderer(){}
 public:
 	static bool initialized(){ return init; }
@@ -88,12 +97,17 @@ public:
 	static void setView(mat4 &v){ view = v; }
 	static void setCurrentShader(Shader *shader){ currentShader = shader; }
 	static void setRenderCallback(AMG_FunctionCallback cb){ renderCb = cb; }
+	static void setRender2dCallback(AMG_FunctionCallback cb){ render2dCb = cb; }
 	static void setUnloadCallback(AMG_FunctionCallback cb){ unloadCb = cb; }
 	static Camera *getCamera(){ return camera; }
 	static void setRenderDistance(float distance){ renderDistance = distance; }
 	static mat4 &getView(){ return view; }
 	static float &getHDRExposure(){ return hdrExposure; }
 	static float &getGammaCorrection(){ return gammaCorrection; }
+	static void setsRGBTextures(int t){ srgbTextures = t; }
+	static bool getsRGBTextures(){ return srgbTextures; }
+	static Framebuffer *get3dFramebuffer(){ return defaultFB; }
+	static int getNSamples(){ return nSamples; }
 
 	static int exitProcess();
 	static Texture *createCubeMap(AMG_FunctionCallback render, Shader *shader, int dimensions, vec3 position);

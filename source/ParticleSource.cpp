@@ -40,7 +40,7 @@ ParticleSource::ParticleSource(const char *texPath, int hframes, int vframes, in
 	particles.reserve(maxparticles);
 
 	atlas = NULL;
-	atlas = new Texture(texPath, hframes, vframes);
+	atlas = new Texture(texPath, hframes, vframes, true);
 }
 
 /**

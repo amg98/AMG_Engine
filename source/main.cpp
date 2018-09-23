@@ -118,8 +118,11 @@ void render(){
 	skybox->draw();
 
 	water->prepare(renderWater);
-
 	water->draw();
+
+	s5->enable();
+	source->update();
+	source->draw(GL_ONE);
 
 	Object *clicked = Renderer::getWorld()->getClickingObject(20.0f);
 	if(clicked == bullet->getObject(2)){
@@ -131,18 +134,14 @@ void render(){
 	if(Renderer::getKey(GLFW_KEY_Q)){
 		source->getParticles().push_back(Particle(vec3(0, 0, 0), vec3(0, 5, 2), 1, 5, 0, 1));
 	}
+}
 
-	s5->enable();
-	source->update();
-	source->draw(GL_ONE);
-
-	Renderer::set3dMode(false);
+void render2d(){
 	s3->enable();
 	sprite->draw();
 	lens->draw(cam, s0->getLights()[0]);
 	s4->enable();
 	hello->draw();
-	Renderer::set3dMode(true);
 }
 
 void unload(){
@@ -179,9 +178,10 @@ void unload(){
 
 int main(int argc, char **argv){
 
-	Renderer::initialize(1440, 900, "Window1", false, 0);
+	Renderer::initialize(1440, 900, "Window1", false, 4);
 	Renderer::createWorld();
 	Renderer::setRenderCallback(render);
+	Renderer::setRender2dCallback(render2d);
 	Renderer::setUnloadCallback(unload);
 	Renderer::getFogDensity() = 0.1f;
 	Renderer::getFogGradient() = 5.0f;

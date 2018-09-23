@@ -52,7 +52,7 @@ Material::Material(const char **names){
 	this->diffusePower = 1.0f;
 	this->specularPower = 1.0f;
 	this->textures = std::vector<Texture*>();
-	Texture *tex = new Texture(names);
+	Texture *tex = new Texture(names, true);
 	this->textures.push_back(tex);
 }
 
@@ -75,7 +75,7 @@ Material::Material(float *data) {
 void Material::addTexture(const char *texture){
 	Texture *tex = NULL;
 	if(texture){
-		tex = new Texture(texture);
+		tex = new Texture(texture, textures.size() < Renderer::getsRGBTextures());
 		tex->setLod(-0.4f);			// -0.4 level of detail
 		tex->setAniso(4.0f);		// 4x anisotropic filtering
 		this->textures.push_back(tex);

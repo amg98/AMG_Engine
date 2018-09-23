@@ -8,6 +8,7 @@
 
 // Own includes
 #include "DeferredRendering.h"
+#include "Renderer.h"
 
 namespace AMG {
 
@@ -135,7 +136,6 @@ void DeferredRendering::render(bool blitDepth){
 	normalTexture->bind(1);
 	ssaoNoiseTexture->bind(2);
 	renderSprite->draw();
-	ssaoFB->unbind();
 
 	// Blur the SSAO texture
 	outFB->bind();

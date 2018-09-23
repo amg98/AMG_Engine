@@ -140,9 +140,10 @@ Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment, GLu
 /**
  * @brief Constructor for a Texture (1 frame version)
  * @param path File to load as a Texture
+ * @param srgb Load in sRGB format?
  */
-Texture::Texture(const char *path){
-	loadTexture(path);
+Texture::Texture(const char *path, bool srgb){
+	loadTexture(path, srgb);
 	this->currentFrame = 0.0f;
 	this->texScale = vec2(1, 1);
 	this->texPosition = vec4(0, 0, 0, 0);
@@ -154,9 +155,10 @@ Texture::Texture(const char *path){
 /**
  * @brief Constructor for a Texture (cube map version)
  * @param names Path of all the textures, in this order: right, left, up, bottom, behind, front
+ * @param srgb Load in sRGB format?
  * @note Each texture must have the same number of mipmaps (only 1 is recommended)
  */
-Texture::Texture(const char **names){
+Texture::Texture(const char **names, bool srgb){
 
 	this->currentFrame = 0.0f;
 	this->texScale.x = 1.0f;
@@ -172,7 +174,7 @@ Texture::Texture(const char **names){
 
 	int w, h;
 	for(int i=0;i<AMG_CUBE_SIDES;i++){
-		Texture::loadTexture(names[i], GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &w, &h);
+		Texture::loadTexture(names[i], GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &w, &h, srgb);
 	}
 
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -186,8 +188,8 @@ Texture::Texture(const char **names){
  * @param frameWidth Width of one frame, in pixels
  * @param frameHeight Height of one frame, in pixels
  */
-Texture::Texture(const char *path, int frameWidth, int frameHeight){
-	loadTexture(path);
+Texture::Texture(const char *path, int frameWidth, int frameHeight, bool srgb){
+	loadTexture(path, srgb);
 	this->currentFrame = 0.0f;
 	this->texScale.x = (float)frameWidth / (float)width;
 	this->texScale.y = (float)frameHeight / (float)height;
@@ -200,9 +202,9 @@ Texture::Texture(const char *path, int frameWidth, int frameHeight){
 /**
  * @brief Load a texture on memory
  * @param path Location of the texture file (*.dds)
- * @param bias Level of detail bias
+ * @param srgb Load in sRGB format?
  */
-void Texture::loadTexture(const char *path){
+void Texture::loadTexture(const char *path, bool srgb){
 
 	this->target = GL_TEXTURE_2D;
 	glGenTextures(1, &this->id);
@@ -212,7 +214,7 @@ void Texture::loadTexture(const char *path){
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	Texture::loadTexture(path, target, &this->width, &this->height);
+	Texture::loadTexture(path, target, &this->width, &this->height, srgb);
 	glBindTexture(target, 0);
 }
 
@@ -244,8 +246,9 @@ void Texture::setAniso(float aniso){
  * @param path Location of the texture file (*.dds)
  * @param w Width of the image (output)
  * @param h Height of the image (output)
+ * @param srgb Load in sRGB format?
  */
-void Texture::loadTexture(const char *path, GLuint target, int *w, int *h){
+void Texture::loadTexture(const char *path, GLuint target, int *w, int *h, bool srgb){
 	FILE *fp = fopen(getFullPath(path, AMG_TEXTURE), "rb");
 	if (fp == NULL)
 		Debug::showError(5, (void*)path);
@@ -285,13 +288,13 @@ void Texture::loadTexture(const char *path, GLuint target, int *w, int *h){
 	unsigned int format;
 	switch(fourCC){
 		case FOURCC_DXT1:
-			format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			format = srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			break;
 		case FOURCC_DXT3:
-			format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+			format = srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT : GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 			break;
 		case FOURCC_DXT5:
-			format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			format = srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 			break;
 		default:
 			free(buffer);

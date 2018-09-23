@@ -9,7 +9,6 @@
 
 // Own includes
 #include "Texture.h"
-#include "Renderer.h"
 #include "Entity.h"
 
 namespace AMG {

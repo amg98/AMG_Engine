@@ -10,6 +10,7 @@
 
 // Own includes
 #include "LensFlare.h"
+#include "Renderer.h"
 
 /**< Scale for each lens flare texture */
 const static float lens_scale[] = {

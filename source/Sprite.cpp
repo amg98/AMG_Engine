@@ -6,6 +6,7 @@
 
 #include "Sprite.h"
 #include "Shader.h"
+#include "Renderer.h"
 
 namespace AMG {
 

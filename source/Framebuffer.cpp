@@ -11,6 +11,13 @@
 namespace AMG {
 
 /**
+ * @brief Default constructor for a Framebuffer
+ */
+Framebuffer::Framebuffer() : Framebuffer(Renderer::getWidth(), Renderer::getHeight()) {
+
+}
+
+/**
  * @brief Constructor for a Framebuffer
  * @param w Width of the texture, in pixels
  * @param h Height of the texture, in pixels
@@ -105,7 +112,7 @@ void Framebuffer::bind(){
  * @brief Unbind this Framebuffer
  */
 void Framebuffer::unbind(){
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, Renderer::get3dFramebuffer()->getFbo());
 	glViewport(0, 0, Renderer::getWidth(), Renderer::getHeight());
 }
 
@@ -119,17 +126,18 @@ void Framebuffer::blit(int attachment, Framebuffer *fb){
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
 	glBlitFramebuffer(0, 0, width, height, 0, 0, fb->getWidth(), fb->getHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, Renderer::get3dFramebuffer()->getFbo());
 }
 
 /**
  * @brief Blits a Framebuffer to the screen (only the depth buffer)
  */
 void Framebuffer::blitDepthBuffer(){
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	Framebuffer *fb = Renderer::get3dFramebuffer();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->getFbo());
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	glBlitFramebuffer(0, 0, width, height, 0, 0, Renderer::getWidth(), Renderer::getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, fb->getFbo());
 }
 
 /**
@@ -140,18 +148,19 @@ void Framebuffer::blitDepthBuffer(Framebuffer *fb){
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb->getFbo());
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	glBlitFramebuffer(0, 0, width, height, 0, 0, fb->getWidth(), fb->getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, Renderer::get3dFramebuffer()->getFbo());
 }
 
 /**
  * @brief Blits a Framebuffer to the screen
  */
 void Framebuffer::blit(){
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	GLuint dfb = Renderer::get3dFramebuffer()->getFbo();
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dfb);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	glDrawBuffer(GL_BACK);
 	glBlitFramebuffer(0, 0, width, height, 0, 0, Renderer::getWidth(), Renderer::getHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, dfb);
 }
 
 /**

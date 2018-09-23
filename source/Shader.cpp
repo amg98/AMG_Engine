@@ -309,8 +309,6 @@ void Shader::setUniform3fv(const std::string &name, int n, GLfloat *data){
 void Shader::enable(){
 	if(Renderer::getCurrentShader() != this){
 		glUseProgram(programID);
-		setUniform("AMG_HDRExposure", Renderer::getHDRExposure());
-		setUniform("AMG_GammaValue", Renderer::getGammaCorrection());
 		Renderer::setCurrentShader(this);
 	}
 }

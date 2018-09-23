@@ -33,8 +33,8 @@ private:
 	float progress;			/**< Blending between frames */
 	float currentFrame;		/**< Current frame to show, it will be truncated */
 	bool isCopy;			/**< Is this texture a reference to another texture */
-	void loadTexture(const char *path);
-	static void loadTexture(const char *path, GLuint target, int *w, int *h);
+	void loadTexture(const char *path, bool srgb=false);
+	static void loadTexture(const char *path, GLuint target, int *w, int *h, bool srgb);
 protected:
 	int width;						/**< Texture width, in pixels (must be a power of two) */
 	int height;						/**< Texture height, in pixels (must be a power of two) */
@@ -49,9 +49,9 @@ public:
 
 	Texture();
 	Texture(Texture *texture);
-	Texture(const char *path);
-	Texture(const char **names);
-	Texture(const char *path, int frameWidth, int frameHeight);
+	Texture(const char *path, bool srgb=false);
+	Texture(const char **names, bool srgb=false);
+	Texture(const char *path, int frameWidth, int frameHeight, bool srgb=false);
 	Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment, GLuint type=GL_UNSIGNED_BYTE);
 	void loadFloatData(int w, int h, float *data);
 	void createCubeMap(int dimensions);

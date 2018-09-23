@@ -22,6 +22,7 @@ namespace AMG {
 GLFWwindow* Renderer::window;
 bool Renderer::init = false;
 AMG_FunctionCallback Renderer::renderCb;
+AMG_FunctionCallback Renderer::render2dCb;
 AMG_FunctionCallback Renderer::unloadCb;
 mat4 *Renderer::projection;
 mat4 Renderer::perspective, Renderer::ortho;
@@ -39,6 +40,7 @@ vec4 Renderer::fogColor;
 float Renderer::fov;
 Camera *Renderer::camera;
 Shader *Renderer::currentShader;
+Shader *Renderer::hdrGammaShader;
 mat4 Renderer::zupConversion;
 World *Renderer::world;
 GLuint Renderer::quadID;
@@ -47,6 +49,11 @@ GLuint Renderer::quadTexcoords;
 float Renderer::renderDistance;
 float Renderer::hdrExposure;
 float Renderer::gammaCorrection;
+int Renderer::srgbTextures;
+Framebuffer *Renderer::defaultFB;
+Sprite *Renderer::fbSprite;
+Texture *Renderer::fbTexture;
+int Renderer::nSamples;
 
 /**< A vertex buffer for a quad (used for particles and 2D rendering) */
 static float spr_vertices[] = {
@@ -85,6 +92,7 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	width = w;
 	height = h;
 	renderCb = NULL;
+	render2dCb = NULL;
 	unloadCb = NULL;
 	FPS = 60.0f;
 	fogColor = vec4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -96,13 +104,19 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	renderDistance = 100.0f;
 	hdrExposure = 1.0f;
 	gammaCorrection = 2.2f;
+	srgbTextures = 1;
+	hdrGammaShader = NULL;
+	defaultFB = NULL;
+	fbSprite = NULL;
+	fbTexture = NULL;
+	nSamples = samples;
 
 	// Initialise GLFW
 	if(!glfwInit())
 		Debug::showError(1, NULL);
 
 	// Set window hints
-	glfwWindowHint(GLFW_SAMPLES, samples);
+	glfwWindowHint(GLFW_SAMPLES, 0);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);					// OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -158,6 +172,17 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	glGenBuffers(1, &quadTexcoords);
 	glBindBuffer(GL_ARRAY_BUFFER, quadTexcoords);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
+
+	// Load shaders
+	hdrGammaShader = new Shader("Effects/AMG_HDRGamma.vs", "Effects/AMG_HDRGamma.fs");
+
+	// Create the 3D framebuffer
+	defaultFB = new Framebuffer();
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFB->getFbo());
+	fbTexture = new Texture(width, height, GL_RGB16F, GL_RGB, GL_COLOR_ATTACHMENT0);
+	fbSprite = new Sprite(fbTexture);
+	fbSprite->getScaleY() = -1.0f;
+	fbSprite->getPosition() = vec3(width / 2.0f, height / 2.0f, 0.0f);
 
 	// All set up
 	init = true;
@@ -232,10 +257,24 @@ void Renderer::update(){
 			running = false;
 		}
 
-		// Render the scene
+		// Render the 3D scene onto the framebuffer
 		glClearColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		defaultFB->bind();
 		if(renderCb) renderCb();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// Render the scene
+		set3dMode(false);
+		hdrGammaShader->enable();
+		hdrGammaShader->setUniform("AMG_HDRExposure", Renderer::getHDRExposure());
+		hdrGammaShader->setUniform("AMG_GammaValue", Renderer::getGammaCorrection());
+		fbSprite->draw();
+
+		if(render2dCb){
+			render2dCb();
+		}
+		set3dMode(true);
+
 		glfwSwapBuffers(window);
 		frames ++;
 
@@ -256,6 +295,10 @@ int Renderer::exitProcess(){
 		// Destroy the window
 		if(window) glfwDestroyWindow(window);
 		if(world) delete world;
+		if(hdrGammaShader) delete hdrGammaShader;
+		if(fbSprite) delete fbSprite;
+		if(defaultFB) delete defaultFB;
+		if(fbTexture) delete fbTexture;
 
 		// Delete the quad object
 		glDeleteBuffers(1, &quadVertices);

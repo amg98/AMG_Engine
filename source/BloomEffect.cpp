@@ -6,6 +6,7 @@
 // Own includes
 #include "BloomEffect.h"
 #include "GaussianBlur.h"
+#include "Renderer.h"
 
 namespace AMG {
 

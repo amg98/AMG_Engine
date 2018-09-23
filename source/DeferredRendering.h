@@ -13,6 +13,7 @@
 #include "Framebuffer.h"
 #include "Sprite.h"
 #include "Light.h"
+#include "Shader.h"
 
 namespace AMG {
 

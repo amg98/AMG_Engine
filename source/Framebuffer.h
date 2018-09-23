@@ -9,7 +9,6 @@
 // Own includes
 #include "Entity.h"
 #include "Texture.h"
-#include "Renderer.h"
 
 namespace AMG {
 
@@ -34,7 +33,7 @@ public:
 	Texture *getColorTexture(){ return colorTexture; }
 	Texture *getDepthTexture(){ return depthTexture; }
 
-	Framebuffer() : Framebuffer(Renderer::getWidth(), Renderer::getHeight()) {}
+	Framebuffer();
 	Framebuffer(int w, int h, int n=0, int samples=0);
 	void createColorTexture(int attachment);
 	void createDepthTexture();

@@ -5,6 +5,7 @@
 
 // Own includes
 #include "GaussianBlur.h"
+#include "Renderer.h"
 
 namespace AMG {
 

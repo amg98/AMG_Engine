@@ -5,6 +5,7 @@
 
 // Own includes
 #include "MotionBlur.h"
+#include "Renderer.h"
 
 namespace AMG {
 
