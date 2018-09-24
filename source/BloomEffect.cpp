@@ -26,12 +26,12 @@ Sprite *BloomEffect::bloomSprite = NULL;
 void BloomEffect::initialize(int width, int height){
 
 	// Load brightness files
-	brightShader = new Shader("Effects/AMG_BrightFilter.vs", "Effects/AMG_BrightFilter.fs");
+	brightShader = new Shader("Effects/AMG_BrightFilter");
 	brightFB = new Framebuffer(width, height);
 	brightFB->createColorTexture(0);
 
 	// Load combine files
-	combineShader = new Shader("Effects/AMG_CombineEffect.vs", "Effects/AMG_CombineEffect.fs");
+	combineShader = new Shader("Effects/AMG_CombineEffect");
 	combineFB = new Framebuffer(width, height);
 	combineFB->createColorTexture(0);
 

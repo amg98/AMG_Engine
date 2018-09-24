@@ -21,7 +21,7 @@ Shader *WaterTile::waterShader = NULL;
 void WaterTile::initialize(Light *light){
 
 	// Load the shader
-	waterShader = new Shader("Effects/AMG_Water.vs", "Effects/AMG_Water.fs");
+	waterShader = new Shader("Effects/AMG_Water");
 	waterShader->defineUniform("moveFactor");
 	waterShader->getLights().push_back(light);
 }

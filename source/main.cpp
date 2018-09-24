@@ -112,7 +112,6 @@ void render(){
 	terrain->draw();
 
 	DeferredRendering::end();
-	DeferredRendering::render();
 
 	s2->enable();
 	skybox->draw();
@@ -138,8 +137,8 @@ void render(){
 
 void render2d(){
 	s3->enable();
-	sprite->draw();
 	lens->draw(cam, s0->getLights()[0]);
+	sprite->draw();
 	s4->enable();
 	hello->draw();
 }
@@ -195,18 +194,18 @@ int main(int argc, char **argv){
 
 	cam = new Camera(vec3(-4, 3, 5));
 
-	s0 = new Shader("default.vs", "default.fs");
-	s1 = new Shader("terrain.vs", "terrain.fs");
-	s2 = new Shader("skybox.vs", "skybox.fs");
-	s3 = new Shader("shader2d.vs", "shader2d.fs");
-	s4 = new Shader("text2d.vs", "text2d.fs");
-	s5 = new Shader("particles.vs", "particles.fs");
-	s6 = new Shader("bullet.vs", "bullet.fs");
-	s7 = new Shader("barrel.vs", "barrel.fs");
-	s00 = new Shader("_default.vs", "_default.fs");
-	s70 = new Shader("_barrel.vs", "_barrel.fs");
-	s60 = new Shader("_bullet.vs", "_bullet.fs");
-	s10 = new Shader("_terrain.vs", "_terrain.fs");
+	s0 = new Shader("default");
+	s1 = new Shader("terrain");
+	s2 = new Shader("skybox");
+	s3 = new Shader("shader2d");
+	s4 = new Shader("text2d");
+	s5 = new Shader("particles");
+	s6 = new Shader("bullet");
+	s7 = new Shader("barrel");
+	s00 = new Shader("_default");
+	s70 = new Shader("_barrel");
+	s60 = new Shader("_bullet");
+	s10 = new Shader("_terrain");
 
 	light = new Light(vec3(100000, 100000, 100000), vec3(1, 1, 0), vec3(0.0f, 0, 1));
 	s0->getLights().push_back(light);
@@ -269,7 +268,10 @@ int main(int argc, char **argv){
 	cmapPos.y = 0.0f;
 	cubeMap = Renderer::createCubeMap(renderSimple, s6, 256, cmapPos);
 
-	lens = new LensFlare("lens", 0.4f, 1);
+	float lens_scale[] = {
+		0.5f, 0.23f, 0.1f, 0.05f, 0.06f, 0.07f, 0.2f, 0.07f, 0.3f, 0.4f, 0.6f
+	};
+	lens = new LensFlare("lens", 0.4f, lens_scale);
 
 	Renderer::update();
 

@@ -170,7 +170,7 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uv_vertices), uv_vertices, GL_STATIC_DRAW);
 
 	// Load shaders
-	hdrGammaShader = new Shader("Effects/AMG_HDRGamma.vs", "Effects/AMG_HDRGamma.fs");
+	hdrGammaShader = new Shader("Effects/AMG_HDRGamma");
 
 	// Create the 3D framebuffer
 	defaultFB = new Framebuffer(width, height, 1, samples);
@@ -262,8 +262,8 @@ void Renderer::update(){
 		// Render the scene
 		set3dMode(false);
 		hdrGammaShader->enable();
-		hdrGammaShader->setUniform("AMG_HDRExposure", Renderer::getHDRExposure());
-		hdrGammaShader->setUniform("AMG_GammaValue", Renderer::getGammaCorrection());
+		hdrGammaShader->setUniform(AMG_HDRExposure, Renderer::getHDRExposure());
+		hdrGammaShader->setUniform(AMG_GammaValue, Renderer::getGammaCorrection());
 		fbSprite->draw();
 
 		if(render2dCb){
@@ -382,10 +382,10 @@ void Renderer::setTransformationBillboard(vec3 pos, float rot, float scale){
 void Renderer::updateMVP(){
 	mv = view * model;
 	mvp = *projection * mv;
-	if(camera) currentShader->setUniform("AMG_CamPosition", camera->getPosition());
-	currentShader->setUniform("AMG_MVP", mvp);
-	currentShader->setUniform("AMG_MV", mv);
-	currentShader->setUniform("AMG_M", model);
+	if(camera) currentShader->setUniform(AMG_CamPosition, camera->getPosition());
+	currentShader->setUniform(AMG_MVP, mvp);
+	currentShader->setUniform(AMG_MV, mv);
+	currentShader->setUniform(AMG_M, model);
 }
 
 /**
@@ -428,9 +428,9 @@ void Renderer::updateCamera(Camera *cam){
  * @brief Update fog to the current shader
  */
 void Renderer::updateFog(){
-	currentShader->setUniform("AMG_FogColor", fogColor);
-	currentShader->setUniform("AMG_FogDensity", fogDensity);
-	currentShader->setUniform("AMG_FogGradient", fogGradient);
+	currentShader->setUniform(AMG_FogColor, fogColor);
+	currentShader->setUniform(AMG_FogDensity, fogDensity);
+	currentShader->setUniform(AMG_FogGradient, fogGradient);
 }
 
 /**

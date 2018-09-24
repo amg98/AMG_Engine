@@ -41,14 +41,14 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.1095919108" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="glfw3dll"/>
-									<listOptionValue builtIn="false" value="ogg.dll"/>
-									<listOptionValue builtIn="false" value="vorbis.dll"/>
-									<listOptionValue builtIn="false" value="vorbisfile.dll"/>
-									<listOptionValue builtIn="false" value="OpenAL32"/>
+									<listOptionValue builtIn="false" value="glew32"/>
 									<listOptionValue builtIn="false" value="BulletDynamics"/>
 									<listOptionValue builtIn="false" value="BulletCollision"/>
 									<listOptionValue builtIn="false" value="LinearMath"/>
-									<listOptionValue builtIn="false" value="glew32"/>
+									<listOptionValue builtIn="false" value="vorbis.dll"/>
+									<listOptionValue builtIn="false" value="vorbisfile.dll"/>
+									<listOptionValue builtIn="false" value="OpenAL32"/>
+									<listOptionValue builtIn="false" value="ogg.dll"/>
 									<listOptionValue builtIn="false" value="opengl32"/>
 								</option>
 								<option id="gnu.cpp.link.option.flags.195970495" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="" valueType="string"/>
@@ -91,6 +91,9 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.exe.release.2096237184" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.mingw.exe.release">
 								<option id="gnu.cpp.compiler.mingw.exe.release.option.optimization.level.1055781776" name="Optimization Level" superClass="gnu.cpp.compiler.mingw.exe.release.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.mingw.exe.release.option.debugging.level.1643462833" name="Debug Level" superClass="gnu.cpp.compiler.mingw.exe.release.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.include.paths.854729657" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Libraries/include}&quot;"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.977432815" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.mingw.exe.release.1691485514" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.mingw.exe.release">
@@ -100,6 +103,21 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.release.535541543" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.release.999615033" name="MinGW C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.mingw.exe.release">
+								<option id="gnu.cpp.link.option.paths.1355129636" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Libraries/lib}&quot;"/>
+								</option>
+								<option id="gnu.cpp.link.option.libs.1089820523" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+									<listOptionValue builtIn="false" value="glfw3dll"/>
+									<listOptionValue builtIn="false" value="glew32"/>
+									<listOptionValue builtIn="false" value="BulletDynamics"/>
+									<listOptionValue builtIn="false" value="BulletCollision"/>
+									<listOptionValue builtIn="false" value="LinearMath"/>
+									<listOptionValue builtIn="false" value="vorbis.dll"/>
+									<listOptionValue builtIn="false" value="vorbisfile.dll"/>
+									<listOptionValue builtIn="false" value="OpenAL32"/>
+									<listOptionValue builtIn="false" value="ogg.dll"/>
+									<listOptionValue builtIn="false" value="opengl32"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.668941357" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

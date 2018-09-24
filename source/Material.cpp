@@ -96,11 +96,11 @@ void Material::apply(){
 		glEnable(GL_CULL_FACE);
 	}
 	Shader *shader = Renderer::getCurrentShader();
-	shader->setUniform("AMG_MaterialDiffuse", diffuse);
-	shader->setUniform("AMG_MaterialSpecular", specular);
-	shader->setUniform("AMG_MaterialAmbient", ambient);
-	shader->setUniform("AMG_DiffusePower", diffusePower);
-	shader->setUniform("AMG_SpecularPower", specularPower);
+	shader->setUniform(AMG_MaterialDiffuse, diffuse);
+	shader->setUniform(AMG_MaterialSpecular, specular);
+	shader->setUniform(AMG_MaterialAmbient, ambient);
+	shader->setUniform(AMG_DiffusePower, diffusePower);
+	shader->setUniform(AMG_SpecularPower, specularPower);
 }
 
 void Material::disable(){

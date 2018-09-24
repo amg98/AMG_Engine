@@ -37,6 +37,9 @@ char *Entity::getFullPath(const char *path, int type){
 		case AMG_AUDIO:
 			sprintf(_fullpath, "Data/Audio/%s", path);
 			break;
+		case AMG_SHADERLIB:
+			sprintf(_fullpath, "Data/Shader/Engine/%s", path);
+			break;
 		default: break;
 	}
 	return _fullpath;

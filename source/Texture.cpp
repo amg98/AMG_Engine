@@ -285,7 +285,7 @@ void Texture::loadTexture(const char *path, GLuint target, int *w, int *h, bool 
 	fclose(fp);
 
 	//unsigned int components  = (fourCC == FOURCC_DXT1) ? 3 : 4;
-	unsigned int format;
+	unsigned int format = 0;
 	switch(fourCC){
 		case FOURCC_DXT1:
 			format = srgb ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -327,9 +327,9 @@ void Texture::bind(int slot){
 
 	// Update uniforms in the shader
 	Shader *shader = Renderer::getCurrentShader();
-	shader->setUniform("AMG_TexPosition", texPosition);
-	shader->setUniform("AMG_TexScale", texScale);
-	shader->setUniform("AMG_TexProgress", progress);
+	shader->setUniform(AMG_TexPosition, texPosition);
+	shader->setUniform(AMG_TexScale, texScale);
+	shader->setUniform(AMG_TexProgress, progress);
 }
 
 /**

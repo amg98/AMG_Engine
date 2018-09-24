@@ -28,13 +28,13 @@ void GaussianBlur::initialize(int width, int height){
 	if(init) return;
 
 	// Create horizontal blur stuff
-	hblurShader = new Shader("Effects/AMG_HBlur.vs", "Effects/AMG_Blur.fs");
+	hblurShader = new Shader("Effects/AMG_HBlur");
 	hblurShader->defineUniform("targetWidth");
 	hblurShader->enable();
 	hblurShader->setUniform("targetWidth", (float)width);
 
 	// Create horizontal blur stuff
-	vblurShader = new Shader("Effects/AMG_VBlur.vs", "Effects/AMG_Blur.fs");
+	vblurShader = new Shader("Effects/AMG_VBlur");
 	vblurShader->defineUniform("targetHeight");
 	vblurShader->enable();
 	vblurShader->setUniform("targetHeight", (float)height);

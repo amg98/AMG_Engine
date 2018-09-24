@@ -27,6 +27,18 @@ using namespace glm;
 
 namespace AMG {
 
+enum AMG_SHADER_UNIFORMS {
+	AMG_MVP, AMG_BoneMatrix,
+	AMG_NLights, AMG_MV, AMG_M,
+	AMG_FogDensity, AMG_FogGradient, AMG_CamPosition, AMG_TexScale, AMG_TexPosition,
+	AMG_ShadowMatrix, AMG_ShadowDistance, AMG_ShadowMapSize, AMG_ClippingPlanes,
+	AMG_MaterialDiffuse, AMG_MaterialAmbient, AMG_MaterialSpecular, AMG_DiffusePower,
+	AMG_SpecularPower, AMG_SprColor, AMG_FogColor, AMG_TexProgress, AMG_CharWidth,
+	AMG_CharEdge, AMG_CharBorderWidth, AMG_CharBorderEdge, AMG_CharShadowOffset,
+	AMG_CharOutlineColor, AMG_SSAOSamples, AMG_SSAOProjection, AMG_DView, AMG_HDRExposure,
+	AMG_GammaValue,
+};
+
 /**
  * @class Shader
  * @brief Holds a shader program and its usage
@@ -36,6 +48,7 @@ private:
 	int programID;											/**< Internal OpenGL program ID */
 	std::tr1::unordered_map<std::string, int> uniformsMap;	/**< Hash map holding uniform variables in the shader */
 	std::vector<Light*> lights;								/**< Vector holding all lights used in the shader */
+	const static char uniformsTable[][32];					/**< Uniforms table */
 	int loadShader(const char *path, int type);
 	std::string loadShaderCode(const char *path);
 	void internalDefineUniform(std::string name);
@@ -43,9 +56,10 @@ public:
 	std::vector<Light*> &getLights(){ return lights; }
 	int getProgram(){ return programID; }
 
-	Shader(const char *vertex_file_path, const char *fragment_file_path, const char *geometry_file_path=NULL);
+	Shader(const char *file_path);
 	void defineUniform(std::string name);
 	int getUniform(const std::string &name);
+	template<typename T> inline void setUniform(int id, T &v){ setUniform(uniformsTable[id], v); }
 	void setUniform(const std::string &name, int v);
 	void setUniform(const std::string &name, float v);
 	void setUniform(const std::string &name, vec2 &v);
@@ -54,6 +68,7 @@ public:
 	void setUniform(const std::string &name, mat4 &v);
 	void setUniform(const std::string &name, mat3 &v);
 	void setUniform3fv(const std::string &name, int n, GLfloat *data);
+	inline void setUniform3fv(int id, int n, GLfloat *data){ setUniform3fv(uniformsTable[id], n, data); }
 	void setClipPlane(int id, vec4 &plane);
 	void setWaterClipPlane(vec4 &plane);
 	void disableClipPlane(int id);

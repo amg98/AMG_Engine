@@ -59,7 +59,7 @@ Sprite::Sprite(const char *path, int frameWidth, int frameHeight) : Texture(path
  * @brief Draw a Sprite in the proper window
  */
 void Sprite::draw(){
-	Renderer::getCurrentShader()->setUniform("AMG_SprColor", color);
+	Renderer::getCurrentShader()->setUniform(AMG_SprColor, color);
 	Renderer::setTransformation(position, glm::quat(glm::vec3(0, 0, rotation)), glm::vec3(sx * texScale.x * width, sy * texScale.y * height, 1.0f));
 	Renderer::updateMVP();
 	animate();		// Animate texture
@@ -70,14 +70,13 @@ void Sprite::draw(){
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
-	unbind(0);
 }
 
 /**
  * @brief Draw a Sprite in the proper window (billboard mode)
  */
 void Sprite::drawBillboard(){
-	Renderer::getCurrentShader()->setUniform("AMG_SprColor", color);
+	Renderer::getCurrentShader()->setUniform(AMG_SprColor, color);
 	Renderer::setTransformationBillboard(position, rotation, billboardScale);
 	Renderer::updateMVP();
 	Renderer::bindQuad(true);

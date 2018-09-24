@@ -17,13 +17,28 @@
 
 namespace AMG {
 
+// Internal data
+const char Shader::uniformsTable[][32] = {
+	"AMG_MVP", "AMG_BoneMatrix",
+	"AMG_NLights", "AMG_MV", "AMG_M",
+	"AMG_FogDensity", "AMG_FogGradient", "AMG_CamPosition", "AMG_TexScale", "AMG_TexPosition",
+	"AMG_ShadowMatrix", "AMG_ShadowDistance", "AMG_ShadowMapSize", "AMG_ClippingPlanes",
+	"AMG_MaterialDiffuse", "AMG_MaterialAmbient", "AMG_MaterialSpecular", "AMG_DiffusePower",
+	"AMG_SpecularPower", "AMG_SprColor", "AMG_FogColor", "AMG_TexProgress", "AMG_CharWidth",
+	"AMG_CharEdge", "AMG_CharBorderWidth", "AMG_CharBorderEdge", "AMG_CharShadowOffset",
+	"AMG_CharOutlineColor", "AMG_SSAOSamples", "AMG_SSAOProjection", "AMG_DView", "AMG_HDRExposure",
+	"AMG_GammaValue",
+};
+
+#define AMG_NUNIFORMS 33
+
 /**
  * @brief Load a file onto a string, doing preprocessing step
  * @param path Path to the file to be loaded
  * @return The code onto that file on a std::string
  */
 std::string Shader::loadShaderCode(const char *path){
-	std::ifstream ShaderStream(getFullPath(path, AMG_SHADER), std::ios::in);
+	std::ifstream ShaderStream(path, std::ios::in);
 	std::string ShaderCode;
 	if(ShaderStream.is_open()){
 		std::string line;
@@ -32,7 +47,7 @@ std::string Shader::loadShaderCode(const char *path){
 			if(line.find("#include") != std::string::npos){
 				int start = line.find("<") + 1;
 				int end = line.find(">");
-				sstr << loadShaderCode(line.substr(start, end - start).c_str());
+				sstr << loadShaderCode(getFullPath(line.substr(start, end - start).c_str(), AMG_SHADERLIB));
 			}else{
 				sstr << line + "\n";
 			}
@@ -59,7 +74,7 @@ int Shader::loadShader(const char *path, int type){
 	}
 
 	// Load shader code
-	std::string ShaderCode = loadShaderCode(path);
+	std::string ShaderCode = loadShaderCode(getFullPath(path, AMG_SHADER));
 
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
@@ -84,17 +99,26 @@ int Shader::loadShader(const char *path, int type){
 
 /**
  * @brief Constructor for a Shader object
- * @param vertex_file_path Location of the vertex shader file, any extension allowed
- * @param fragment_file_path Location of the fragment shader file, any extension allowed
- * @param geometry_file_path Location of the geometry shader file, any extension allowed (optional)
+ * @param file_path Shader file path (without extension)
+ * @note Vertex shaders must have a .vs extension, fragment shaders .fs, and geometry shaders .gs
  */
-Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, const char *geometry_file_path) {
+Shader::Shader(const char *file_path) {
 
 	// Create shader objects
-	GLuint VertexShaderID = loadShader(vertex_file_path, GL_VERTEX_SHADER);
-	GLuint FragmentShaderID = loadShader(fragment_file_path, GL_FRAGMENT_SHADER);
+	char path[512];
+	sprintf(path, "%s.vs", file_path);
+	GLuint VertexShaderID = loadShader(path, GL_VERTEX_SHADER);
+	sprintf(path, "%s.fs", file_path);
+	GLuint FragmentShaderID = loadShader(path, GL_FRAGMENT_SHADER);
+
+	// Check the geometry shader
 	GLuint GeometryShaderID = 0;
-	if(geometry_file_path) GeometryShaderID = loadShader(geometry_file_path, GL_GEOMETRY_SHADER);
+	sprintf(path, "%s.gs", file_path);
+	FILE *f = fopen(path, "rb");
+	if(f){
+		fclose(f);
+		GeometryShaderID = loadShader(path, GL_GEOMETRY_SHADER);
+	}
 
 	// Create a shader program and attach the loaded shaders
 	programID = glCreateProgram();
@@ -125,7 +149,7 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, con
 	if(InfoLogLength > 0){
 		std::vector<char> ProgramErrorMessage(InfoLogLength+1);
 		glGetProgramInfoLog(programID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-		fprintf(stderr, "[%s]\n", vertex_file_path);
+		fprintf(stderr, "[%s]\n", file_path);
 		Debug::showError(8, &ProgramErrorMessage[0]);
 	}
 
@@ -133,10 +157,11 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, con
 	this->uniformsMap = std::tr1::unordered_map<std::string, int>();
 	lights = std::vector<Light*>();
 
-	// Define vertex shader uniforms
+	// Define all uniforms
+	for(unsigned int i=0;i<AMG_NUNIFORMS;i++){
+		internalDefineUniform(uniformsTable[i]);
+	}
 	char text[64];
-	internalDefineUniform("AMG_MVP");
-	internalDefineUniform("AMG_BoneMatrix");
 	for(int i=0;i<AMG_MAX_LIGHTS;i++){
 		sprintf(text, "AMG_Light[%d].position", i);
 		internalDefineUniform(std::string(text));			// Vertex shader
@@ -151,39 +176,6 @@ Shader::Shader(const char *vertex_file_path, const char *fragment_file_path, con
 		sprintf(text, "AMG_LightDR[%d].color", i);
 		internalDefineUniform(std::string(text));
 	}
-	internalDefineUniform("AMG_NLights");
-	internalDefineUniform("AMG_MV");
-	internalDefineUniform("AMG_M");
-	internalDefineUniform("AMG_FogDensity");
-	internalDefineUniform("AMG_FogGradient");
-	internalDefineUniform("AMG_CamPosition");
-	internalDefineUniform("AMG_TexScale");
-	internalDefineUniform("AMG_TexPosition");
-	internalDefineUniform("AMG_ShadowMatrix");
-	internalDefineUniform("AMG_ShadowDistance");
-	internalDefineUniform("AMG_ShadowMapSize");
-	internalDefineUniform("AMG_ClippingPlanes");
-
-	// Define fragment shader uniforms
-	internalDefineUniform("AMG_MaterialDiffuse");
-	internalDefineUniform("AMG_MaterialAmbient");
-	internalDefineUniform("AMG_MaterialSpecular");
-	internalDefineUniform("AMG_DiffusePower");
-	internalDefineUniform("AMG_SpecularPower");
-	internalDefineUniform("AMG_SprColor");
-	internalDefineUniform("AMG_FogColor");
-	internalDefineUniform("AMG_TexProgress");
-	internalDefineUniform("AMG_CharWidth");
-	internalDefineUniform("AMG_CharEdge");
-	internalDefineUniform("AMG_CharBorderWidth");
-	internalDefineUniform("AMG_CharBorderEdge");
-	internalDefineUniform("AMG_CharShadowOffset");
-	internalDefineUniform("AMG_CharOutlineColor");
-	internalDefineUniform("AMG_SSAOSamples");
-	internalDefineUniform("AMG_SSAOProjection");
-	internalDefineUniform("AMG_DView");
-	internalDefineUniform("AMG_HDRExposure");
-	internalDefineUniform("AMG_GammaValue");
 	glUseProgram(programID);
 	for(int i=0;i<AMG_MAX_TEXTURES;i++){
 		sprintf(text, "AMG_TextureSampler[%d]", i);

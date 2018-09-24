@@ -39,7 +39,7 @@ mat4 ShadowRenderer::projectionMatrix;
 void ShadowRenderer::initialize(int dimensions, float offset, float distance){
 
 	// Load the shader
-	shadowMapShader = new Shader("Effects/AMG_ShadowMap.vs", "Effects/AMG_ShadowMap.fs");
+	shadowMapShader = new Shader("Effects/AMG_ShadowMap");
 
 	// Create the framebuffer
 	shadowMap = new Framebuffer(dimensions, dimensions);
@@ -92,9 +92,10 @@ void ShadowRenderer::updateShadowMap(AMG_FunctionCallback render, Light *light){
 void ShadowRenderer::updateShadows(int slot){
 	mat4 m = projectionMatrix * lightViewMatrix;
 	Shader *shader = Renderer::getCurrentShader();
-	shader->setUniform("AMG_ShadowMatrix", m);
-	shader->setUniform("AMG_ShadowDistance", shadowDistance);
-	shader->setUniform("AMG_ShadowMapSize", (float)shadowMap->getWidth());
+	float shadowMapWidth = (float) shadowMap->getWidth();
+	shader->setUniform(AMG_ShadowMatrix, m);
+	shader->setUniform(AMG_ShadowDistance, shadowDistance);
+	shader->setUniform(AMG_ShadowMapSize, shadowMapWidth);
 	shadowMap->getDepthTexture()->bind(slot);
 }
 

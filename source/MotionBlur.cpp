@@ -26,7 +26,7 @@ void MotionBlur::initialize(){
 	int height = Renderer::getHeight();
 
 	// Load the shader
-	motionShader = new Shader("Effects/AMG_MotionBlur.vs", "Effects/AMG_MotionBlur.fs");
+	motionShader = new Shader("Effects/AMG_MotionBlur");
 
 	// Create the fraebuffers
 	for(int i=0;i<AMG_MOTION_BLUR_IMAGES;i++){

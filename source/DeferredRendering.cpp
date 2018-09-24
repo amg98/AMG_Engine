@@ -45,9 +45,9 @@ void DeferredRendering::initialize(){
 	outFB->createColorTexture(0, GL_R16F, GL_RGB, GL_FLOAT);
 
 	// Load shaders
-	renderShader = new Shader("Deferred/AMG_Render.vs", "Deferred/AMG_Render.fs");
-	ssaoShader = new Shader("Deferred/AMG_SSAO.vs", "Deferred/AMG_SSAO.fs");
-	blurShader = new Shader("Deferred/AMG_SSAOBlur.vs", "Deferred/AMG_SSAOBlur.fs");
+	renderShader = new Shader("Deferred/AMG_Render");
+	ssaoShader = new Shader("Deferred/AMG_SSAO");
+	blurShader = new Shader("Deferred/AMG_SSAOBlur");
 
 	// Create the rendering sprite
 	renderSprite = new Sprite();
@@ -91,6 +91,7 @@ void DeferredRendering::initialize(){
 
 /**
  * @brief Start the deferred rendering pass
+ * @note Always draw first the deferred part of your scene, as it requieres an empty color buffer to work
  */
 void DeferredRendering::start(){
 	glDisable(GL_BLEND);
@@ -102,14 +103,9 @@ void DeferredRendering::start(){
  * @brief Stop the deferred rendering pass
  */
 void DeferredRendering::end(){
-	gBuffer->end();
-	glEnable(GL_BLEND);
-}
 
-/**
- * @brief Do the rendering process and return a framebuffer with it
- */
-void DeferredRendering::render(){
+	// Process the G-buffer
+	gBuffer->end();
 
 	// Get the current view
 	mat4 view = Renderer::getView();
@@ -117,10 +113,9 @@ void DeferredRendering::render(){
 	Renderer::set3dMode(false);
 
 	// Render SSAO image
-	glDisable(GL_BLEND);
 	ssaoShader->enable();
-	ssaoShader->setUniform("AMG_SSAOProjection", Renderer::getPerspective());
-	ssaoShader->setUniform3fv("AMG_SSAOSamples", 64, ssaoKernel);
+	ssaoShader->setUniform(AMG_SSAOProjection, Renderer::getPerspective());
+	ssaoShader->setUniform3fv(AMG_SSAOSamples, 64, ssaoKernel);
 	ssaoFB->start();
 	renderSprite->set(gBuffer->getColorTexture(0));
 	gBuffer->getColorTexture(1)->bind(1);
@@ -139,8 +134,9 @@ void DeferredRendering::render(){
 	renderShader->enable();
 
 	// Update lighting information
-	renderShader->setUniform("AMG_NLights", (int)lights.size());
-	renderShader->setUniform("AMG_DView", view3x3);
+	int nlights = lights.size();
+	renderShader->setUniform(AMG_NLights, nlights);
+	renderShader->setUniform(AMG_DView, view3x3);
 	for(unsigned int i=0;i<lights.size();i++){
 		lights[i]->enableDeferred(i);
 	}

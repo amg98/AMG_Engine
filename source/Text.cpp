@@ -37,13 +37,13 @@ Text::Text(float *vertices, float *texcoords, int size, Texture *texture) {
 void Text::draw(){
 	Shader *shader = Renderer::getCurrentShader();
 	texture->bind(0);
-	shader->setUniform("AMG_CharWidth", charWidth);
-	shader->setUniform("AMG_CharEdge", charEdge);
-	shader->setUniform("AMG_CharBorderWidth", charBorderWidth);
-	shader->setUniform("AMG_CharBorderEdge", charBorderEdge);
-	shader->setUniform("AMG_CharShadowOffset", charShadowOffset);
-	shader->setUniform("AMG_CharOutlineColor", charOutlineColor);
-	shader->setUniform("AMG_SprColor", color);
+	shader->setUniform(AMG_CharWidth, charWidth);
+	shader->setUniform(AMG_CharEdge, charEdge);
+	shader->setUniform(AMG_CharBorderWidth, charBorderWidth);
+	shader->setUniform(AMG_CharBorderEdge, charBorderEdge);
+	shader->setUniform(AMG_CharShadowOffset, charShadowOffset);
+	shader->setUniform(AMG_CharOutlineColor, charOutlineColor);
+	shader->setUniform(AMG_SprColor, color);
 	Renderer::setTransformation(position);
 	Renderer::updateMVP();
 	MeshData::drawRaw();

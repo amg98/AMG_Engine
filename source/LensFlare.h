@@ -29,9 +29,10 @@ private:
 	bool query;										/**< Doing a query? */
 	float coverage;									/**< How much occlusion is happening? */
 	float nsamples;									/**< Maximum number of samples */
+	float *lens_scale;								/**< Scale for each lens flare texture */
 	void drawTexture(int i, float brightness, vec4 &coords, vec2 &sunToCenter);
 public:
-	LensFlare(const char *dir, float spacing, int nsamples);
+	LensFlare(const char *dir, float spacing, float *scale);
 	void draw(Camera *cam, Light *light);
 	virtual ~LensFlare();
 };

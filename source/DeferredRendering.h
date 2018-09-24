@@ -38,7 +38,6 @@ public:
 	static void initialize();
 	static void start();
 	static void end();
-	static void render();
 	static void finish();
 };
 
