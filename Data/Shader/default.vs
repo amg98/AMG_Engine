@@ -15,9 +15,7 @@ layout(location = 4) in ivec4 AMG_WeightBoneID;
 #include <AMG_PassLight.glsl>
 #include <AMG_WaterClipPlane.glsl>
 #include <AMG_PassFog.glsl>
-
-out vec3 AMG_OutGPosition;
-out vec3 AMG_OutGNormal;
+#include <AMG_PassDeferred.glsl>
 
 void main(){
 	
@@ -34,6 +32,5 @@ void main(){
     // Pass data to the fragment shader
 	AMG_PassTexcoords();
 	
-	AMG_OutGPosition = (modelview * vec4(AMG_Position, 1)).xyz;
-	AMG_OutGNormal = (modelview * vec4(AMG_Normal, 0)).xyz;
+	AMG_PassDeferred(modelview);
 }

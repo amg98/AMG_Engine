@@ -36,7 +36,8 @@ enum AMG_SHADER_UNIFORMS {
 	AMG_SpecularPower, AMG_SprColor, AMG_FogColor, AMG_TexProgress, AMG_CharWidth,
 	AMG_CharEdge, AMG_CharBorderWidth, AMG_CharBorderEdge, AMG_CharShadowOffset,
 	AMG_CharOutlineColor, AMG_SSAOSamples, AMG_SSAOProjection, AMG_DView, AMG_HDRExposure,
-	AMG_GammaValue,
+	AMG_GammaValue, AMG_SpecularReflectivity, AMG_SSAOKernelSize, AMG_SSAOKernelRadius, AMG_WorldAmbient,
+	AMG_RefractionIndex
 };
 
 /**
@@ -47,13 +48,11 @@ class Shader : private Entity {
 private:
 	int programID;											/**< Internal OpenGL program ID */
 	std::tr1::unordered_map<std::string, int> uniformsMap;	/**< Hash map holding uniform variables in the shader */
-	std::vector<Light*> lights;								/**< Vector holding all lights used in the shader */
-	const static char uniformsTable[][32];					/**< Uniforms table */
+	const static char *uniformsTable[];						/**< Uniforms table */
 	int loadShader(const char *path, int type);
 	std::string loadShaderCode(const char *path);
 	void internalDefineUniform(std::string name);
 public:
-	std::vector<Light*> &getLights(){ return lights; }
 	int getProgram(){ return programID; }
 
 	Shader(const char *file_path);

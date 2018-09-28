@@ -195,8 +195,6 @@ Model::Model(const char *path, bool tangent) {
  * @brief Draw a 3D model previously loaded
  */
 void Model::draw(){
-	Renderer::updateLighting();
-	Renderer::updateFog();
 	for(unsigned int i=0;i<nobjects;i++){
 		objects[i]->draw();
 	}

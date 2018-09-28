@@ -18,7 +18,7 @@
 namespace AMG {
 
 // Internal data
-const char Shader::uniformsTable[][32] = {
+const char *Shader::uniformsTable[] = {
 	"AMG_MVP", "AMG_BoneMatrix",
 	"AMG_NLights", "AMG_MV", "AMG_M",
 	"AMG_FogDensity", "AMG_FogGradient", "AMG_CamPosition", "AMG_TexScale", "AMG_TexPosition",
@@ -27,10 +27,9 @@ const char Shader::uniformsTable[][32] = {
 	"AMG_SpecularPower", "AMG_SprColor", "AMG_FogColor", "AMG_TexProgress", "AMG_CharWidth",
 	"AMG_CharEdge", "AMG_CharBorderWidth", "AMG_CharBorderEdge", "AMG_CharShadowOffset",
 	"AMG_CharOutlineColor", "AMG_SSAOSamples", "AMG_SSAOProjection", "AMG_DView", "AMG_HDRExposure",
-	"AMG_GammaValue",
+	"AMG_GammaValue", "AMG_SpecularReflectivity", "AMG_SSAOKernelSize", "AMG_SSAOKernelRadius", "AMG_WorldAmbient",
+	"AMG_RefractionIndex",
 };
-
-#define AMG_NUNIFORMS 33
 
 /**
  * @brief Load a file onto a string, doing preprocessing step
@@ -155,10 +154,10 @@ Shader::Shader(const char *file_path) {
 
 	// Everything OK, create a uniform map
 	this->uniformsMap = std::tr1::unordered_map<std::string, int>();
-	lights = std::vector<Light*>();
 
 	// Define all uniforms
-	for(unsigned int i=0;i<AMG_NUNIFORMS;i++){
+	unsigned int nuniforms = sizeof(uniformsTable)/sizeof(char*);
+	for(unsigned int i=0;i<nuniforms;i++){
 		internalDefineUniform(uniformsTable[i]);
 	}
 	char text[64];
@@ -169,11 +168,21 @@ Shader::Shader(const char *file_path) {
 		internalDefineUniform(std::string(text));			// Fragment shader
 		sprintf(text, "AMG_Lights[%d].attenuation", i);
 		internalDefineUniform(std::string(text));
+		sprintf(text, "AMG_Lights[%d].spotDirection", i);
+		internalDefineUniform(std::string(text));
+		sprintf(text, "AMG_Lights[%d].spotCutoff", i);
+		internalDefineUniform(std::string(text));
 	}
 	for(int i=0;i<AMG_MAX_DLIGHTS;i++){
 		sprintf(text, "AMG_LightDR[%d].position", i);
 		internalDefineUniform(std::string(text));
 		sprintf(text, "AMG_LightDR[%d].color", i);
+		internalDefineUniform(std::string(text));
+		sprintf(text, "AMG_LightDR[%d].attenuation", i);
+		internalDefineUniform(std::string(text));
+		sprintf(text, "AMG_LightDR[%d].spotDirection", i);
+		internalDefineUniform(std::string(text));
+		sprintf(text, "AMG_LightDR[%d].spotCutoff", i);
 		internalDefineUniform(std::string(text));
 	}
 	glUseProgram(programID);
@@ -300,8 +309,21 @@ void Shader::setUniform3fv(const std::string &name, int n, GLfloat *data){
  */
 void Shader::enable(){
 	if(Renderer::getCurrentShader() != this){
+
+		// Enable the shader program
 		glUseProgram(programID);
 		Renderer::setCurrentShader(this);
+
+		// Update fog uniforms
+		setUniform(AMG_FogColor, Renderer::getFogColor());
+		setUniform(AMG_FogDensity, Renderer::getFogDensity());
+		setUniform(AMG_FogGradient, Renderer::getFogGradient());
+
+		// Update forward lighting uniforms
+		std::vector<Light*> &lights = Renderer::getLights();
+		for(unsigned int i=0;i<lights.size();i++){
+			lights[i]->enable(i);
+		}
 	}
 }
 

@@ -38,6 +38,7 @@ float Renderer::fogDensity;
 float Renderer::fogGradient;
 vec4 Renderer::fogColor;
 float Renderer::fov;
+float Renderer::worldAmbient;
 Camera *Renderer::camera;
 Shader *Renderer::currentShader;
 Shader *Renderer::hdrGammaShader;
@@ -52,6 +53,7 @@ float Renderer::gammaCorrection;
 int Renderer::srgbTextures;
 Framebuffer *Renderer::defaultFB;
 Sprite *Renderer::fbSprite;
+std::vector<Light*> Renderer::lights;
 
 /**< A vertex buffer for a quad (used for particles and 2D rendering) */
 static float spr_vertices[] = {
@@ -106,6 +108,7 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	hdrGammaShader = NULL;
 	defaultFB = NULL;
 	fbSprite = NULL;
+	worldAmbient = 0.2f;
 
 	// Initialise GLFW
 	if(!glfwInit())
@@ -178,6 +181,9 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	fbSprite = new Sprite(defaultFB->getColorTexture(0));
 	fbSprite->getScaleY() = -1.0f;
 	fbSprite->getPosition() = vec3(width / 2.0f, height / 2.0f, 0.0f);
+
+	// Create the lights vector
+	lights = std::vector<Light*>();
 
 	// All set up
 	init = true;
@@ -257,6 +263,12 @@ void Renderer::update(){
 		defaultFB->start();
 		if(renderCb) renderCb();
 		defaultFB->end();
+
+		// Blit the depth buffer to the default framebuffer, for 2D depth effects (Lens flare...)
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, defaultFB->getFbo());
+		glDrawBuffer(GL_BACK);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// Render the scene
@@ -422,25 +434,6 @@ void Renderer::set3dMode(bool mode){
 void Renderer::updateCamera(Camera *cam){
 	camera = cam;
 	cam->update(window, getDelta());
-}
-
-/**
- * @brief Update fog to the current shader
- */
-void Renderer::updateFog(){
-	currentShader->setUniform(AMG_FogColor, fogColor);
-	currentShader->setUniform(AMG_FogDensity, fogDensity);
-	currentShader->setUniform(AMG_FogGradient, fogGradient);
-}
-
-/**
- * @brief Update lighting to the current shader
- */
-void Renderer::updateLighting(){
-	std::vector<Light*> lights = currentShader->getLights();
-	for(unsigned int i=0;i<lights.size();i++){
-		lights[i]->enable(i);
-	}
 }
 
 /**

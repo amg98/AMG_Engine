@@ -15,9 +15,7 @@ layout(location = 4) in vec3 AMG_Bitangent;
 #include <AMG_PassLightNormalMap.glsl>
 #include <AMG_WaterClipPlane.glsl>
 #include <AMG_PassFog.glsl>
-
-out vec3 AMG_OutGPosition;
-out mat3 AMG_OutGNormalMatrix;
+#include <AMG_PassDeferredNormalMap.glsl>
 
 void main(){
 
@@ -29,6 +27,5 @@ void main(){
     // Pass data to the fragment shader
 	AMG_PassTexcoords();
 	
-	AMG_OutGPosition = (AMG_MV * vec4(AMG_Position, 1)).xyz;
-	AMG_OutGNormalMatrix = transpose(AMG_NormalMapMatrix(AMG_MV));
+	AMG_PassDeferredNormalMap(AMG_MV);
 }

@@ -31,3 +31,6 @@ out vec3 AMG_OutUV3D;
 out vec4 AMG_OutShadowCoord;
 out vec3 AMG_RView;
 out vec3 AMG_RNormal;
+out vec3 AMG_OutGPosition;
+out vec3 AMG_OutGNormal;
+out mat3 AMG_OutGNormalMatrix;

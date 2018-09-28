@@ -31,12 +31,16 @@ private:
 	float ambient;					/**< Material ambient color */
 	float diffusePower;				/**< Material diffuse power */
 	float specularPower;			/**< Material specular power */
+	float reflectivity;				/**< Material reflectivity */
+	float refractionIndex;			/**< Refraction index */
 public:
 	vec4 &getDiffuse(){ return diffuse; }
 	vec4 &getSpecular(){ return specular; }
 	float &getAmbient(){ return ambient; }
 	float &getDiffusePower(){ return diffusePower; }
 	float &getSpecularPower(){ return specularPower; }
+	float &getReflectivity(){ return reflectivity; }
+	float &getRefractionIndex(){ return refractionIndex; }
 	Texture *getTexture(int id){ return textures[id]; }
 
 	Material(Texture *texture);

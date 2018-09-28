@@ -8,6 +8,9 @@ layout (location = 0) out vec4 AMG_Color;
 in vec4 clipSpaceCoords;
 
 uniform float moveFactor;
+uniform vec4 waterColor;
+uniform float waterSpecular;
+uniform float waterReflectivity;
 
 void main(){
 
@@ -37,8 +40,10 @@ void main(){
 	vec3 reflectedLight = reflect(normalize(-AMG_OutToLight[0]), normal);
 	float specular = max(dot(reflectedLight, cameraVector), 0.0);
 	specular = pow(specular, 20.0);
-	vec3 specularHighlights = AMG_Lights[0].color * specular * 0.6;
+	vec3 specularHighlights = AMG_Lights[0].color * specular * waterSpecular;
 	
 	AMG_Color = mix(reflectionColor, refractionColor, refractivity);
-	AMG_Color = mix(AMG_Color, vec4(0, 0.3, 0.5, 1.0), 0.2) + vec4(specularHighlights, 0.0);
+	AMG_Color = mix(AMG_Color, waterColor, waterReflectivity) + vec4(specularHighlights, 0.0);
+	
+	AMG_ComputeFog();
 }

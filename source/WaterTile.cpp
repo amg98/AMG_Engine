@@ -16,14 +16,16 @@ Shader *WaterTile::waterShader = NULL;
 
 /**
  * @brief Initialize the water engine
- * @param light Light source for water shininess
+ * @note Light 0 will be used to compute water shininess
  */
-void WaterTile::initialize(Light *light){
+void WaterTile::initialize(){
 
 	// Load the shader
 	waterShader = new Shader("Effects/AMG_Water");
 	waterShader->defineUniform("moveFactor");
-	waterShader->getLights().push_back(light);
+	waterShader->defineUniform("waterColor");
+	waterShader->defineUniform("waterSpecular");
+	waterShader->defineUniform("waterReflectivity");
 }
 
 /**
@@ -63,6 +65,9 @@ WaterTile::WaterTile(const char *normalMapPath, const char *dudvpath, vec3 pos, 
 	// Initialize variables
 	waveSpeed = 0.03f;
 	moveFactor = 0.0f;
+	waterColor = vec4(0.0f, 0.3f, 0.5f, 1.0f);
+	waterSpecular = 0.6f;
+	waterReflectivity = 0.2f;
 }
 
 /**
@@ -114,6 +119,9 @@ void WaterTile::draw(){
 	float d;
 	moveFactor = modf(moveFactor, &d);
 	waterShader->setUniform("moveFactor", moveFactor);
+	waterShader->setUniform("waterColor", waterColor);
+	waterShader->setUniform("waterSpecular", waterSpecular);
+	waterShader->setUniform("waterReflectivity", waterSpecular);
 
 	// Bind the needed textures
 	reflection->getColorTexture(0)->bind(0);

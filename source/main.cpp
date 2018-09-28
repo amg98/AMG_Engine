@@ -31,7 +31,7 @@ Sprite *sprite = NULL;
 ParticleSource *source = NULL;
 Texture *cubeMap = NULL;
 LensFlare *lens = NULL;
-Light *light = NULL;
+Light *light = NULL, *spot = NULL;
 Font *font = NULL;
 WaterTile *water = NULL;
 
@@ -137,7 +137,7 @@ void render(){
 
 void render2d(){
 	s3->enable();
-	lens->draw(cam, s0->getLights()[0]);
+	lens->draw(cam, Renderer::getLights()[0]);
 	sprite->draw();
 	s4->enable();
 	hello->draw();
@@ -173,6 +173,7 @@ void unload(){
 	AMG_DELETE(lens);
 	AMG_DELETE(light);
 	AMG_DELETE(font);
+	AMG_DELETE(spot);
 }
 
 int main(int argc, char **argv){
@@ -187,9 +188,9 @@ int main(int argc, char **argv){
 
 	ShadowRenderer::initialize(2048, 10.0f, 100.0f);
 
-	DeferredRendering::initialize();
+	DeferredRendering::initialize(true, 32);
 
-	WaterTile::initialize(light);
+	WaterTile::initialize();
 	water = new WaterTile("waterNormalMap.dds", "waterDUDV.dds", vec3(0, 2.5f, -10), 5.0f);
 
 	cam = new Camera(vec3(-4, 3, 5));
@@ -208,15 +209,11 @@ int main(int argc, char **argv){
 	s10 = new Shader("_terrain");
 
 	light = new Light(vec3(100000, 100000, 100000), vec3(1, 1, 0), vec3(0.0f, 0, 1));
-	s0->getLights().push_back(light);
-	s1->getLights().push_back(light);
-	s6->getLights().push_back(light);
-	s7->getLights().push_back(light);
-	s00->getLights().push_back(light);
-	s60->getLights().push_back(light);
-	s10->getLights().push_back(light);
-	s70->getLights().push_back(light);
+	spot = new Light(vec3(0, 3, 0), vec3(0, 0, 1), vec3(0, 0, 1));
+	spot->setSpotLight(vec3(0, 0, 1), M_PI/3.0f);
+	Renderer::getLights().push_back(light);
 	DeferredRendering::lights.push_back(light);
+	DeferredRendering::lights.push_back(spot);
 	DeferredRendering::lights.push_back(new Light(vec3(0, 10, 0), vec3(0, 1, 0), vec3(0.1f, 0, 1)));
 
 	link = new Model("model2.amd");

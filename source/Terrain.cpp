@@ -88,8 +88,6 @@ Terrain::Terrain(float x, float y, const char *texture){
  * @brief Render a Terrain object
  */
 void Terrain::draw(){
-	Renderer::updateFog();
-	Renderer::updateLighting();
 	Renderer::setTransformation(position, rotation, scale);
 	Renderer::updateMVP();
 

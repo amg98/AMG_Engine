@@ -14,6 +14,13 @@ vec4 AMG_ComputeLightNormalMap(int id, vec4 diffuseTex, int normalMap, int specu
 	vec3 toLight = normalize(AMG_OutToLight[id]);
 	vec3 toCam = normalize(AMG_OutToCamera);
 	
+	vec3 spotDirection = AMG_Lights[id].spotDirection;
+	if(spotDirection != vec3(0, 0, 0)){
+		spotDirection = normalize(spotDirection);
+	}
+	if(dot(toLight, spotDirection) < AMG_Lights[id].spotCutoff)
+		return vec4(0, 0, 0, 1);
+	
 	// Attenuation
 	float attenuation = AMG_Lights[id].attenuation.x * AMG_OutLightDistance[id] * AMG_OutLightDistance[id] + 
 						AMG_Lights[id].attenuation.y * AMG_OutLightDistance[id] +

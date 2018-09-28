@@ -24,6 +24,8 @@ Light::Light(vec3 position, vec3 color, vec3 attenuation) {
 	this->position = position;
 	this->color = color;
 	this->attenuation = attenuation;
+	this->spotDirection = vec3(0.0f);
+	this->spotCutoff = M_PI;
 }
 
 /**
@@ -36,6 +38,12 @@ void Light::enableDeferred(int id){
 	shader->setUniform(std::string(shaderText), position);
 	sprintf(shaderText, "AMG_LightDR[%d].color", id);
 	shader->setUniform(std::string(shaderText), color);
+	sprintf(shaderText, "AMG_LightDR[%d].attenuation", id);
+	shader->setUniform(std::string(shaderText), attenuation);
+	sprintf(shaderText, "AMG_LightDR[%d].spotDirection", id);
+	shader->setUniform(std::string(shaderText), spotDirection);
+	sprintf(shaderText, "AMG_LightDR[%d].spotCutoff", id);
+	shader->setUniform(std::string(shaderText), cosf(spotCutoff));
 }
 
 /**
@@ -50,6 +58,10 @@ void Light::enable(int id){
 	shader->setUniform(std::string(shaderText), color);
 	sprintf(shaderText, "AMG_Lights[%d].attenuation", id);
 	shader->setUniform(std::string(shaderText), attenuation);
+	sprintf(shaderText, "AMG_Lights[%d].spotDirection", id);
+	shader->setUniform(std::string(shaderText), spotDirection);
+	sprintf(shaderText, "AMG_Lights[%d].spotCutoff", id);
+	shader->setUniform(std::string(shaderText), cosf(spotCutoff));
 }
 
 /**

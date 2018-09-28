@@ -38,13 +38,19 @@ private:
 	Texture *normalMap;			/**< Water normal map */
 	float waveSpeed;			/**< Wave speed */
 	float moveFactor;			/**< Wave movement */
+	float waterSpecular;		/**< Specular component */
+	float waterReflectivity;	/**< Water reflectivity */
+	vec4 waterColor;			/**< Water color */
 	static Shader *waterShader;	/**< Water rendering shader */
 public:
-	static void initialize(Light *light);
+	static void initialize();
 	static void finish();
 
 	void setWaveSpeed(float speed){ waveSpeed = speed; }
 	float getWaveSpeed(){ return waveSpeed; }
+	vec4 &getWaterColor(){ return waterColor; }
+	float &getWaterSpecular(){ return waterSpecular; }
+	float &getWaterReflectivity(){ return waterReflectivity; }
 	Texture *getReflectionTexture(){ return reflection->getColorTexture(); }
 	Texture *getRefractionTexture(){ return refraction->getColorTexture(); }
 

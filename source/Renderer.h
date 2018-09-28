@@ -69,9 +69,11 @@ private:
 	static float renderDistance;				/**< Maximum render distance */
 	static float hdrExposure;					/**< Exposure for the HDR -> LDR color transformation */
 	static float gammaCorrection;				/**< Gamma correction factor (2.2 by default) */
-	static int srgbTextures;					/**< Number of sRGB textures on the next model (1 by default) */
+	static int srgbTextures;					/**< Number of sRGB textures on the next model to load (1 by default) */
 	static Framebuffer *defaultFB;				/**< Default 3D framebuffer */
 	static Sprite *fbSprite;					/**< Framebuffer sprite */
+	static std::vector<Light*> lights;			/**< Vector of lights for this Renderer */
+	static float worldAmbient;					/**< World ambient lighting value */
 	Renderer(){}
 public:
 	static bool initialized(){ return init; }
@@ -105,6 +107,8 @@ public:
 	static void setsRGBTextures(int t){ srgbTextures = t; }
 	static bool getsRGBTextures(){ return srgbTextures; }
 	static Framebuffer *get3dFramebuffer(){ return defaultFB; }
+	static std::vector<Light*> &getLights(){ return lights; }
+	static float &getWorldAmbient(){ return worldAmbient; }
 
 	static int exitProcess();
 	static Texture *createCubeMap(AMG_FunctionCallback render, Shader *shader, int dimensions, vec3 position);
@@ -122,8 +126,6 @@ public:
 	static void calculateProjection();
 	static void calculatePanoramicProjection();
 	static void updateCamera(Camera *cam);
-	static void updateFog();
-	static void updateLighting();
 	static void getMousePosition(double *x, double *y);
 	static bool getKey(int code);
 	static void createWorld();

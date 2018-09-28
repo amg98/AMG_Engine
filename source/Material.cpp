@@ -23,6 +23,8 @@ Material::Material(Texture *texture){
 	this->ambient = 0.2f;
 	this->diffusePower = 1.0f;
 	this->specularPower = 1.0f;
+	this->reflectivity = 0.4f;
+	this->refractionIndex = 1.0f/1.33f;
 	this->textures = std::vector<Texture*>();
 	textures.push_back(texture);
 }
@@ -37,6 +39,8 @@ Material::Material(const char *texture){
 	this->ambient = 0.2f;
 	this->diffusePower = 1.0f;
 	this->specularPower = 1.0f;
+	this->reflectivity = 0.4f;
+	this->refractionIndex = 1.0f/1.33f;
 	this->textures = std::vector<Texture*>();
 	addTexture(texture);
 }
@@ -51,6 +55,8 @@ Material::Material(const char **names){
 	this->ambient = 0.2f;
 	this->diffusePower = 1.0f;
 	this->specularPower = 1.0f;
+	this->reflectivity = 0.4f;
+	this->refractionIndex = 1.0f/1.33f;
 	this->textures = std::vector<Texture*>();
 	Texture *tex = new Texture(names, true);
 	this->textures.push_back(tex);
@@ -66,6 +72,8 @@ Material::Material(float *data) {
 	this->ambient = data[10];
 	this->diffusePower = data[3];
 	this->specularPower = data[8];
+	this->reflectivity = 0.4f;
+	this->refractionIndex = 1.0f/1.33f;
 	this->textures = std::vector<Texture*>();
 }
 
@@ -101,6 +109,8 @@ void Material::apply(){
 	shader->setUniform(AMG_MaterialAmbient, ambient);
 	shader->setUniform(AMG_DiffusePower, diffusePower);
 	shader->setUniform(AMG_SpecularPower, specularPower);
+	shader->setUniform(AMG_SpecularReflectivity, reflectivity);
+	shader->setUniform(AMG_RefractionIndex, refractionIndex);
 }
 
 void Material::disable(){

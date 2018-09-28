@@ -6,6 +6,9 @@ layout (location=0) out vec4 AMG_Color;
 
 #include <AMG_TextureMap.glsl>
 
+uniform float AMG_HDRExposure;
+uniform float AMG_GammaValue;
+
 void main(){
 
     vec3 color = AMG_TextureMap(0).rgb;
