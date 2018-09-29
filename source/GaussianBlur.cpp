@@ -41,9 +41,9 @@ void GaussianBlur::initialize(int width, int height){
 
 	// Create framebuffers
 	hblurFB = new Framebuffer(width, height);
-	hblurFB->createColorTexture(0);
+	hblurFB->createColorTexture(0, GL_RGB16F, GL_RGB, GL_FLOAT);
 	vblurFB = new Framebuffer(width, height);
-	vblurFB->createColorTexture(0);
+	vblurFB->createColorTexture(0, GL_RGB16F, GL_RGB, GL_FLOAT);
 
 	// Create the blur sprite
 	blurSprite = new Sprite();
@@ -66,17 +66,17 @@ Framebuffer *GaussianBlur::render(Framebuffer *fb){
 	blurSprite->getPosition().y = fb->getHeight() / 2.0f;
 
 	// Do a horizontal blur
-	hblurFB->bind();
+	hblurFB->start();
 	hblurShader->enable();
 	blurSprite->set(fb->getColorTexture());
 	blurSprite->draw();
 
 	// Do a vertical blur
-	vblurFB->bind();
+	vblurFB->start();
 	vblurShader->enable();
 	blurSprite->set(hblurFB->getColorTexture());
 	blurSprite->draw();
-	vblurFB->unbind();
+	vblurFB->end();
 
 	// Return the resulting framebuffer
 	return vblurFB;

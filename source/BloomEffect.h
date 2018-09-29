@@ -26,7 +26,7 @@ private:
 	static Framebuffer *combineFB;		/**< Combine framebuffer */
 	static Sprite *bloomSprite;			/**< General purpose Sprite */
 public:
-	static void initialize(int width, int height);
+	static void initialize();
 	static Framebuffer *render(Framebuffer *fb);
 	static void finish();
 };

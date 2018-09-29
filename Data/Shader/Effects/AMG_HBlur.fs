@@ -1,5 +1,7 @@
 #version 330 core
 
+layout (location = 0) out vec4 AMG_Color;
+
 #include <AMG_FragmentCommon.glsl>
 
 in vec2 blurUV[11];
@@ -18,4 +20,5 @@ void main(){
     AMG_Color += texture(AMG_TextureSampler[0], blurUV[8]) * 0.065984;
     AMG_Color += texture(AMG_TextureSampler[0], blurUV[9]) * 0.028002;
     AMG_Color += texture(AMG_TextureSampler[0], blurUV[10]) * 0.0093;
+	AMG_Color.a = 1.0;
 }

@@ -18,8 +18,6 @@
 #include "Particle.h"
 #include "Texture.h"
 
-#define AMG_PVBO_STRIDE 21 * sizeof(float)		/**< Stride for the particle source VBO */
-
 namespace AMG {
 
 /**

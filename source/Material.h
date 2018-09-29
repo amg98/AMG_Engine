@@ -43,6 +43,7 @@ public:
 	float &getRefractionIndex(){ return refractionIndex; }
 	Texture *getTexture(int id){ return textures[id]; }
 
+	Material();
 	Material(Texture *texture);
 	Material(const char *path);
 	Material(const char **names);

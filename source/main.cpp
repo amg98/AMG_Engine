@@ -9,7 +9,6 @@
 #include "Sprite.h"
 #include "Model.h"
 #include "Light.h"
-#include "Terrain.h"
 #include "Skybox.h"
 #include "Font.h"
 #include "ParticleSource.h"
@@ -18,12 +17,14 @@
 #include "ShadowRenderer.h"
 #include "WaterTile.h"
 #include "DeferredRendering.h"
+#include "BloomEffect.h"
+#include "GaussianBlur.h"
+#include "MotionBlur.h"
 using namespace AMG;
 
 // Definition of objects
 Camera *cam = NULL;
 Model *link = NULL, *bullet = NULL, *barrel = NULL;
-Terrain *terrain = NULL;
 Skybox *skybox = NULL;
 Shader *s0 = NULL, *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL, *s5 = NULL, *s6 = NULL, *s7 = NULL, *s00 = NULL, *s60 = NULL, *s10 = NULL, *s70 = NULL;
 Text *hello = NULL;
@@ -39,9 +40,6 @@ void renderSimple(){
 
 	s00->enable();
 	link->draw();
-
-	s1->enable();
-	terrain->draw();
 
 	s2->enable();
 	skybox->draw();
@@ -69,12 +67,6 @@ void renderWater(vec4 plane){
 	cubeMap->bind(0);
 	bullet->draw();
 	s60->disableWaterClipPlane();
-
-	s10->enable();
-	s10->setWaterClipPlane(plane);
-	ShadowRenderer::updateShadows(5);
-	terrain->draw();
-	s10->disableWaterClipPlane();
 
 	s2->enable();
 	s2->setWaterClipPlane(plane);
@@ -106,10 +98,6 @@ void render(){
 	s6->enable();
 	cubeMap->bind(0);
 	bullet->draw();
-
-	s1->enable();
-	ShadowRenderer::updateShadows(5);
-	terrain->draw();
 
 	DeferredRendering::end();
 
@@ -143,7 +131,12 @@ void render2d(){
 	hello->draw();
 }
 
+void post(){
+	MotionBlur::render(Renderer::get3dFramebuffer(), s3)->blitToScreen();
+}
+
 void unload(){
+	MotionBlur::finish();
 	ShadowRenderer::finish();
 	WaterTile::finish();
 	DeferredRendering::finish();
@@ -152,7 +145,6 @@ void unload(){
 	AMG_DELETE(barrel);
 	AMG_DELETE(link);
 	AMG_DELETE(bullet);
-	AMG_DELETE(terrain);
 	AMG_DELETE(skybox);
 	AMG_DELETE(s0);
 	AMG_DELETE(s1);
@@ -183,8 +175,11 @@ int main(int argc, char **argv){
 	Renderer::setRenderCallback(render);
 	Renderer::setRender2dCallback(render2d);
 	Renderer::setUnloadCallback(unload);
+	Renderer::setPostCallback(post);
 	Renderer::getFogDensity() = 0.1f;
 	Renderer::getFogGradient() = 5.0f;
+
+	MotionBlur::initialize();
 
 	ShadowRenderer::initialize(2048, 10.0f, 100.0f);
 
@@ -228,12 +223,6 @@ int main(int argc, char **argv){
 	barrel = new Model("barrel.amd", true);
 	barrel->getObject(0)->getScale() = vec3(0.1f, 0.1f, 0.1f);
 	barrel->getObject(0)->getPosition() = vec3(0.0f, 3.0f, -3.0f);
-
-	terrain = new Terrain(-0.5f, -0.5f, "grassy2.dds");
-	terrain->getMaterial(0)->addTexture("grassFlowers.dds");
-	terrain->getMaterial(0)->addTexture("mud.dds");
-	terrain->getMaterial(0)->addTexture("path.dds");
-	terrain->getMaterial(0)->addTexture("blendMap.dds");
 
 	font = new Font("candara.dds", "candara.fnt");
 

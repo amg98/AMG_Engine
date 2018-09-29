@@ -44,6 +44,7 @@ private:
 	static AMG_FunctionCallback renderCb;		/**< Rendering callback */
 	static AMG_FunctionCallback render2dCb;		/**< 2D rendering callback */
 	static AMG_FunctionCallback unloadCb;		/**< Unload callback */
+	static AMG_FunctionCallback postCb;			/**< Post-processing callback */
 	static mat4 *projection;					/**< Current projection matrix */
 	static mat4 perspective, ortho;				/**< Precalculated perspective and ortho matrices */
 	static mat4 view;							/**< View matrix */
@@ -99,6 +100,7 @@ public:
 	static void setRenderCallback(AMG_FunctionCallback cb){ renderCb = cb; }
 	static void setRender2dCallback(AMG_FunctionCallback cb){ render2dCb = cb; }
 	static void setUnloadCallback(AMG_FunctionCallback cb){ unloadCb = cb; }
+	static void setPostCallback(AMG_FunctionCallback cb){ postCb = cb; }
 	static Camera *getCamera(){ return camera; }
 	static void setRenderDistance(float distance){ renderDistance = distance; }
 	static mat4 &getView(){ return view; }

@@ -19,22 +19,24 @@ Sprite *BloomEffect::bloomSprite = NULL;
 
 /**
  * @brief Initialize objects for this class
- * @param width Display width, in pixels
- * @param height Display height, in pixels
  * @note Gaussian Blur must be initialized
  */
-void BloomEffect::initialize(int width, int height){
+void BloomEffect::initialize(){
+
+	// Initialize Gaussian Blur, if it is not yet
+	GaussianBlur::initialize(Renderer::getWidth(), Renderer::getHeight());
 
 	// Load brightness files
 	brightShader = new Shader("Effects/AMG_BrightFilter");
-	brightFB = new Framebuffer(width, height);
-	brightFB->createColorTexture(0);
+	brightFB = new Framebuffer();
+	brightFB->createColorTexture(0, GL_RGB16F, GL_RGB, GL_FLOAT);
 
 	// Load combine files
 	combineShader = new Shader("Effects/AMG_CombineEffect");
-	combineFB = new Framebuffer(width, height);
-	combineFB->createColorTexture(0);
+	combineFB = new Framebuffer();
+	combineFB->createColorTexture(0, GL_RGB16F, GL_RGB, GL_FLOAT);
 
+	// Create a sprite for rendering steps
 	bloomSprite = new Sprite();
 	bloomSprite->getScaleY() = -1.0f;
 }
@@ -52,7 +54,7 @@ Framebuffer *BloomEffect::render(Framebuffer *fb){
 	bloomSprite->getPosition().y = fb->getHeight() / 2.0f;
 
 	// Do the brightness part
-	brightFB->bind();
+	brightFB->start();
 	brightShader->enable();
 	bloomSprite->set(fb->getColorTexture());
 	bloomSprite->draw();
@@ -61,12 +63,12 @@ Framebuffer *BloomEffect::render(Framebuffer *fb){
 	Framebuffer *blur = GaussianBlur::render(brightFB);
 
 	// Combine the two stages
-	combineFB->bind();
+	combineFB->start();
 	combineShader->enable();
 	blur->getColorTexture()->bind(1);
 	bloomSprite->set(fb->getColorTexture());
 	bloomSprite->draw();
-	combineFB->unbind();
+	combineFB->end();
 
 	// Return the resulting framebuffer
 	return combineFB;

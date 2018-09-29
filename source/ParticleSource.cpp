@@ -11,6 +11,9 @@
 #include "Renderer.h"
 #include "Debug.h"
 
+// Defines
+#define AMG_PVBO_STRIDE 21 * sizeof(float)		/**< Stride for the particle source VBO */
+
 namespace AMG {
 
 /**

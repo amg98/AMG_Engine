@@ -48,7 +48,7 @@ public:
 	void update();
 	void update(GLFWwindow *window, float delta);
 	void lookAt(int side);
-	virtual ~Camera();
+	virtual ~Camera(){ }
 };
 
 }

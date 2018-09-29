@@ -21,22 +21,18 @@ int MotionBlur::motionIndex;
  */
 void MotionBlur::initialize(){
 
-	// Get screen dimensions
-	int width = Renderer::getWidth();
-	int height = Renderer::getHeight();
-
 	// Load the shader
 	motionShader = new Shader("Effects/AMG_MotionBlur");
 
 	// Create the fraebuffers
 	for(int i=0;i<AMG_MOTION_BLUR_IMAGES;i++){
-		motionFB[i] = new Framebuffer(width, height);
-		motionFB[i]->createColorTexture(0);
+		motionFB[i] = new Framebuffer();
+		motionFB[i]->createColorTexture(0, GL_RGB16F, GL_RGB, GL_FLOAT);
 	}
 
 	// Create the final framebuffer
-	outFB = new Framebuffer(width, height);
-	outFB->createColorTexture(0);
+	outFB = new Framebuffer();
+	outFB->createColorTexture(0, GL_RGB16F, GL_RGB, GL_FLOAT);
 
 	// Create a sprite used to draw
 	motionSprite = new Sprite();
@@ -47,45 +43,35 @@ void MotionBlur::initialize(){
 }
 
 /**
- * @brief Bind the effect, since then what is drawn is motion blurred
- */
-void MotionBlur::bind(){
-
-	// Bind the current framebuffer
-	motionFB[motionIndex]->bind();
-
-	// Increase the count
-	motionIndex ++;
-	motionIndex %= AMG_MOTION_BLUR_IMAGES;
-}
-
-/**
- * @brief Stop the effect, rendering is done without blurring
- */
-void MotionBlur::unbind(){
-	motionFB[0]->unbind();
-}
-
-/**
  * @brief Render the blurred scene
+ * @param fb The framebuffer to take images
+ * @param shader2d 2D shader
  * @return The final framebuffer
  * @note Don't delete the resulting framebuffer
  */
-Framebuffer *MotionBlur::render(){
+Framebuffer *MotionBlur::render(Framebuffer *fb, Shader *shader2d){
 
 	// Set the sprite's position
 	motionSprite->getPosition().x = motionFB[0]->getWidth() / 2.0f;
 	motionSprite->getPosition().y = motionFB[0]->getHeight() / 2.0f;
 
+	// Get a copy of the current image
+	motionFB[motionIndex]->start();
+	shader2d->enable();
+	motionSprite->set(fb->getColorTexture());
+	motionSprite->draw();
+	motionIndex ++;
+	motionIndex %= AMG_MOTION_BLUR_IMAGES;
+
 	// Do the motion blur effect
-	outFB->bind();
+	outFB->start();
 	motionShader->enable();
 	for(int i=1;i<AMG_MOTION_BLUR_IMAGES;i++){
 		motionFB[i]->getColorTexture()->bind(i);
 	}
 	motionSprite->set(motionFB[0]->getColorTexture());
 	motionSprite->draw();
-	outFB->unbind();
+	outFB->end();
 
 	// Return the resulting framebuffer
 	return outFB;

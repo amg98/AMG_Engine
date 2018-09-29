@@ -40,12 +40,6 @@ Camera::Camera(vec3 position) {
 }
 
 /**
- * @brief Destructor of a camera
- */
-Camera::~Camera() {
-}
-
-/**
  * @brief Compute the camera trihedron
  */
 void Camera::computeTrihedron(){

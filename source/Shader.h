@@ -21,9 +21,10 @@ using namespace glm;
 #include "Light.h"
 
 // Defines
-#define AMG_MAX_LIGHTS 4		/**< Maximum number of lights at once */
-#define AMG_MAX_DLIGHTS 8		/**< Maximum number of lights in deferred rendering */
-#define AMG_MAX_TEXTURES 6		/**< Maximum number of textures at once */
+#define AMG_MAX_LIGHTS 4			/**< Maximum number of lights at once */
+#define AMG_MAX_DLIGHTS 8			/**< Maximum number of lights in deferred rendering */
+#define AMG_MAX_TEXTURES 6			/**< Maximum number of textures at once */
+#define AMG_WATER_CLIPPING_PLANE 7	/**< Clipping plane for water rendering */
 
 namespace AMG {
 
@@ -69,9 +70,9 @@ public:
 	void setUniform3fv(const std::string &name, int n, GLfloat *data);
 	inline void setUniform3fv(int id, int n, GLfloat *data){ setUniform3fv(uniformsTable[id], n, data); }
 	void setClipPlane(int id, vec4 &plane);
-	void setWaterClipPlane(vec4 &plane);
+	inline void setWaterClipPlane(vec4 &plane){ setClipPlane(AMG_WATER_CLIPPING_PLANE, plane); }
 	void disableClipPlane(int id);
-	void disableWaterClipPlane();
+	void disableWaterClipPlane(){ disableClipPlane(AMG_WATER_CLIPPING_PLANE); }
 	void enable();
 	inline void disable(){ glUseProgram(0); }
 	virtual ~Shader();

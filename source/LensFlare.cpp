@@ -70,16 +70,17 @@ void LensFlare::draw(Camera *cam, Light *light){
 	float brightness = 1.0f - glm::length(sunToCenterNDC) / 0.6f;
 	if(brightness > 0.0f){
 
+		// Enable depth testing
+		glEnable(GL_DEPTH_TEST);
+
 		// Begin the query
 		if(!query){
-			glEnable(GL_DEPTH_TEST);
 			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 			glBeginQuery(GL_SAMPLES_PASSED, queryID);
 			query = true;
 			drawTexture(0, brightness, coords, sunToCenter);
 			glEndQuery(GL_SAMPLES_PASSED);
 			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-			glDisable(GL_DEPTH_TEST);
 		}
 
 		// Do a query fetch to see how many samples passed the depth test
@@ -99,8 +100,9 @@ void LensFlare::draw(Camera *cam, Light *light){
 			drawTexture(i, brightness * coverage, coords, sunToCenter);
 		}
 
-		// Restore blending settings
+		// Restore blending and depth settings
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_DEPTH_TEST);
 	}
 }
 

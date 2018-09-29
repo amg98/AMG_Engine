@@ -19,9 +19,6 @@ namespace AMG {
 /**< Function callback to draw in the water engine */
 typedef void (*AMG_WaterFunctionCallback)(vec4);
 
-// Defines
-#define AMG_WATER_CLIPPING_PLANE 7	/**< Clipping plane for water rendering */
-
 /**
  * @class WaterTile
  * @brief Rendering of water zones

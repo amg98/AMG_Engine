@@ -15,9 +15,8 @@ namespace AMG {
 
 /**
  * @brief Constructor for a Material
- * @param texture Texture to use
  */
-Material::Material(Texture *texture){
+Material::Material(){
 	this->diffuse = vec4(1, 1, 1, 1);
 	this->specular = vec4(1, 1, 1, 1);
 	this->ambient = 0.2f;
@@ -26,6 +25,13 @@ Material::Material(Texture *texture){
 	this->reflectivity = 0.4f;
 	this->refractionIndex = 1.0f/1.33f;
 	this->textures = std::vector<Texture*>();
+}
+
+/**
+ * @brief Constructor for a Material
+ * @param texture Texture to use
+ */
+Material::Material(Texture *texture) : Material() {
 	textures.push_back(texture);
 }
 
@@ -33,15 +39,7 @@ Material::Material(Texture *texture){
  * @brief Constructor for a Material
  * @param texture Texture path (if its NULL it doesn't load a texture)
  */
-Material::Material(const char *texture){
-	this->diffuse = vec4(1, 1, 1, 1);
-	this->specular = vec4(1, 1, 1, 1);
-	this->ambient = 0.2f;
-	this->diffusePower = 1.0f;
-	this->specularPower = 1.0f;
-	this->reflectivity = 0.4f;
-	this->refractionIndex = 1.0f/1.33f;
-	this->textures = std::vector<Texture*>();
+Material::Material(const char *texture) : Material() {
 	addTexture(texture);
 }
 
@@ -49,15 +47,7 @@ Material::Material(const char *texture){
  * @brief Constructor for a Material, if the Texture is a cube map
  * @param texture Cube map filenames
  */
-Material::Material(const char **names){
-	this->diffuse = vec4(1, 1, 1, 1);
-	this->specular = vec4(1, 1, 1, 1);
-	this->ambient = 0.2f;
-	this->diffusePower = 1.0f;
-	this->specularPower = 1.0f;
-	this->reflectivity = 0.4f;
-	this->refractionIndex = 1.0f/1.33f;
-	this->textures = std::vector<Texture*>();
+Material::Material(const char **names) : Material() {
 	Texture *tex = new Texture(names, true);
 	this->textures.push_back(tex);
 }

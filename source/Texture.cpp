@@ -112,20 +112,9 @@ Texture::Texture(Texture *texture){
  * @param attachment Where to attach the texture
  * @param type Texture type (GL_UNSIGNED_BYTE as default)
  */
-Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment, GLuint type){
-	this->target = GL_TEXTURE_2D;
-	this->progress = 0.0f;
+Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment, GLuint type) : Texture(){
 	this->width = w;
 	this->height = h;
-	this->currentFrame = 0.0f;
-	this->texScale = vec2(1, 1);
-	this->texPosition = vec4(0, 0, 0, 0);
-	this->horizontalFrames = 1;
-	this->verticalFrames = 1;
-	this->nframes = 1;
-	this->width = w;
-	this->height = h;
-	this->isCopy = false;
 	glGenTextures(1, &id);
 	glBindTexture(target, id);
 	glTexImage2D(target, 0, mode, w, h, 0, mode2, type, NULL);
@@ -142,14 +131,8 @@ Texture::Texture(int w, int h, GLuint mode, GLuint mode2, GLuint attachment, GLu
  * @param path File to load as a Texture
  * @param srgb Load in sRGB format?
  */
-Texture::Texture(const char *path, bool srgb){
+Texture::Texture(const char *path, bool srgb) : Texture(){
 	loadTexture(path, srgb);
-	this->currentFrame = 0.0f;
-	this->texScale = vec2(1, 1);
-	this->texPosition = vec4(0, 0, 0, 0);
-	this->horizontalFrames = 1;
-	this->verticalFrames = 1;
-	this->nframes = 1;
 }
 
 /**
@@ -158,15 +141,8 @@ Texture::Texture(const char *path, bool srgb){
  * @param srgb Load in sRGB format?
  * @note Each texture must have the same number of mipmaps (only 1 is recommended)
  */
-Texture::Texture(const char **names, bool srgb){
+Texture::Texture(const char **names, bool srgb) : Texture(){
 
-	this->currentFrame = 0.0f;
-	this->texScale.x = 1.0f;
-	this->texScale.y = 1.0f;
-	this->texPosition = vec4(0, 0, 0, 0);
-	this->horizontalFrames = 1;
-	this->verticalFrames = 1;
-	this->nframes = 1;
 	this->target = GL_TEXTURE_CUBE_MAP;
 
 	glGenTextures(1, &this->id);

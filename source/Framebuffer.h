@@ -33,6 +33,7 @@ public:
 	int getWidth(){ return width; }
 	int getHeight(){ return height; }
 	GLuint getFbo(){ return fbo; }
+	GLuint getMultisampledFbo(){ return msFbo; }
 	Texture *getColorTexture(int attachment=0){ return colorTexture[attachment]; }
 	Texture *getDepthTexture(){ return depthTexture; }
 
@@ -44,7 +45,8 @@ public:
 	void end();
 	void bind();
 	void unbind();
-	void blit(Framebuffer *fb, int attachment, GLuint buffers);
+	void blit(Framebuffer *fb, int attachment, GLuint buffers, bool ms=false);
+	inline void blitToScreen(){ blit(NULL, 0, GL_COLOR_BUFFER_BIT, true);}
 	virtual ~Framebuffer();
 };
 

@@ -24,6 +24,7 @@ bool Renderer::init = false;
 AMG_FunctionCallback Renderer::renderCb;
 AMG_FunctionCallback Renderer::render2dCb;
 AMG_FunctionCallback Renderer::unloadCb;
+AMG_FunctionCallback Renderer::postCb;
 mat4 *Renderer::projection;
 mat4 Renderer::perspective, Renderer::ortho;
 mat4 Renderer::invPerspective;
@@ -94,6 +95,7 @@ void Renderer::initialize(int w, int h, const char *title, bool fullscreen, int 
 	renderCb = NULL;
 	render2dCb = NULL;
 	unloadCb = NULL;
+	postCb = NULL;
 	FPS = 60.0f;
 	fogColor = vec4(0.2f, 0.2f, 0.2f, 1.0f);
 	fogDensity = 0.0f;
@@ -222,6 +224,7 @@ void Renderer::calculateProjection(){
  */
 void Renderer::calculatePanoramicProjection(){
 	perspective = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
+	invPerspective = glm::inverse(perspective);
 }
 
 /**
@@ -262,7 +265,12 @@ void Renderer::update(){
 		glClearColor(fogColor.r, fogColor.g, fogColor.b, fogColor.a);
 		defaultFB->start();
 		if(renderCb) renderCb();
+
 		defaultFB->end();
+
+		// Perform the post-processing step
+		set3dMode(false);
+		if(postCb) postCb();
 
 		// Blit the depth buffer to the default framebuffer, for 2D depth effects (Lens flare...)
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -271,16 +279,14 @@ void Renderer::update(){
 		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		// Render the scene
-		set3dMode(false);
+		// Render the 3D scene
 		hdrGammaShader->enable();
 		hdrGammaShader->setUniform(AMG_HDRExposure, Renderer::getHDRExposure());
 		hdrGammaShader->setUniform(AMG_GammaValue, Renderer::getGammaCorrection());
 		fbSprite->draw();
 
-		if(render2dCb){
-			render2dCb();
-		}
+		// Render the 2D scene
+		if(render2dCb) render2dCb();
 		set3dMode(true);
 
 		glfwSwapBuffers(window);

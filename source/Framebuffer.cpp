@@ -186,10 +186,11 @@ void Framebuffer::unbind(){
  * @param fb Framebuffer to blit to
  * @param attachment Number of color attachment to use (0-7)
  * @param buffers Buffer copy flags
+ * @param ms Blit to the multisampled image? (false by default)
  */
-void Framebuffer::blit(Framebuffer *fb, int attachment, GLuint buffers){
+void Framebuffer::blit(Framebuffer *fb, int attachment, GLuint buffers, bool ms){
 	Framebuffer *f = (fb == NULL) ? Renderer::get3dFramebuffer() : fb;
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, f->getFbo());
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ms ? f->getMultisampledFbo() : f->getFbo());
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 	if(fb == NULL) glDrawBuffer(GL_BACK);
 	if(buffers &GL_COLOR_BUFFER_BIT) glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);

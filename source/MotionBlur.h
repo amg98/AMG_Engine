@@ -30,9 +30,7 @@ private:
 	static Sprite *motionSprite;							/**< General purpose Sprite */
 public:
 	static void initialize();
-	static void bind();
-	static void unbind();
-	static Framebuffer *render();
+	static Framebuffer *render(Framebuffer *fb, Shader *shader2d);
 	static void finish();
 };
 
